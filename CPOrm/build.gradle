@@ -1,12 +1,17 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url  "http://dl.bintray.com/wackymax/maven"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.14.2'
     }
 }
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
 
 repositories {
     jcenter()
@@ -31,6 +36,91 @@ android {
     }
 }
 
+def siteUrl = 'https://github.com/Wackymax/CPOrm' // Homepage URL
+def gitUrl = 'https://github.com/Wackymax/CPOrm.git'   // Git repository URL
+group = "za.co.cporm"
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "CPOrm"
+        desc = 'Android Content Provider ORM'
+        websiteUrl = siteUrl
+        issueTrackerUrl = siteUrl + '/issues'
+        vcsUrl = gitUrl
+        licenses = ["MIT"]
+        labels = ['Android', 'ORM', 'Content Provider']
+        publicDownloadNumbers = true
+        publish = false
+        version {
+            name = '1.0' //Bintray logical version name
+            desc = 'Firts Release'
+        }
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+
+                // Add your description here
+                name 'CPOrm - Android Content Provider ORM'
+                url siteUrl
+
+                // Set your license
+                licenses {
+                    license {
+                        name 'MIT'
+                        url 'http://opensource.org/licenses/MIT'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'Wackymax'
+                        name 'Hennie Brink'
+                        email 'hennie.e.brink@gmail.com'
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+artifacts {
+    archives javadocJar
+    archives sourcesJar
 }

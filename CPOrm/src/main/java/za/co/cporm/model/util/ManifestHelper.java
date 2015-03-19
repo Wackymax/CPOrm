@@ -53,8 +53,8 @@ public class ManifestHelper {
     /**
      * This will try to instantiate the mapping factory based on the class name provided in the meta.  If
      * no class name is found, or the meta is not set, the default factory {@link za.co.cporm.model.map.SqlColumnMappingFactory} will be loaded.
-     * @param context
-     * @return
+     * @param context the {@link android.content.Context} of the Android application
+     * @return The mapping factory specified by the {@link #METADATA_MAPPING_FACTORY}
      * @throws IllegalArgumentException
      */
     public static SqlColumnMappingFactory getMappingFactory(Context context) throws IllegalArgumentException{

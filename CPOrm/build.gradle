@@ -7,7 +7,6 @@ buildscript {
     }
 }
 apply plugin: 'com.android.library'
-apply plugin: 'robolectric'
 
 repositories {
     jcenter()
@@ -32,28 +31,6 @@ android {
     }
 }
 
-robolectric {
-    // configure the set of classes for JUnit tests
-    //include '**/*Test.class'
-    //exclude '**/espresso/**/*.class'
-
-    // configure max heap size of the test JVM
-    maxHeapSize = '2048m'
-
-    // configure the test JVM arguments
-    jvmArgs '-XX:MaxPermSize=512m', '-XX:-UseSplitVerifier'
-
-    // configure whether failing tests should fail the build
-    ignoreFailures true
-
-    // use afterTest to listen to the test execution results
-    afterTest { descriptor, result ->
-        println "Executing test for {$descriptor.name} with result: ${result.resultType}"
-    }
-}
-
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile 'org.robolectric:robolectric:2.3'
-    androidTestCompile 'junit:junit:4.10'
 }

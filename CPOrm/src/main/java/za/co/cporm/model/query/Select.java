@@ -9,6 +9,7 @@ import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.util.CPOrmCursor;
 import za.co.cporm.model.util.ContentResolverValues;
 import za.co.cporm.model.util.CursorIterator;
+import za.co.cporm.provider.CPOrmContentProvider;
 import za.co.cporm.provider.util.UriMatcherHelper;
 
 import java.util.*;
@@ -24,6 +25,8 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     private List<String> sortingOrderList;
     private List<String> includedColumns;
     private List<String> excludedColumns;
+    private Integer offset;
+    private Integer limit;
 
     private Select(Class<T> dataObjectClass){
         this.dataObjectClass = dataObjectClass;
@@ -167,6 +170,32 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     /**
+     * Sets the offset of rows from which the select will start executing
+     * @param offset the row offset
+     * @return The current select instance
+     */
+    public Select<T> offset(int offset) {
+
+        if(offset < 0)
+            throw new IllegalArgumentException("Offset must be larger than 0");
+        this.offset = offset;
+        return this;
+    }
+
+    /**
+     * Sets the limit of how many rows will be selected
+     * @param limit Amount of rows
+     * @return The current select statement
+     */
+    public Select<T> limit(int limit) {
+
+        if(limit < 1)
+            throw new IllegalArgumentException("Limit must be larger than 0");
+        this.limit = limit;
+        return this;
+    }
+
+    /**
      * Columns to retrieve, if not specified all columns will be retrieved.  Remember, the inflated object will only contain valid values for the selected columns.
      * If this is specified the excluded columns will be ignored
      * @param columns The columns to retrieve
@@ -274,9 +303,12 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         QueryBuilder where = buildWhereClause(context);
         QueryBuilder sort = buildSort();
 
-        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails);
+        Uri.Builder itemUri = UriMatcherHelper.generateItemUri(context, tableDetails);
 
-        return new ContentResolverValues(itemUri, getProjection(tableDetails), where.getQueryString(), where.getQueryArgsAsArray(), sort.getQueryString());
+        if(offset != null) itemUri.appendQueryParameter(CPOrmContentProvider.PARAMETER_OFFSET, offset.toString());
+        if(limit != null) itemUri.appendQueryParameter(CPOrmContentProvider.PARAMETER_LIMIT, limit.toString());
+
+        return new ContentResolverValues(itemUri.build(), getProjection(tableDetails), where.getQueryString(), where.getQueryArgsAsArray(), sort.getQueryString());
     }
 
     /**

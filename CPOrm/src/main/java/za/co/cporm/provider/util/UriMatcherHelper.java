@@ -104,17 +104,16 @@ public class UriMatcherHelper {
         else throw new IllegalArgumentException("No URI match found for code: " + code);
     }
 
-    public static Uri generateItemUri(Context context, TableDetails tableDetails){
+    public static Uri.Builder generateItemUri(Context context, TableDetails tableDetails){
 
         String authority = ManifestHelper.getAuthority(context);
         return new Uri.Builder()
                 .scheme("content")
                 .authority(authority)
-                .appendEncodedPath(tableDetails.getTableName())
-                .build();
+                .appendEncodedPath(tableDetails.getTableName());
     }
 
-    public static Uri generateItemUri(Context context, TableDetails tableDetails, String itemId){
+    public static Uri.Builder generateItemUri(Context context, TableDetails tableDetails, String itemId){
 
         String authority = ManifestHelper.getAuthority(context);
 
@@ -122,7 +121,6 @@ public class UriMatcherHelper {
                 .scheme("content")
                 .authority(authority)
                 .appendEncodedPath(tableDetails.getTableName())
-                .appendEncodedPath("/" + itemId)
-                .build();
+                .appendEncodedPath("/" + itemId);
     }
 }

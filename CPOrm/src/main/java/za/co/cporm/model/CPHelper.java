@@ -31,7 +31,7 @@ public class CPHelper {
     public static <T> Iterator<T> findAll(Context context, Class<T> dataModel){
 
         TableDetails tableDetails = findTableDetails(context, dataModel);
-        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
         ContentResolver contentResolver = context.getContentResolver();
         Cursor cursor = contentResolver.query(itemUri, null, null, null, null);
 
@@ -43,7 +43,7 @@ public class CPHelper {
         TableDetails tableDetails = findTableDetails(context, dataModel);
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
         Object columnValue = primaryKeyColumn.getColumnTypeMapping().toSqlType(key);
-        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue));
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
         return findSingleItem(context, itemUri, tableDetails);
     }
@@ -51,7 +51,7 @@ public class CPHelper {
     public static <T> void insert(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails);
+        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
         Uri itemUri = contentResolver.insert(insertUri, contentValues);
@@ -61,7 +61,7 @@ public class CPHelper {
     public static <T> T insertAndReturn(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails);
+        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
         Uri itemUri = contentResolver.insert(insertUri, contentValues);
@@ -74,7 +74,7 @@ public class CPHelper {
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = contentValues.get(tableDetails.findPrimaryKeyColumn().getColumnName());
-        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue));
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.update(itemUri, contentValues, null, null);
@@ -85,7 +85,7 @@ public class CPHelper {
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = contentValues.get(tableDetails.findPrimaryKeyColumn().getColumnName());
-        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue));
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);
@@ -94,7 +94,7 @@ public class CPHelper {
 
     public static <T> void deleteAll(Context context, Class<T> dataModel){
         TableDetails tableDetails = findTableDetails(context, dataModel);
-        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);

@@ -47,6 +47,7 @@ public class ModelInflater {
         }
 
         for (TableDetails.ColumnDetails columnDetails : tableDetails.getColumns()) {
+
             inflateColumn(cursor, dataModelObject, columnDetails);
         }
 
@@ -55,9 +56,9 @@ public class ModelInflater {
 
     private static <T> void inflateColumn(Cursor cursor,T dataModelObject, TableDetails.ColumnDetails columnDetails){
 
-        int columnIndex = cursor.getColumnIndexOrThrow(columnDetails.getColumnName());
+        int columnIndex = cursor.getColumnIndex(columnDetails.getColumnName());
 
-        if(cursor.isNull(columnIndex)){
+        if(columnIndex == -1 || cursor.isNull(columnIndex)){
             return;
         }
 

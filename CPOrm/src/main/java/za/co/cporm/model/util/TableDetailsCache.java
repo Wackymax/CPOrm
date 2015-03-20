@@ -42,7 +42,12 @@ public class TableDetailsCache {
     public synchronized TableDetails findTableDetails(Context context, Class<?> object){
 
         if(!cache.containsKey(object)){
-            cache.put(object, ReflectionHelper.getTableDetails(context, object));
+            try {
+                cache.put(object, ReflectionHelper.getTableDetails(context, object));
+            }
+            catch (Exception ex){
+                throw new IllegalArgumentException("Failed load table details for object " + object.getSimpleName());
+            }
 
             //Check if it exists after we attempted to add it
             if(!cache.containsKey(object)) throw new IllegalArgumentException("No table details could be found for supplied object: " + object.getSimpleName());

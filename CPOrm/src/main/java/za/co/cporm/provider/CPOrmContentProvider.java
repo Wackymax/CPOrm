@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.text.TextUtils;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.provider.util.UriMatcherHelper;
@@ -14,6 +15,9 @@ import za.co.cporm.provider.util.UriMatcherHelper;
  * Objects are expose in the form of authority/table_name/*
  */
 public class CPOrmContentProvider extends ContentProvider {
+
+    public static final String PARAMETER_OFFSET = "OFFSET";
+    public static final String PARAMETER_LIMIT = "LIMIT";
 
     private CPOrmDatabase database;
     private UriMatcherHelper uriMatcherHelper;
@@ -31,6 +35,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getReadableDatabase();
+        String limit = constructLimit(uri);
 
         if(uriMatcherHelper.isSingleItemRequested(uri)){
 
@@ -38,7 +43,7 @@ public class CPOrmContentProvider extends ContentProvider {
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
             return db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
         }
-        else return db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, sortOrder, null);
+        else return db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
     }
 
     @Override
@@ -91,5 +96,46 @@ public class CPOrmContentProvider extends ContentProvider {
             return db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         }
         else return db.update(tableDetails.getTableName(), contentValues, where, args);
+    }
+
+    private String constructLimit(Uri uri){
+
+        String offsetParam = uri.getQueryParameter(PARAMETER_OFFSET);
+        String limitParam = uri.getQueryParameter(PARAMETER_LIMIT);
+
+        Integer offset = null;
+        Integer limit = null;
+
+        if(!TextUtils.isEmpty(offsetParam) && TextUtils.isDigitsOnly(offsetParam)){
+            offset = Integer.valueOf(offsetParam);
+        }
+        if(!TextUtils.isEmpty(limitParam) && TextUtils.isDigitsOnly(limitParam)){
+            limit = Integer.valueOf(limitParam);
+        }
+
+        if(limit == null && offset == null)
+            return null;
+
+        StringBuilder limitStatement = new StringBuilder();
+
+        if(limit != null && offset != null)
+        {
+            limitStatement.append(" LIMIT ");
+            limitStatement.append(offset);
+            limitStatement.append(", ");
+            limitStatement.append(limit);
+        }
+        else if(limit != null)
+        {
+            limitStatement.append(" LIMIT ");
+            limitStatement.append(limit);
+        }
+        else
+        {
+            limitStatement.append(" OFFSET ");
+            limitStatement.append(offset);
+        }
+
+        return limitStatement.toString();
     }
 }

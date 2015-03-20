@@ -1,14 +1,50 @@
 # CPOrm
 Content Provider ORM for android.  This ORM uses an android sqlite database as a backing store, but interactes with it using  content providers.  You use it like a normal ORM, by creating java objects, and then do all of you interations through the objects. And you get the added benefits of using it like normal content providers, so integration with list views and other components are simple.
 
-# Features
+## Features
 1. Supports table creation from the data model.
 2. Supports view creation from the data model.
 3. Advanced querying capabilities, allowing you to created complex queries easily.
 4. It is extendable, allowing you to define custom column type mappings.
 5. Most importantly, it is easy to use.
 
-#Using it
+## Install it
+
+There are four ways to install Sugar:
+
+#### As a Gradle dependency
+
+This is the preferred way. Simply add:
+
+```groovy
+compile 'za.co.cporm:CPOrm:1.3'
+```
+
+to your project dependencies and run `gradle build` or `gradle assemble`.
+
+#### As a Maven dependency
+
+Declare the dependency in Maven:
+
+```xml
+<dependency>
+    <groupId>za.co.cporm</groupId>
+    <artifactId>CPOrm</artifactId>
+    <version>1.3</version>
+</dependency>
+```
+
+#### As a library project
+
+Download the source code and import it as a library project in Eclipse. The project is available in the folder **library**. For more information on how to do this, read [here](http://developer.android.com/tools/projects/index.html#LibraryProjects).
+
+#### As a jar
+
+Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to download jars directly. You can drop them into your `libs` folder and configure the Java build path to include the library. See this [tutorial](http://www.vogella.com/tutorials/AndroidLibraryProjects/article.html) for an excellent guide on how to do this.
+
+===================
+
+## Use it
 To use the ORM, include it as a library in you project.  Create a Model Factory class by implementing ModelFactory, this will tell the ORM which classes belong to the model.  You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. Now all that is left to do is define the meta tags that will tell the ORM all the important stuff. Add these as part of the application element in the Android Manifest
 
 

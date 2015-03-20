@@ -47,7 +47,7 @@ Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to downloa
 ## Use it
 To use the ORM, include it as a library in you project.  Create a Model Factory class by implementing ModelFactory, this will tell the ORM which classes belong to the model.  You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. Now all that is left to do is define the meta tags that will tell the ORM all the important stuff. Add these as part of the application element in the Android Manifest
 
-
+```xml
       <meta-data android:name="DATABASE" android:value="example.db" />
       <meta-data android:name="VERSION" android:value="1" /> <!-- Increase this to have the db recreated with new model changes -->
       <meta-data android:name="QUERY_LOG" android:value="true" />
@@ -60,7 +60,7 @@ To use the ORM, include it as a library in you project.  Create a Model Factory 
             android:name="za.co.cporm.provider.CPOrmContentProvider"
             android:exported="false"
             android:permission="true"/>
-
+```
 Now that the setup is done, all you need to do is create your model objects, stick on some annotations, link them to the model factory, and you are done.  Some notable annotations are Table, Column, and Primary Key.
 
 To interact with the ORM you can extend the CPRecord class, this will make it easy to do CRUD operations, or you can use the CPHelper class if you can't extend CPRecord. To perform queries use the Select class.  To take advantage of the built in support for content providers on android, extends the CPDefaultRecord class, this already has a _id column defined.

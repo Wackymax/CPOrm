@@ -17,7 +17,7 @@ import java.util.*;
  * The starting point for select statements.  Contains the basic functions to do a simple select operation
  * and allows you to specify the result type you want for the query.
  */
-public class Select<T> implements DataFilterClause{
+public class Select<T> implements DataFilterClause<Select<T>>{
 
     private final Class<T> dataObjectClass;
     private DataFilterCriteria filterCriteria;
@@ -25,7 +25,7 @@ public class Select<T> implements DataFilterClause{
     private List<String> includedColumns;
     private List<String> excludedColumns;
 
-    private Select( Class<T> dataObjectClass){
+    private Select(Class<T> dataObjectClass){
         this.dataObjectClass = dataObjectClass;
         this.sortingOrderList = new LinkedList<String>();
         this.filterCriteria = new DataFilterCriteria();
@@ -97,11 +97,33 @@ public class Select<T> implements DataFilterClause{
     }
 
     /**
+     * Adds the specified clause with and AND conjunction
+     * @param clause The clause to add
+     * @return The current select instance
+     */
+    public Select<T> and(DataFilterClause clause){
+
+        filterCriteria.addClause(clause, DataFilterConjunction.AND);
+        return this;
+    }
+
+    /**
      * Starts a new Criterion builder with an OR conjunction
      * @return The current select instance
      */
     public DataFilterCriterion.Builder<Select<T>> or(){
         return new DataFilterCriterion.Builder<Select<T>>(this, DataFilterClause.DataFilterConjunction.OR);
+    }
+
+    /**
+     * Adds the specified clause with an OR conjunction
+     * @param filterClause The clause to add
+     * @return The current select instance
+     */
+    public Select<T> or(DataFilterClause filterClause){
+
+        filterCriteria.addClause(filterClause, DataFilterConjunction.OR);
+        return this;
     }
 
     /**
@@ -385,9 +407,10 @@ public class Select<T> implements DataFilterClause{
     }
 
     @Override
-    public void addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
+    public Select<T> addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
 
         this.filterCriteria.addClause(clause, conjunction);
+        return this;
     }
 
     @Override

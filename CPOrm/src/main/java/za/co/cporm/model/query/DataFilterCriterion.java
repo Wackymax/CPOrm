@@ -12,7 +12,7 @@ import java.util.Iterator;
  * for this criterion to be valid. Filter values are automatically converted to the correct sql format, and
  * the sql % are automatically added in the correct locations based on the operator used.
  */
-public class DataFilterCriterion implements DataFilterClause {
+public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion> {
 
     public String filterColumn;
     public DataFilterOperator filterOperator;
@@ -120,7 +120,7 @@ public class DataFilterCriterion implements DataFilterClause {
     }
 
     @Override
-    public void addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
+    public DataFilterCriterion addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
         throw new UnsupportedOperationException("Clauses cannot be added to a data filter criterion");
     }
 
@@ -129,7 +129,7 @@ public class DataFilterCriterion implements DataFilterClause {
         if(filterOperator == DataFilterOperator.LIKE || filterOperator == DataFilterOperator.NOT_LIKE) return "%" + object + "%";
         else if(filterOperator == DataFilterOperator.BEGINS_WITH) return object + "%";
         else if(filterOperator == DataFilterOperator.ENDS_WITH) return "%" + object;
-        else return ManifestHelper.getMappingFactory(context).findColumnMapping(filterValue.getClass()).toSqlType(filterValue);
+        else return ManifestHelper.getMappingFactory(context).findColumnMapping(object.getClass()).toSqlType(object);
     }
 
     private void validate()
@@ -152,7 +152,7 @@ public class DataFilterCriterion implements DataFilterClause {
         this.filterValue = filterValue;
     }
 
-    public static class Builder<T extends DataFilterClause>{
+    public static class Builder<T extends DataFilterClause<T>>{
 
         private final T originator;
         private final DataFilterConjunction conjunction;

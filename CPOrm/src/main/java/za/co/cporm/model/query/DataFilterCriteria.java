@@ -11,34 +11,39 @@ import java.util.Map;
  * queries, each separated by a Conjunction.  This entire Criteria is a grouping of its own, and
  * as such will be wrapped in parenthesis.
  */
-public class DataFilterCriteria implements DataFilterClause{
+public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
 
-    Map<DataFilterClause, DataFilterConjunction> filterClauses;
+    private final Map<DataFilterClause, DataFilterConjunction> filterClauses;
 
     /**
      * Creates a new instance, using the context to determine the conversion for arguments to sql friendly format
      */
     public DataFilterCriteria(){
-
         filterClauses = new LinkedHashMap<DataFilterClause, DataFilterConjunction>();
     }
 
-    public void addClause(DataFilterClause clause){
+    public DataFilterCriteria addClause(DataFilterClause clause){
 
         addClause(clause, null);
+
+        return this;
     }
 
     @Override
-    public void addClause(DataFilterClause clause, DataFilterConjunction conjunction){
+    public DataFilterCriteria addClause(DataFilterClause clause, DataFilterConjunction conjunction){
 
         if(conjunction == null) conjunction = DataFilterConjunction.AND;
 
         filterClauses.put(clause, conjunction);
+
+        return this;
     }
 
-    public void addCriterion(String column, DataFilterCriterion.DataFilterOperator operator, Object filterValue){
+    public DataFilterCriteria addCriterion(String column, DataFilterCriterion.DataFilterOperator operator, Object filterValue){
 
         addClause(new DataFilterCriterion(column, operator, filterValue));
+
+        return this;
     }
 
     @Override
@@ -101,7 +106,7 @@ public class DataFilterCriteria implements DataFilterClause{
         return builder.toString();
     }
 
-    public static class Builder<T extends DataFilterClause> implements DataFilterClause{
+    public static class Builder<T extends DataFilterClause<T>> implements DataFilterClause<Builder<T>>{
 
         private final T originator;
         private final DataFilterConjunction conjunction;
@@ -114,19 +119,28 @@ public class DataFilterCriteria implements DataFilterClause{
             this.criteria = new DataFilterCriteria();
         }
 
-        public DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>> and(){
-            return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>>(this, DataFilterClause.DataFilterConjunction.AND);
+        public DataFilterCriterion.Builder<Builder<T>> and(){
+            return new DataFilterCriterion.Builder<Builder<T>>(this, DataFilterClause.DataFilterConjunction.AND);
+        }
+
+        public DataFilterCriteria.Builder<T> and(DataFilterClause dataFilterClause){
+
+            return addClause(dataFilterClause, DataFilterConjunction.AND);
         }
 
         public DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>> or(){
-            return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>>(this, DataFilterClause.DataFilterConjunction.OR);
+            return new DataFilterCriterion.Builder<Builder<T>>(this, DataFilterClause.DataFilterConjunction.OR);
         }
 
-        public DataFilterCriteria.Builder<DataFilterCriteria.Builder<T>> obAnd(){
+        public DataFilterCriteria.Builder<T> or(DataFilterClause dataFilterClause){
+            return addClause(dataFilterClause, DataFilterConjunction.OR);
+        }
+
+        public Builder<Builder<T>> openBracketAnd(){
             return new Builder<Builder<T>>(this, DataFilterConjunction.AND);
         }
 
-        public DataFilterCriteria.Builder<DataFilterCriteria.Builder<T>> obOr(){
+        public Builder<Builder<T>> openBracketOr(){
             return new Builder<Builder<T>>(this, DataFilterConjunction.OR);
         }
 
@@ -147,9 +161,11 @@ public class DataFilterCriteria implements DataFilterClause{
         }
 
         @Override
-        public void addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
+        public Builder<T> addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
 
             criteria.addClause(clause, conjunction);
+
+            return this;
         }
     }
 }

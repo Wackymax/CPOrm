@@ -62,8 +62,7 @@ public class ModelInflater {
         int columnIndex = cursor.getColumnIndexOrThrow(columnDetails.getColumnName());
 
         if(cursor.isNull(columnIndex)){
-            if(columnDetails.isNullable()) return;
-            else throw new IllegalStateException("Found a null value on a non nullable column: " + columnDetails.getColumnName());
+            return;
         }
 
         Field columnField = columnDetails.getColumnField();

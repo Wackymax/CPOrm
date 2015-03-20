@@ -1,9 +1,5 @@
 package za.co.cporm.model.query;
 
-import android.content.Context;
-import za.co.cporm.model.map.SqlColumnMappingFactory;
-import za.co.cporm.model.util.ManifestHelper;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -48,20 +44,6 @@ public class QueryBuilder {
         return queryString.toString();
     }
 
-    public Collection<String> getQueryArgs(Context context){
-
-        SqlColumnMappingFactory columnMappingFactory = ManifestHelper.getMappingFactory(context);
-        List<String> queryArgs = new LinkedList<String>();
-
-        for (Object arg : argsStore) {
-
-            Object argConverted = columnMappingFactory.findColumnMapping(arg.getClass()).toSqlType(arg);
-            queryArgs.add(String.valueOf(argConverted));
-        }
-
-        return Collections.unmodifiableCollection(queryArgs);
-    }
-
     private Collection<Object> getQueryArgs(){
 
         List<Object> queryArgs = new LinkedList<Object>();
@@ -70,9 +52,9 @@ public class QueryBuilder {
         return Collections.unmodifiableCollection(queryArgs);
     }
 
-    public String[] getQueryArgsAsArray(Context context){
+    public String[] getQueryArgsAsArray(){
 
-        return getQueryArgs(context).toArray(new String[]{});
+        return getQueryArgs().toArray(new String[]{});
     }
 
     @Override

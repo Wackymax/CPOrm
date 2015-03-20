@@ -25,7 +25,7 @@ public class CPHelper {
     private static TableDetailsCache tableDetailsCache;
 
     public static <T> long countAll(Context context, Class<T> dataModel){
-        return Select.from(dataModel).queryAsCount(context);
+        return Select.from(context, dataModel).queryAsCount();
     }
 
     public static <T> Iterator<T> findAll(Context context, Class<T> dataModel){

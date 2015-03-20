@@ -1,6 +1,8 @@
 package za.co.cporm.model.query;
 
+import android.content.Context;
 import android.text.TextUtils;
+import za.co.cporm.model.util.ManifestHelper;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -12,15 +14,29 @@ import java.util.Iterator;
  */
 public class DataFilterCriterion implements DataFilterClause {
 
+    private final Context context;
     public String filterColumn;
     public DataFilterOperator filterOperator;
     public Object filterValue;
 
-    private DataFilterCriterion()
-    {}
+    /**
+     * Creates a new instance, using the context to determine the conversion for arguments to sql friendly format
+     * @param context The context to access application meta
+     */
+    private DataFilterCriterion(Context context){
 
-    public DataFilterCriterion(String filterColumn, DataFilterOperator operator, Object filterValue){
+        this.context = context;
+    }
 
+    /**
+     * Creates a new instance, using the context to determine the conversion for arguments to sql friendly format.
+     * The additional arguments can be used to set the values for the criterion.
+     * @param context The context to access application meta.
+     * @param filterColumn The column to query compare.
+     * @param operator The operator used for comparison.
+     */
+    public DataFilterCriterion(Context context, String filterColumn, DataFilterOperator operator, Object filterValue){
+        this(context);
         this.filterColumn = filterColumn;
         this.filterOperator = operator;
         this.filterValue = filterValue;
@@ -49,7 +65,12 @@ public class DataFilterCriterion implements DataFilterClause {
                 }
                 builder.append(")");
 
-            } else builder.append(" ?", convertToSQLFormat(filterValue));
+            }
+            else if(filterValue instanceof Select){
+
+                builder.append(((Select)filterValue).getSelectQuery());
+            }
+            else builder.append(" ?", convertToSQLFormat(filterValue));
         }
 
         return builder;
@@ -65,7 +86,7 @@ public class DataFilterCriterion implements DataFilterClause {
         if(filterOperator == DataFilterOperator.LIKE || filterOperator == DataFilterOperator.NOT_LIKE) return "%" + object + "%";
         else if(filterOperator == DataFilterOperator.BEGINS_WITH) return object + "%";
         else if(filterOperator == DataFilterOperator.ENDS_WITH) return "%" + object;
-        else return filterValue;
+        else return ManifestHelper.getMappingFactory(context).findColumnMapping(filterValue.getClass()).toSqlType(filterValue);
     }
 
     private void validate()
@@ -90,15 +111,17 @@ public class DataFilterCriterion implements DataFilterClause {
 
     public static class Builder<T extends DataFilterClause>{
 
+        private final Context context;
         private final T originator;
         private final DataFilterConjunction conjunction;
         private final DataFilterCriterion criterion;
 
-        protected Builder(T originator, DataFilterConjunction conjunction){
+        protected Builder(Context context, T originator, DataFilterConjunction conjunction){
 
+            this.context = context;
             this.originator = originator;
             this.conjunction = conjunction;
-            criterion = new DataFilterCriterion();
+            criterion = new DataFilterCriterion(context);
         }
 
         public T equal(String column, Object value) {
@@ -164,7 +187,21 @@ public class DataFilterCriterion implements DataFilterClause {
             return value(value);
         }
 
+        public T in(String column, Select value){
+
+            column(column);
+            criterion.setFilterOperator(DataFilterOperator.IN);
+            return value(value);
+        }
+
         public T notIn(String column, Collection value){
+
+            column(column);
+            criterion.setFilterOperator(DataFilterOperator.NOT_IN);
+            return value(value);
+        }
+
+        public T notIn(String column, Select value){
 
             column(column);
             criterion.setFilterOperator(DataFilterOperator.NOT_IN);

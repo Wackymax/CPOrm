@@ -38,7 +38,7 @@ public class CPOrmContentProvider extends ContentProvider {
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
             return db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
         }
-        else return db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), selection, selectionArgs, null, sortOrder, null);
+        else return db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, sortOrder, null);
     }
 
     @Override

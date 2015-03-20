@@ -1,5 +1,7 @@
 package za.co.cporm.model.query;
 
+import android.content.Context;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,10 +13,16 @@ import java.util.Map;
  */
 public class DataFilterCriteria implements DataFilterClause{
 
+    private final Context context;
     Map<DataFilterClause, DataFilterConjunction> filterClauses;
 
-    public DataFilterCriteria(){
+    /**
+     * Creates a new instance, using the context to determine the conversion for arguments to sql friendly format
+     * @param context The context to access application meta
+     */
+    public DataFilterCriteria(Context context){
 
+        this.context = context;
         filterClauses = new LinkedHashMap<DataFilterClause, DataFilterConjunction>();
     }
 
@@ -33,7 +41,7 @@ public class DataFilterCriteria implements DataFilterClause{
 
     public void addCriterion(String column, DataFilterCriterion.DataFilterOperator operator, Object filterValue){
 
-        addClause(new DataFilterCriterion(column, operator, filterValue));
+        addClause(new DataFilterCriterion(context, column, operator, filterValue));
     }
 
     @Override
@@ -68,31 +76,33 @@ public class DataFilterCriteria implements DataFilterClause{
 
     public static class Builder<T extends DataFilterClause> implements DataFilterClause{
 
+        private final Context context;
         private final T originator;
         private final DataFilterConjunction conjunction;
         private final DataFilterCriteria criteria;
 
-        protected Builder(T originator, DataFilterConjunction conjunction){
+        protected Builder(Context context, T originator, DataFilterConjunction conjunction){
 
+            this.context = context;
             this.originator = originator;
             this.conjunction = conjunction;
-            this.criteria = new DataFilterCriteria();
+            this.criteria = new DataFilterCriteria(context);
         }
 
         public DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>> and(){
-            return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>>(this, DataFilterClause.DataFilterConjunction.AND);
+            return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>>(context, this, DataFilterClause.DataFilterConjunction.AND);
         }
 
         public DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>> or(){
-            return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>>(this, DataFilterClause.DataFilterConjunction.OR);
+            return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<T>>(context, this, DataFilterClause.DataFilterConjunction.OR);
         }
 
         public DataFilterCriteria.Builder<DataFilterCriteria.Builder<T>> obAnd(){
-            return new Builder<Builder<T>>(this, DataFilterConjunction.AND);
+            return new Builder<Builder<T>>(context, this, DataFilterConjunction.AND);
         }
 
         public DataFilterCriteria.Builder<DataFilterCriteria.Builder<T>> obOr(){
-            return new Builder<Builder<T>>(this, DataFilterConjunction.OR);
+            return new Builder<Builder<T>>(context, this, DataFilterConjunction.OR);
         }
 
         public T closeBracket(){

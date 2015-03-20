@@ -41,7 +41,7 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CPOrmLoader<User>(this, Select.from(this, User.class).and().in("role_id", Select.from(this, Role.class).include("_id").and().greaterThan("_id", 0)));
+        return new CPOrmLoader<User>(this, Select.from(User.class).and().in("role_id", Select.from(Role.class).include("_id").and().greaterThan("_id", 0)));
     }
 
     @Override
@@ -71,17 +71,17 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             //CPHelper.deleteAll(context, User.class);
 
             Role role = new Role();
-            role.setRoleName("role " + Select.from(context, Role.class).queryAsCount());
+            role.setRoleName("role " + Select.from(Role.class).queryAsCount(context));
             role = role.insertAndReturn(context); //We need the returned object to get the database assigned id
 
             User user = new User();
-            user.setUserName("user " + Select.from(context, User.class).queryAsCount());
+            user.setUserName("user " + Select.from(User.class).queryAsCount(context));
             user.setGivenName("John");
             user.setFamilyName("Doe");
             user.setRoleId(role.getId());
             user.insert(context);
 
-            user.setUserName("user " + Select.from(context, User.class).queryAsCount());
+            user.setUserName("user " + Select.from(User.class).queryAsCount(context));
             user.setGivenName("Jane");
             user.setFamilyName("Soe");
             user.setRoleId(role.getId());

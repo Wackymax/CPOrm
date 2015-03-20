@@ -1,5 +1,6 @@
 package za.co.cporm.model.query;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -9,7 +10,7 @@ import java.util.List;
  * This class will keep track of the query and its supplied arguments , so that when multiple
  * queries are appended, the query and arguments will always match up.
  */
-public class QueryBuilder {
+public class QueryBuilder implements Serializable{
 
     private final StringBuilder queryBuffer;
     private final List<Object> argsStore;
@@ -17,6 +18,12 @@ public class QueryBuilder {
     public QueryBuilder() {
 
         queryBuffer = new StringBuilder();
+        argsStore = new LinkedList<Object>();
+    }
+
+    public QueryBuilder(String init){
+
+        queryBuffer = new StringBuilder(init);
         argsStore = new LinkedList<Object>();
     }
 

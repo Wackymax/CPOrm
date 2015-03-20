@@ -13,7 +13,7 @@ public class CPOrmLoader<T> extends CursorLoader {
     public CPOrmLoader(Context context, Select<T> select) {
         super(context);
 
-        ContentResolverValues resolverValues = select.asContentResolverValue();
+        ContentResolverValues resolverValues = select.asContentResolverValue(context);
         setUri(resolverValues.getItemUri());
         setProjection(resolverValues.getProjection());
         setSelection(resolverValues.getWhere());

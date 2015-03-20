@@ -14,36 +14,31 @@ import java.util.Iterator;
  */
 public class DataFilterCriterion implements DataFilterClause {
 
-    private final Context context;
     public String filterColumn;
     public DataFilterOperator filterOperator;
     public Object filterValue;
 
     /**
      * Creates a new instance, using the context to determine the conversion for arguments to sql friendly format
-     * @param context The context to access application meta
      */
-    private DataFilterCriterion(Context context){
+    private DataFilterCriterion(){
 
-        this.context = context;
     }
 
     /**
      * Creates a new instance, using the context to determine the conversion for arguments to sql friendly format.
      * The additional arguments can be used to set the values for the criterion.
-     * @param context The context to access application meta.
      * @param filterColumn The column to query compare.
      * @param operator The operator used for comparison.
      */
-    public DataFilterCriterion(Context context, String filterColumn, DataFilterOperator operator, Object filterValue){
-        this(context);
+    public DataFilterCriterion(String filterColumn, DataFilterOperator operator, Object filterValue){
         this.filterColumn = filterColumn;
         this.filterOperator = operator;
         this.filterValue = filterValue;
     }
 
     @Override
-    public QueryBuilder getWhereClause() {
+    public QueryBuilder buildWhereClause(Context context) {
 
         QueryBuilder builder = new QueryBuilder();
         builder.append(filterColumn);
@@ -59,7 +54,7 @@ public class DataFilterCriterion implements DataFilterClause {
 
                 while(collectionIterator.hasNext()){
 
-                    builder.append("?", convertToSQLFormat(collectionIterator.next()));
+                    builder.append("?", convertToSQLFormat(context, collectionIterator.next()));
 
                     if(collectionIterator.hasNext()) builder.append(", ");
                 }
@@ -74,13 +69,54 @@ public class DataFilterCriterion implements DataFilterClause {
                     throw new IllegalArgumentException("Inner select can only contain a single column selection");
 
                 builder.append(" (");
-                builder.append((innerSelect).getSelectQuery());
+                builder.append((innerSelect).getSelectQuery(context));
                 builder.append(")");
             }
-            else builder.append(" ?", convertToSQLFormat(filterValue));
+            else builder.append(" ?", convertToSQLFormat(context, filterValue));
         }
 
         return builder;
+    }
+
+    @Override
+    public String getWhereClause() {
+
+        QueryBuilder builder = new QueryBuilder();
+        builder.append(filterColumn);
+        builder.append(" ");
+        builder.append(filterOperator.getSqlRepresentation());
+
+        if(filterValue != null){
+
+            if(filterValue instanceof Collection){
+
+                Iterator collectionIterator = ((Collection)filterValue).iterator();
+                builder.append(" (");
+
+                while(collectionIterator.hasNext()){
+
+                    builder.append("?");
+
+                    if(collectionIterator.hasNext()) builder.append(", ");
+                }
+                builder.append(")");
+
+            }
+            else if(filterValue instanceof Select){
+
+                Select innerSelect = (Select)filterValue;
+
+                if(!innerSelect.isSingleColumnProjection())
+                    throw new IllegalArgumentException("Inner select can only contain a single column selection");
+
+                builder.append(" (");
+                builder.append((innerSelect).getSelectQuery(null));
+                builder.append(")");
+            }
+            else builder.append(" ?");
+        }
+
+        return builder.toString();
     }
 
     @Override
@@ -88,7 +124,7 @@ public class DataFilterCriterion implements DataFilterClause {
         throw new UnsupportedOperationException("Clauses cannot be added to a data filter criterion");
     }
 
-    private Object convertToSQLFormat(Object object){
+    private Object convertToSQLFormat(Context context, Object object){
 
         if(filterOperator == DataFilterOperator.LIKE || filterOperator == DataFilterOperator.NOT_LIKE) return "%" + object + "%";
         else if(filterOperator == DataFilterOperator.BEGINS_WITH) return object + "%";
@@ -118,17 +154,15 @@ public class DataFilterCriterion implements DataFilterClause {
 
     public static class Builder<T extends DataFilterClause>{
 
-        private final Context context;
         private final T originator;
         private final DataFilterConjunction conjunction;
         private final DataFilterCriterion criterion;
 
-        protected Builder(Context context, T originator, DataFilterConjunction conjunction){
+        protected Builder(T originator, DataFilterConjunction conjunction){
 
-            this.context = context;
             this.originator = originator;
             this.conjunction = conjunction;
-            criterion = new DataFilterCriterion(context);
+            criterion = new DataFilterCriterion();
         }
 
         public T equal(String column, Object value) {

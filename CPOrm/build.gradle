@@ -26,7 +26,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 15
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
     }
     buildTypes {
         release {
@@ -60,7 +60,7 @@ bintray {
         publicDownloadNumbers = true
         publish = false
         version {
-            name = '1.0' //Bintray logical version name
+            name = '1.1' //Bintray logical version name
             desc = 'Firts Release'
         }
     }

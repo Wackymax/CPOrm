@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 public class IntegerType implements SqlColumnMapping {
     @Override
     public Type getJavaType() {
-        return Integer.TYPE;
+        return Integer.class;
     }
 
     @Override

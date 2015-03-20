@@ -368,6 +368,11 @@ public class Select<T> implements DataFilterClause{
         return select;
     }
 
+    protected boolean isSingleColumnProjection(){
+
+        return includedColumns.size() == 1;
+    }
+
     /**
      * The where clause for this query
      */

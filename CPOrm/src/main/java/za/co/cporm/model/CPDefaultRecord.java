@@ -20,8 +20,8 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> {
      * @param id the id of the record to find
      * @return The record, if found.
      */
-    public T findById(Context context, long id){
-        return findByPrimaryKey(context, id);
+    public static <T> T findById(Context context, Class<T> object, long id){
+        return CPHelper.findByPrimaryKey(context, object, id);
     }
 
     public int getId() {

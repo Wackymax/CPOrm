@@ -55,7 +55,7 @@ public class DataFilterCriterion implements DataFilterClause {
             if(filterValue instanceof Collection){
 
                 Iterator collectionIterator = ((Collection)filterValue).iterator();
-                builder.append("(");
+                builder.append(" (");
 
                 while(collectionIterator.hasNext()){
 
@@ -68,7 +68,14 @@ public class DataFilterCriterion implements DataFilterClause {
             }
             else if(filterValue instanceof Select){
 
-                builder.append(((Select)filterValue).getSelectQuery());
+                Select innerSelect = (Select)filterValue;
+
+                if(!innerSelect.isSingleColumnProjection())
+                    throw new IllegalArgumentException("Inner select can only contain a single column selection");
+
+                builder.append(" (");
+                builder.append((innerSelect).getSelectQuery());
+                builder.append(")");
             }
             else builder.append(" ?", convertToSQLFormat(filterValue));
         }

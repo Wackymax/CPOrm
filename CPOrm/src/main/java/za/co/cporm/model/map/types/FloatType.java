@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 public class FloatType implements SqlColumnMapping {
     @Override
     public Type getJavaType() {
-        return Float.TYPE;
+        return Float.class;
     }
 
     @Override

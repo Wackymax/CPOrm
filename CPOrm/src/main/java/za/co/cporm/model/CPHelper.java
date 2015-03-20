@@ -92,6 +92,15 @@ public class CPHelper {
         contentResolver.notifyChange(itemUri, null);
     }
 
+    public static <T> void deleteAll(Context context, Class<T> dataModel){
+        TableDetails tableDetails = findTableDetails(context, dataModel);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails);
+
+        ContentResolver contentResolver = context.getContentResolver();
+        contentResolver.delete(itemUri, null, null);
+        contentResolver.notifyChange(itemUri, null);
+    }
+
     private static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails){
         ContentResolver contentResolver = context.getContentResolver();
 

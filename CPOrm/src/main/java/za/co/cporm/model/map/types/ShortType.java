@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 public class ShortType implements SqlColumnMapping {
     @Override
     public Type getJavaType() {
-        return Short.TYPE;
+        return Short.class;
     }
 
     @Override

@@ -2,7 +2,6 @@ package za.co.cporm.model.map;
 
 import za.co.cporm.model.map.types.*;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,12 +29,31 @@ public class SqlColumnMappingFactory {
         columnMappings.add(new UUIDType());
     }
 
-    public SqlColumnMapping findColumnMapping(Type fieldType){
+    public SqlColumnMapping findColumnMapping(Class<?> fieldType){
+
+        Class<?> fieldTypeWrapped = wrapPrimitives(fieldType);
 
         for (SqlColumnMapping columnMapping : columnMappings) {
-            if(columnMapping.getJavaType().equals(fieldType)) return columnMapping;
+            if(columnMapping.getJavaType().equals(fieldTypeWrapped)) return columnMapping;
         }
 
         throw new IllegalArgumentException("No valid SQL mapping found for type " + fieldType);
+    }
+
+    private Class<?> wrapPrimitives(Class fieldType){
+
+        if(!fieldType.isPrimitive()) return fieldType;
+
+        if(long.class.equals(fieldType)) return Long.class;
+        if(int.class.equals(fieldType)) return Integer.class;
+        if(double.class.equals(fieldType)) return Double.class;
+        if(float.class.equals(fieldType)) return Float.class;
+        if(short.class.equals(fieldType)) return Short.class;
+        if(boolean.class.equals(fieldType)) return Boolean.class;
+        if(byte.class.equals(fieldType)) return Byte.class;
+        if(void.class.equals(fieldType)) return Void.class;
+        if(char.class.equals(fieldType)) return Character.class;
+
+        throw new IllegalArgumentException("No primitive type registered for type " + fieldType);
     }
 }

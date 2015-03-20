@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 public class BooleanType implements SqlColumnMapping {
     @Override
     public Type getJavaType() {
-        return Boolean.TYPE;
+        return Boolean.class;
     }
 
     @Override

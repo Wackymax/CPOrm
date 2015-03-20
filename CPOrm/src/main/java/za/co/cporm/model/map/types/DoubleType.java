@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 public class DoubleType implements SqlColumnMapping {
     @Override
     public Type getJavaType() {
-        return Double.TYPE;
+        return Double.class;
     }
 
     @Override

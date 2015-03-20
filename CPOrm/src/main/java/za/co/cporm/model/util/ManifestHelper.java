@@ -18,7 +18,6 @@ public class ManifestHelper {
     public static final String METADATA_MAPPING_FACTORY = "MAPPING_FACTORY";
     public static final String METADATA_DATABASE = "DATABASE";
     public static final String METADATA_VERSION = "VERSION";
-    public static final String METADATA_DOMAIN_PACKAGE_NAME = "DOMAIN_PACKAGE_NAME";
     public static final String METADATA_QUERY_LOG = "QUERY_LOG";
 
     public static final String DATABASE_DEFAULT_NAME = "CPOrm.db";
@@ -89,22 +88,6 @@ public class ManifestHelper {
         }
 
         return databaseVersion;
-    }
-
-    /**
-     * Grabs the domain name of the model classes from the manifest.
-     *
-     * @param context  the {@link android.content.Context} of the Android application
-     * @return the package String that Sugar uses to search for model classes
-     */
-    public static String getDomainPackageName(Context context){
-        String domainPackageName = getMetaDataString(context, METADATA_DOMAIN_PACKAGE_NAME);
-
-        if (domainPackageName == null) {
-            domainPackageName = "";
-        }
-
-        return domainPackageName;
     }
 
     /**

@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/CPOrm" />
+            <option value="$PROJECT_DIR$/CPOrmExample" />
           </set>
         </option>
       </GradleProjectSettings>

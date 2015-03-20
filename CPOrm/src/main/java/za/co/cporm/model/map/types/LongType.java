@@ -12,7 +12,7 @@ import java.lang.reflect.Type;
 public class LongType implements SqlColumnMapping {
     @Override
     public Type getJavaType() {
-        return Long.TYPE;
+        return Long.class;
     }
 
     @Override

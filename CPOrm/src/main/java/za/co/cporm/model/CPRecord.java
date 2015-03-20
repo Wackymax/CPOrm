@@ -26,7 +26,7 @@ public abstract class CPRecord<T> {
         CPHelper.insert(context, this);
     }
 
-    public T insertAndReturn(Context context, T dataModelObject){
+    public T insertAndReturn(Context context){
         return (T)CPHelper.insertAndReturn(context, this);
     }
 

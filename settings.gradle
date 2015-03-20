@@ -1,1 +1,1 @@
-include ':CPOrm'
+include ':CPOrm', ':CPOrmExample'

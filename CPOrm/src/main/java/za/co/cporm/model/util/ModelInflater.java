@@ -2,7 +2,6 @@ package za.co.cporm.model.util;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.util.Log;
 import za.co.cporm.model.generate.TableDetails;
 
 import java.lang.reflect.Field;
@@ -14,7 +13,6 @@ public class ModelInflater {
 
     public static ContentValues deflate(TableDetails tableDetails, Object dataModelObject){
 
-        long time = System.currentTimeMillis();
         ContentValues contentValues = new ContentValues();
 
         for (TableDetails.ColumnDetails columnDetails : tableDetails.getColumns()) {
@@ -35,7 +33,6 @@ public class ModelInflater {
             }
         }
 
-        Log.d("ModelInflater", "Deflated item in " + (System.currentTimeMillis() - time) + "ms");
         return contentValues;
     }
 

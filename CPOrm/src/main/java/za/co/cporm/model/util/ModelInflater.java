@@ -24,9 +24,8 @@ public class ModelInflater {
                 String key = columnDetails.getColumnName();
                 Object value = columnDetails.getColumnField().get(dataModelObject);
 
-                if(value == null) continue;
-
-                columnDetails.getColumnTypeMapping().setColumnValue(contentValues, key, value);
+                if(value == null) contentValues.putNull(key);
+                else columnDetails.getColumnTypeMapping().setColumnValue(contentValues, key, value);
             }
             catch (IllegalAccessException e) {
                 throw new IllegalArgumentException("Unable to access protected field, change the access level: " + columnDetails.getColumnName());

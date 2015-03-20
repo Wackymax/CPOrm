@@ -82,7 +82,7 @@ public class TableGenerator {
             if (columnDetails.isAutoIncrement()) columnDefinition.append(" AUTOINCREMENT");
         }
         else if(columnDetails.isUnique()) columnDefinition.append(" UNIQUE");
-        else if(!columnDetails.isNullable()) columnDefinition.append(" NOT NULL");
+        else if(columnDetails.isRequired()) columnDefinition.append(" NOT NULL");
 
         return columnDefinition;
     }

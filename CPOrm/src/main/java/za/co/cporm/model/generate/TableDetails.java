@@ -93,19 +93,19 @@ public class TableDetails {
         private final SqlColumnMapping columnTypeMapping;
         private final boolean primaryKey;
         private final boolean unique;
-        private final boolean nullable;
+        private final boolean required;
         private final boolean autoIncrement;
 
-        public ColumnDetails(String columnName, Field columnField, SqlColumnMapping columnTypeMapping, boolean primaryKey, boolean unique, boolean nullable, boolean autoIncrement) {
+        public ColumnDetails(String columnName, Field columnField, SqlColumnMapping columnTypeMapping, boolean primaryKey, boolean unique, boolean required, boolean autoIncrement) {
             this.columnName = columnName;
             this.columnField = columnField;
             this.columnTypeMapping = columnTypeMapping;
             this.primaryKey = primaryKey || autoIncrement;
             this.unique = unique;
-            this.nullable = nullable;
+            this.required = required;
             this.autoIncrement = autoIncrement;
 
-            if(primaryKey && nullable) throw new IllegalStateException("Column must be not nullable if primary key is set");
+            if(primaryKey && !required) throw new IllegalStateException("Column must be not required if primary key is set");
 
             if(TextUtils.isEmpty(columnName)) throw new IllegalArgumentException("A valid column name needs to be provided");
         }
@@ -131,8 +131,8 @@ public class TableDetails {
             return unique;
         }
 
-        public boolean isNullable() {
-            return nullable;
+        public boolean isRequired() {
+            return required;
         }
 
         public boolean isAutoIncrement() {

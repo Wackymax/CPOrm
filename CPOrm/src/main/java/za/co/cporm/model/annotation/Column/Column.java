@@ -14,6 +14,6 @@ public @interface Column {
     /**The name of the column, if none is provided, the field name will be converted and used instead*/
     String columnName() default "";
 
-    /**If the field should be set nullable, the default is false*/
-    boolean nullable() default false;
+    /**If the field should be set required/nullable, the default is true*/
+    boolean required() default true;
 }

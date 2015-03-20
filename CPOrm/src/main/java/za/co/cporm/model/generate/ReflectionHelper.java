@@ -56,7 +56,7 @@ public class ReflectionHelper {
             if(TextUtils.isEmpty(columnName)) columnName = NamingUtils.getSQLName(field.getName());
             SqlColumnMapping columnMapping = columnMappingFactory.findColumnMapping(field.getType());
 
-            tableDetails.addColumn(new TableDetails.ColumnDetails(columnName, field, columnMapping, field.isAnnotationPresent(PrimaryKey.class), field.isAnnotationPresent(Unique.class), column.nullable(), autoIncrement));
+            tableDetails.addColumn(new TableDetails.ColumnDetails(columnName, field, columnMapping, field.isAnnotationPresent(PrimaryKey.class), field.isAnnotationPresent(Unique.class), column.required(), autoIncrement));
         }
 
         if(tableDetails.getColumns().isEmpty()) throw new IllegalStateException("No columns are defined for table " + tableDetails.getTableName());

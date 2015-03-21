@@ -21,13 +21,15 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
     private final Context context;
     private final ModelFactory modelFactory;
     private final TableDetailsCache tableDetailsCache;
+    private final boolean debugEnabled;
 
-    public CPOrmDatabase(Context context) {
-        super(context, ManifestHelper.getDatabaseName(context), new CPOrmCursorFactory(ManifestHelper.getDebugEnabled(context)), ManifestHelper.getDatabaseVersion(context));
+    public CPOrmDatabase(Context context, boolean debugEnabled) {
+        super(context, ManifestHelper.getDatabaseName(context), new CPOrmCursorFactory(debugEnabled), ManifestHelper.getDatabaseVersion(context));
         this.modelFactory = ManifestHelper.getModelFactory(context);
         this.context = context;
         this.tableDetailsCache = new TableDetailsCache();
         this.tableDetailsCache.init(context, modelFactory.getDataModelObjects());
+        this.debugEnabled = debugEnabled;
     }
 
     @Override
@@ -38,12 +40,17 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
             if(TableView.class.isAssignableFrom(dataModelObject)){
                 String createStatement = TableViewGenerator.createViewStatement(findTableDetails(dataModelObject), (Class<? extends TableView>) dataModelObject);
 
-                Log.d(TAG, "Creating View: " + createStatement);
+                if(debugEnabled) {
+                    Log.d(TAG, "Creating View: " + createStatement);
+                }
                 sqLiteDatabase.execSQL(createStatement);
             }
             else {
                 String createStatement = TableGenerator.generateTableCreate(findTableDetails(dataModelObject), false);
-                Log.d(TAG, "Creating Table: " + createStatement);
+
+                if(debugEnabled) {
+                    Log.d(TAG, "Creating Table: " + createStatement);
+                }
                 sqLiteDatabase.execSQL(createStatement);
             }
         }
@@ -56,11 +63,15 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
 
             if(TableView.class.isAssignableFrom(dataModelObject)){
                 String statement = TableViewGenerator.createDropViewStatement(findTableDetails(dataModelObject));
-                Log.d(TAG, "Dropping View: " + statement);
+                if(debugEnabled) {
+                    Log.d(TAG, "Dropping View: " + statement);
+                }
                 sqLiteDatabase.execSQL(statement);
             } else {
                 String statement = TableGenerator.generateTableDrop(findTableDetails(dataModelObject), false);
-                Log.d(TAG, "Dropping Table: " + statement);
+                if(debugEnabled) {
+                    Log.d(TAG, "Dropping Table: " + statement);
+                }
                 sqLiteDatabase.execSQL(statement);
             }
         }

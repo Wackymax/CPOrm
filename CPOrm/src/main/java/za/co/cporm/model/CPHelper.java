@@ -55,7 +55,6 @@ public class CPHelper {
 
         ContentResolver contentResolver = context.getContentResolver();
         Uri itemUri = contentResolver.insert(insertUri, contentValues);
-        contentResolver.notifyChange(insertUri, null);
     }
 
     public static <T> T insertAndReturn(Context context, T dataModelObject){
@@ -65,7 +64,6 @@ public class CPHelper {
 
         ContentResolver contentResolver = context.getContentResolver();
         Uri itemUri = contentResolver.insert(insertUri, contentValues);
-        contentResolver.notifyChange(insertUri, null);
 
         return findSingleItem(context, itemUri, tableDetails);
     }
@@ -78,7 +76,6 @@ public class CPHelper {
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.update(itemUri, contentValues, null, null);
-        contentResolver.notifyChange(itemUri, null);
     }
 
     public static <T> void delete(Context context, T dataModelObject){
@@ -89,7 +86,6 @@ public class CPHelper {
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);
-        contentResolver.notifyChange(itemUri, null);
     }
 
     public static <T> void deleteAll(Context context, Class<T> dataModel){
@@ -98,10 +94,9 @@ public class CPHelper {
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);
-        contentResolver.notifyChange(itemUri, null);
     }
 
-    private static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails){
+    protected static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails){
         ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = null;

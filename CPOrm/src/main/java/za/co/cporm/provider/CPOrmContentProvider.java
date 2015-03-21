@@ -6,9 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
+import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.provider.util.UriMatcherHelper;
+
+import java.util.Arrays;
 
 /**
  * The base content provided that will expose all of the model objects.
@@ -16,15 +20,20 @@ import za.co.cporm.provider.util.UriMatcherHelper;
  */
 public class CPOrmContentProvider extends ContentProvider {
 
+    private static final String TAG = "CPOrmContentProvider";
+
     public static final String PARAMETER_OFFSET = "OFFSET";
     public static final String PARAMETER_LIMIT = "LIMIT";
+    public static final String PARAMETER_SYNC = "SYNC";
 
     private CPOrmDatabase database;
     private UriMatcherHelper uriMatcherHelper;
+    private boolean debugEnabled;
 
     @Override
     public boolean onCreate() {
-        database = new CPOrmDatabase(getContext());
+        debugEnabled = ManifestHelper.getDebugEnabled(getContext());
+        database = new CPOrmDatabase(getContext(), debugEnabled);
         uriMatcherHelper = new UriMatcherHelper(getContext());
         uriMatcherHelper.init(getContext(), database.getModelFactory(), database.getTableDetailsCache());
         return true;
@@ -36,6 +45,16 @@ public class CPOrmContentProvider extends ContentProvider {
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getReadableDatabase();
         String limit = constructLimit(uri);
+
+        if(debugEnabled){
+            Log.d(TAG, "********* Query **********");
+            Log.d(TAG, "Uri: " + uri);
+            Log.d(TAG, "Projection: " + Arrays.toString(projection));
+            Log.d(TAG, "Selection: " + selection);
+            Log.d(TAG, "Args: " + Arrays.toString(selectionArgs));
+            Log.d(TAG, "Sort: " + sortOrder);
+            Log.d(TAG, "Limit: " + limit);
+        }
 
         if(uriMatcherHelper.isSingleItemRequested(uri)){
 
@@ -56,8 +75,17 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
+        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
+
+        if(debugEnabled){
+            Log.d(TAG, "********* Insert **********");
+            Log.d(TAG, "Uri: " + uri);
+            Log.d(TAG, "Content Values: " + contentValues);
+        }
 
         long insertId = db.insert(tableDetails.getTableName(), null, contentValues);
+
+        getContext().getContentResolver().notifyChange(uri, null, sync);
 
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
         if(primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, String.valueOf(insertId));
@@ -73,14 +101,27 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
+        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
+        if(debugEnabled){
+            Log.d(TAG, "********* Delete **********");
+            Log.d(TAG, "Uri: " + uri);
+            Log.d(TAG, "Where: " + where);
+            Log.d(TAG, "Args: " + Arrays.toString(args));
+        }
+
+        int deleteCount = 0;
         if(uriMatcherHelper.isSingleItemRequested(uri)){
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            return db.delete(tableDetails.getTableName(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
+            deleteCount = db.delete(tableDetails.getTableName(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         }
-        return db.delete(tableDetails.getTableName(), where, args);
+        deleteCount = db.delete(tableDetails.getTableName(), where, args);
+
+        if(deleteCount > 0) getContext().getContentResolver().notifyChange(uri, null, sync);
+
+        return deleteCount;
     }
 
     @Override
@@ -88,14 +129,28 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
+        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
+        if(debugEnabled){
+            Log.d(TAG, "********* Update **********");
+            Log.d(TAG, "Uri: " + uri);
+            Log.d(TAG, "Content Values: " + contentValues);
+            Log.d(TAG, "Where: " + where);
+            Log.d(TAG, "Args: " + Arrays.toString(args));
+        }
+
+        int updateCount = 0;
         if(uriMatcherHelper.isSingleItemRequested(uri)){
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            return db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
+            updateCount = db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         }
-        else return db.update(tableDetails.getTableName(), contentValues, where, args);
+        else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
+
+        if(updateCount > 0) getContext().getContentResolver().notifyChange(uri, null, sync);
+
+        return updateCount;
     }
 
     private String constructLimit(Uri uri){

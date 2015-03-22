@@ -11,6 +11,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import za.co.cporm.example.app.model.domain.Role;
 import za.co.cporm.example.app.model.domain.User;
+import za.co.cporm.model.CPHelper;
 import za.co.cporm.model.loader.CPOrmLoader;
 import za.co.cporm.model.query.Select;
 
@@ -41,7 +42,14 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CPOrmLoader<User>(this, Select.from(User.class).and().in("role_id", Select.from(Role.class).include("_id").and().greaterThan("_id", 0)));
+
+        Select selectUser = Select.from(User.class);
+        Select selectRole = Select.from(Role.class) //Specify the class to select from
+                .include("_id") //Restrict the selection to only required columns
+                .and() //Add a new criterion
+                .greaterThan("_id", 0); //Specify the criterion column, type and value
+        selectUser.and().in("role_id", selectRole); //Add role selection as inner query
+        return new CPOrmLoader<User>(this, selectUser); //Give the select to the cursor loader to load the data
     }
 
     @Override
@@ -66,9 +74,8 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
         @Override
         protected Void doInBackground(Void... voids) {
 
-
             //CPHelper.deleteAll(context, Role.class);
-            //CPHelper.deleteAll(context, User.class);
+            CPHelper.deleteAll(context, User.class);
 
             Role role = new Role();
             role.setRoleName("role " + Select.from(Role.class).queryAsCount(context));
@@ -86,6 +93,19 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             user.setFamilyName("Soe");
             user.setRoleId(role.getId());
             user.insert(context);
+
+            //Demonstrates cursor begin notified of data source changes
+            for (int i = 0; i < 100; i++) {
+                user.setUserName("user " + Select.from(User.class).queryAsCount(context));
+                user.setGivenName("Loading " + i);
+                user.setFamilyName("User");
+                user.setRoleId(role.getId());
+                user.insert(context);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignore) {
+                }
+            }
 
             return null;
         }

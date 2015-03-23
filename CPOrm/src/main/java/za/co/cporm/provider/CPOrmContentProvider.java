@@ -56,13 +56,19 @@ public class CPOrmContentProvider extends ContentProvider {
             Log.d(TAG, "Limit: " + limit);
         }
 
+        Cursor cursor;
+
         if(uriMatcherHelper.isSingleItemRequested(uri)){
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            return db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
+            cursor = db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
         }
-        else return db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
+        else cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
+
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        return cursor;
     }
 
     @Override

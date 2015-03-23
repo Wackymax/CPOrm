@@ -54,7 +54,12 @@ public class UriMatcherHelper {
     public TableDetails getTableDetails(Uri uri){
 
         int matchCode = uriMatcher.match(uri);
-        return findTableDetails(matchCode);
+        try {
+            return findTableDetails(matchCode);
+        }
+        catch (Exception ex){
+            throw new IllegalArgumentException("Could not find table information for Uri, make sure the model factory knows of this table: " + uri, ex);
+        }
     }
 
     public String getType(Uri uri){

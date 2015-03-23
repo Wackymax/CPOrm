@@ -41,7 +41,7 @@ public class CPSyncHelper {
     public static <T> void update(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Object columnValue = contentValues.get(tableDetails.findPrimaryKeyColumn().getColumnName());
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
                 .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
 
@@ -51,7 +51,7 @@ public class CPSyncHelper {
     public static <T> void delete(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Object columnValue = contentValues.get(tableDetails.findPrimaryKeyColumn().getColumnName());
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
                 .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
 

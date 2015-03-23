@@ -233,8 +233,6 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public CPOrmCursor<T> queryAsCursor(Context context){
 
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
-
         ContentResolverValues contentResolverValues = asContentResolverValue(context);
         ContentResolver contentResolver = context.getContentResolver();
         Cursor cursor = contentResolver.query(contentResolverValues.getItemUri(),
@@ -243,7 +241,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
                 contentResolverValues.getWhereArgs(),
                 contentResolverValues.getSortOrder());
 
-        return new CPOrmCursor<T>(tableDetails, cursor);
+        return new CPOrmCursor<T>(contentResolverValues.getTableDetails(), cursor);
     }
 
     /**
@@ -308,7 +306,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         if(offset != null) itemUri.appendQueryParameter(CPOrmContentProvider.PARAMETER_OFFSET, offset.toString());
         if(limit != null) itemUri.appendQueryParameter(CPOrmContentProvider.PARAMETER_LIMIT, limit.toString());
 
-        return new ContentResolverValues(itemUri.build(), getProjection(tableDetails), where.getQueryString(), where.getQueryArgsAsArray(), sort.getQueryString());
+        return new ContentResolverValues(tableDetails, itemUri.build(), getProjection(tableDetails), where.getQueryString(), where.getQueryArgsAsArray(), sort.getQueryString());
     }
 
     /**

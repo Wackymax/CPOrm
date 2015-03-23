@@ -71,7 +71,7 @@ public class CPHelper {
     public static <T> void update(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Object columnValue = contentValues.get(tableDetails.findPrimaryKeyColumn().getColumnName());
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
         ContentResolver contentResolver = context.getContentResolver();
@@ -81,7 +81,7 @@ public class CPHelper {
     public static <T> void delete(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Object columnValue = contentValues.get(tableDetails.findPrimaryKeyColumn().getColumnName());
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
         ContentResolver contentResolver = context.getContentResolver();

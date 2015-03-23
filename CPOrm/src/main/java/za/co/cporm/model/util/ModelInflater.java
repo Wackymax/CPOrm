@@ -11,6 +11,20 @@ import java.lang.reflect.Field;
  */
 public class ModelInflater {
 
+    public static Object deflateColumn(TableDetails tableDetails, TableDetails.ColumnDetails columnDetails, Object dataModelObject){
+
+        try {
+
+            Object value = columnDetails.getColumnField().get(dataModelObject);
+
+            if(value == null) return null;
+            else return columnDetails.getColumnTypeMapping().toSqlType(value);
+        }
+        catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Unable to access protected field, change the access level: " + columnDetails.getColumnName());
+            }
+    }
+
     public static ContentValues deflate(TableDetails tableDetails, Object dataModelObject){
 
         ContentValues contentValues = new ContentValues();

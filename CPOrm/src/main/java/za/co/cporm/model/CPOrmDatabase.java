@@ -79,6 +79,13 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+
+        db.enableWriteAheadLogging();
+        super.onOpen(db);
+    }
+
     private TableDetails findTableDetails(Class<?> object){
 
         return tableDetailsCache.findTableDetails(context, object);

@@ -181,21 +181,15 @@ public class CPOrmContentProvider extends ContentProvider {
 
         if(limit != null && offset != null)
         {
-            limitStatement.append(" LIMIT ");
             limitStatement.append(offset);
-            limitStatement.append(", ");
+            limitStatement.append(",");
             limitStatement.append(limit);
         }
         else if(limit != null)
         {
-            limitStatement.append(" LIMIT ");
             limitStatement.append(limit);
         }
-        else
-        {
-            limitStatement.append(" OFFSET ");
-            limitStatement.append(offset);
-        }
+        else throw new IllegalArgumentException("A limit must also be provided when setting an offset");
 
         return limitStatement.toString();
     }

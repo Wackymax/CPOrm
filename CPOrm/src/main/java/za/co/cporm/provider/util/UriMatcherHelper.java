@@ -126,6 +126,6 @@ public class UriMatcherHelper {
                 .scheme("content")
                 .authority(authority)
                 .appendEncodedPath(tableDetails.getTableName())
-                .appendEncodedPath("/" + itemId);
+                .appendEncodedPath(itemId);
     }
 }

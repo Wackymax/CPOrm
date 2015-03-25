@@ -49,7 +49,7 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
     @Override
     public void changeCursor(Cursor cursor) {
 
-        if(cursor instanceof CPOrmCursor){
+        if(cursor instanceof CPOrmCursor || cursor == null){
             super.changeCursor(cursor);
         }
         else throw new IllegalArgumentException("The cursor is not of the instance " + CPOrmCursor.class.getSimpleName());

@@ -91,6 +91,17 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
         }
     }
 
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+
+        super.onOpen(db);
+
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+
+            db.enableWriteAheadLogging();
+        }
+    }
+
     private TableDetails findTableDetails(Class<?> object){
 
         return tableDetailsCache.findTableDetails(context, object);

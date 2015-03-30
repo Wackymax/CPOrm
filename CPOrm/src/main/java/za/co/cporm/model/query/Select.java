@@ -316,6 +316,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public T first(Context context){
 
+        limit(1); //Add a default limit for the user
         CPOrmCursor<T> cursor = queryAsCursor(context);
         try{
 

@@ -1,5 +1,6 @@
 package za.co.cporm.model.generate;
 
+import za.co.cporm.model.annotation.Index;
 import za.co.cporm.model.annotation.TableConstraint;
 
 import java.util.Arrays;
@@ -19,6 +20,7 @@ public class TableGenerator {
         prettyPrint(0, prettyPrint,  tableQuery);
         tableQuery.append("DROP TABLE IF EXISTS ");
         tableQuery.append(tableDetails.getTableName());
+        tableQuery.append(";");
 
         return tableQuery.toString();
     }
@@ -54,8 +56,28 @@ public class TableGenerator {
         }
 
         prettyPrint(1, prettyPrint,  tableQuery);
-        tableQuery.append(")");
+        tableQuery.append(");");
         prettyPrint(1, prettyPrint,  tableQuery);
+
+        for (Index index : tableDetails.getIndices()) {
+
+            prettyPrint(1, prettyPrint,  tableQuery);
+            tableQuery.append("CREATE INDEX ");
+            tableQuery.append(index.indexName());
+            tableQuery.append(" ON ");
+            tableQuery.append(tableDetails.getTableName());
+            tableQuery.append(" (");
+
+            for (int i = 0; i < index.indexColumns().length; i++) {
+
+                String column = index.indexColumns()[i];
+                tableQuery.append(column);
+
+                if((i + 1) < index.indexColumns().length) tableQuery.append(", ");
+            }
+            tableQuery.append(");");
+            prettyPrint(1, prettyPrint, tableQuery);
+        }
 
         return tableQuery.toString();
     }

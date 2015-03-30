@@ -1,8 +1,10 @@
 package za.co.cporm.model;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.util.Log;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.generate.TableGenerator;
@@ -79,11 +81,25 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+
+        super.onConfigure(db);
+        if(!db.isReadOnly()) {
+            db.enableWriteAheadLogging();
+        }
+    }
+
     @Override
     public void onOpen(SQLiteDatabase db) {
 
-        db.enableWriteAheadLogging();
         super.onOpen(db);
+
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN && Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+
+            db.enableWriteAheadLogging();
+        }
     }
 
     private TableDetails findTableDetails(Class<?> object){

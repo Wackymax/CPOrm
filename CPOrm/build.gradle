@@ -13,7 +13,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-version 1.8
+version 1.9
 
 repositories {
     jcenter()
@@ -106,6 +106,7 @@ install {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:support-v4:21.0.3'
 }
 
 task sourcesJar(type: Jar) {

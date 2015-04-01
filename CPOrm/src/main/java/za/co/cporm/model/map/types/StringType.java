@@ -4,14 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import za.co.cporm.model.map.SqlColumnMapping;
 
-import java.lang.reflect.Type;
-
 /**
  * Created by hennie.brink on 2015-03-19.
  */
 public class StringType implements SqlColumnMapping {
     @Override
-    public Type getJavaType() {
+    public Class<?> getJavaType() {
         return String.class;
     }
 

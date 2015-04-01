@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import za.co.cporm.model.map.SqlColumnMapping;
 
-import java.lang.reflect.Type;
 import java.util.Calendar;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Calendar;
  */
 public class CalendarType implements SqlColumnMapping {
     @Override
-    public Type getJavaType() {
+    public Class<?> getJavaType() {
         return Calendar.class;
     }
 
@@ -22,8 +21,8 @@ public class CalendarType implements SqlColumnMapping {
     }
 
     @Override
-    public Object toSqlType(Object source) {
-        return source;
+    public Long toSqlType(Object source) {
+        return ((Calendar)source).getTimeInMillis();
     }
 
     @Override
@@ -36,6 +35,6 @@ public class CalendarType implements SqlColumnMapping {
 
     @Override
     public void setColumnValue(ContentValues contentValues, String key, Object value) {
-        contentValues.put(key, ((Calendar)value).getTimeInMillis());
+        contentValues.put(key, toSqlType(value));
     }
 }

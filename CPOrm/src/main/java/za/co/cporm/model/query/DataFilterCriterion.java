@@ -120,6 +120,12 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
     }
 
     @Override
+    public boolean hasFilterValue() {
+
+        return filterColumn != null && filterOperator != null;
+    }
+
+    @Override
     public DataFilterCriterion addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
         throw new UnsupportedOperationException("Clauses cannot be added to a data filter criterion");
     }

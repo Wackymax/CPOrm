@@ -412,8 +412,11 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         }
         select.append(" FROM ");
         select.append(tableDetails.getTableName());
-        select.append(" WHERE ");
-        select.append(where);
+
+        if(hasFilterValue()) {
+            select.append(" WHERE ");
+            select.append(where);
+        }
 
         return select;
     }
@@ -442,6 +445,12 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
         this.filterCriteria.addClause(clause, conjunction);
         return this;
+    }
+
+    @Override
+    public boolean hasFilterValue() {
+
+        return filterCriteria.hasFilterValue();
     }
 
     @Override

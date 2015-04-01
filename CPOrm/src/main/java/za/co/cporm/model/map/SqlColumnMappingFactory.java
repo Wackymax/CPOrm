@@ -34,7 +34,10 @@ public class SqlColumnMappingFactory {
         Class<?> fieldTypeWrapped = wrapPrimitives(fieldType);
 
         for (SqlColumnMapping columnMapping : columnMappings) {
-            if(columnMapping.getJavaType().equals(fieldTypeWrapped)) return columnMapping;
+
+            Class<?> columnType = columnMapping.getJavaType();
+            if(columnType.equals(fieldTypeWrapped) || columnType.isAssignableFrom(fieldType))
+                return columnMapping;
         }
 
         throw new IllegalArgumentException("No valid SQL mapping found for type " + fieldType);

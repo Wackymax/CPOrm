@@ -34,7 +34,8 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
 
         if(conjunction == null) conjunction = DataFilterConjunction.AND;
 
-        filterClauses.put(clause, conjunction);
+        if(clause != null)
+            filterClauses.put(clause, conjunction);
 
         return this;
     }
@@ -81,21 +82,24 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
 
         QueryBuilder builder = new QueryBuilder();
 
-        if(!filterClauses.isEmpty()){
+        if(hasFilterValue()){
 
-            boolean isFirst = true;
+            DataFilterClause previousClause = null;
             Iterator<DataFilterClause> clauseIterator = filterClauses.keySet().iterator();
             builder.append("(");
             while(clauseIterator.hasNext()) {
 
                 DataFilterClause clause = clauseIterator.next();
-                if(!isFirst){
-                    builder.append(filterClauses.get(clause).toString());
+                if(!clause.hasFilterValue())
+                    continue;
+
+                if(previousClause != null && previousClause.hasFilterValue()){
+                    builder.append(filterClauses.get(previousClause).toString());
                     builder.append(" ");
                 }
-                else isFirst = false;
 
                 builder.append(clause.getWhereClause());
+                previousClause = clause;
 
                 if(clauseIterator.hasNext()) builder.append(" ");
             }
@@ -104,6 +108,18 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
         }
 
         return builder.toString();
+    }
+
+    @Override
+    public boolean hasFilterValue() {
+
+        boolean hasFilterValue = false;
+
+        for (DataFilterClause clause : filterClauses.keySet()) {
+
+            hasFilterValue = hasFilterValue || clause.hasFilterValue();
+        }
+        return hasFilterValue;
     }
 
     public static class Builder<T extends DataFilterClause<T>> implements DataFilterClause<Builder<T>>{
@@ -166,6 +182,12 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
             criteria.addClause(clause, conjunction);
 
             return this;
+        }
+
+        @Override
+        public boolean hasFilterValue() {
+
+            return criteria.hasFilterValue();
         }
     }
 }

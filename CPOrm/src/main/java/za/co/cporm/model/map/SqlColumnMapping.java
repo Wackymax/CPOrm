@@ -3,8 +3,6 @@ package za.co.cporm.model.map;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import java.lang.reflect.Type;
-
 /**
  * This allows us to handle the mapping of objects to and from sql
  * in an easy way without having to worry about the implicit type
@@ -12,7 +10,7 @@ import java.lang.reflect.Type;
 public interface SqlColumnMapping {
 
     /** The java type this mapping will represent */
-    Type getJavaType();
+    Class<?> getJavaType();
 
     /** The SQL equivalent column name that will be used to store this type */
     String getSqlColumnTypeName();

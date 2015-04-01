@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import za.co.cporm.model.map.SqlColumnMapping;
 
-import java.lang.reflect.Type;
 import java.util.UUID;
 
 /**
@@ -12,7 +11,7 @@ import java.util.UUID;
  */
 public class UUIDType implements SqlColumnMapping {
     @Override
-    public Type getJavaType() {
+    public Class<?> getJavaType() {
         return UUID.class;
     }
 
@@ -22,7 +21,7 @@ public class UUIDType implements SqlColumnMapping {
     }
 
     @Override
-    public Object toSqlType(Object source) {
+    public String toSqlType(Object source) {
         return source.toString();
     }
 
@@ -34,6 +33,6 @@ public class UUIDType implements SqlColumnMapping {
 
     @Override
     public void setColumnValue(ContentValues contentValues, String key, Object value) {
-        contentValues.put(key, value.toString());
+        contentValues.put(key, toSqlType(value));
     }
 }

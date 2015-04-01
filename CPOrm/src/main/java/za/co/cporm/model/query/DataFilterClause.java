@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public interface DataFilterClause<T extends DataFilterClause> extends Serializable{
 
+    boolean hasFilterValue();
+
     /** The filter conjunction, this is equal to SQL AND and OR */
     public enum DataFilterConjunction{AND, OR};
 

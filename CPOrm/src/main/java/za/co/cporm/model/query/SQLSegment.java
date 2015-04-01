@@ -1,6 +1,7 @@
 package za.co.cporm.model.query;
 
 import android.content.Context;
+import android.text.TextUtils;
 import za.co.cporm.model.util.ManifestHelper;
 
 /**
@@ -39,5 +40,11 @@ public class SQLSegment implements DataFilterClause {
     @Override
     public SQLSegment addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
         throw new UnsupportedOperationException("Clauses cannot be added to a data filter criterion");
+    }
+
+    @Override
+    public boolean hasFilterValue() {
+
+        return !TextUtils.isEmpty(sqlSegment);
     }
 }

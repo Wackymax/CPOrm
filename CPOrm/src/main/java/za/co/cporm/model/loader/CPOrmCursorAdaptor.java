@@ -54,4 +54,18 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
         }
         else throw new IllegalArgumentException("The cursor is not of the instance " + CPOrmCursor.class.getSimpleName());
     }
+
+    /**
+     * Returns the inflated item at the cursor position
+     * @param position The position to inflate
+     * @return The inflated item if found, null otherwise
+     */
+    public T getInflatedItem(int position) {
+
+        CPOrmCursor<T> cursor = (CPOrmCursor<T>) getCursor();
+        if(cursor.moveToPosition(position)) {
+            return cursor.inflate();
+        }
+        return null;
+    }
 }

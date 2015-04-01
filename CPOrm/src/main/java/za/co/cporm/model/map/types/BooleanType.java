@@ -4,14 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import za.co.cporm.model.map.SqlColumnMapping;
 
-import java.lang.reflect.Type;
-
 /**
  * Created by hennie.brink on 2015-03-19.
  */
 public class BooleanType implements SqlColumnMapping {
     @Override
-    public Type getJavaType() {
+    public Class<?> getJavaType() {
         return Boolean.class;
     }
 
@@ -21,8 +19,8 @@ public class BooleanType implements SqlColumnMapping {
     }
 
     @Override
-    public Object toSqlType(Object source) {
-        return source;
+    public Integer toSqlType(Object source) {
+        return ((Boolean)source) ? 1 : 0;
     }
 
     @Override
@@ -32,6 +30,6 @@ public class BooleanType implements SqlColumnMapping {
 
     @Override
     public void setColumnValue(ContentValues contentValues, String key, Object value) {
-        contentValues.put(key, ((Boolean)value) ? 1 : 0);
+        contentValues.put(key, toSqlType(value));
     }
 }

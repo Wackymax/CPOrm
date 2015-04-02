@@ -89,12 +89,29 @@ public class CPOrmContentProvider extends ContentProvider {
             Log.d(TAG, "Content Values: " + contentValues);
         }
 
-        long insertId = db.insert(tableDetails.getTableName(), null, contentValues);
+        long insertId = db.insertOrThrow(tableDetails.getTableName(), null, contentValues);
+
+        if(insertId == -1)
+            throw new IllegalArgumentException("Failed to insert row for uri " + uri + " using values " + contentValues);
 
         getContext().getContentResolver().notifyChange(uri, null, sync);
 
+        if(!tableDetails.getChangeListeners().isEmpty()) {
+
+            for (Class<?> changeListener : tableDetails.getChangeListeners()) {
+
+                TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
+
+                if(changeListenerDetails == null)
+                    continue;
+
+                Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
+                getContext().getContentResolver().notifyChange(changeUri, null, sync);
+            }
+        }
+
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-        if(primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, String.valueOf(insertId));
+        if(primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
         else {
 
             String primaryKeyValue = contentValues.getAsString(primaryKeyColumn.getColumnName());
@@ -123,9 +140,25 @@ public class CPOrmContentProvider extends ContentProvider {
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
             deleteCount = db.delete(tableDetails.getTableName(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         }
-        deleteCount = db.delete(tableDetails.getTableName(), where, args);
+        else deleteCount = db.delete(tableDetails.getTableName(), where, args);
 
-        if(deleteCount > 0) getContext().getContentResolver().notifyChange(uri, null, sync);
+        if(deleteCount > 0) {
+            getContext().getContentResolver().notifyChange(uri, null, sync);
+
+            if(!tableDetails.getChangeListeners().isEmpty()) {
+
+                for (Class<?> changeListener : tableDetails.getChangeListeners()) {
+
+                    TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
+
+                    if(changeListenerDetails == null)
+                        continue;
+
+                    Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
+                    getContext().getContentResolver().notifyChange(changeUri, null, sync);
+                }
+            }
+        }
 
         return deleteCount;
     }
@@ -154,7 +187,26 @@ public class CPOrmContentProvider extends ContentProvider {
         }
         else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
-        if(updateCount > 0) getContext().getContentResolver().notifyChange(uri, null, sync);
+        if(updateCount > 0) {
+            getContext().getContentResolver().notifyChange(uri, null, sync);
+
+            if(!tableDetails.getChangeListeners().isEmpty()) {
+
+                String itemId = uri.getLastPathSegment();
+                for (Class<?> changeListener : tableDetails.getChangeListeners()) {
+
+                    TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
+
+                    if(changeListenerDetails == null)
+                        continue;
+
+                    Uri changeUri;
+                    if(TextUtils.isEmpty(itemId)) changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
+                    else changeUri = uriMatcherHelper.generateSingleItemUri(changeListenerDetails, itemId);
+                    getContext().getContentResolver().notifyChange(changeUri, null, sync);
+                }
+            }
+        }
 
         return updateCount;
     }

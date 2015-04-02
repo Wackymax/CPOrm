@@ -296,6 +296,9 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public ContentResolverValues asContentResolverValue(Context context){
 
+        if(context == null)
+            throw new IllegalArgumentException("Attempt to query with a null context");
+
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
 
         QueryBuilder where = buildWhereClause(context);
@@ -395,6 +398,9 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     protected QueryBuilder getSelectQuery(Context context){
+
+        if(context == null)
+            throw new IllegalArgumentException("Attempt to query with a null context");
 
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
 

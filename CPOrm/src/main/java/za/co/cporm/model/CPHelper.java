@@ -48,7 +48,7 @@ public class CPHelper {
         return findSingleItem(context, itemUri, tableDetails);
     }
 
-    public static <T> void insert(Context context, T dataModelObject){
+    public static <T> void insert(Context context, T dataModelObject) {
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();

@@ -20,6 +20,7 @@ public class TableDetails {
     private final Collection<ColumnDetails> columns = new LinkedList<ColumnDetails>();
     private final Collection<Index> indices = new LinkedList<Index>();
     private final Collection<TableConstraint> constraints = new LinkedList<TableConstraint>();
+    private final Collection<Class<?>> changeListener = new LinkedList<Class<?>>();
 
     public TableDetails(String tableName, Class tableClass){
         this.tableName = tableName;
@@ -73,6 +74,14 @@ public class TableDetails {
 
     public void addIndex(Index index) {
         indices.add(index);
+    }
+
+    public Collection<Class<?>> getChangeListeners() {
+        return Collections.unmodifiableCollection(changeListener);
+    }
+
+    public void addChangeListener(Class<?> clazz) {
+        changeListener.add(clazz);
     }
 
     public Collection<TableConstraint> getConstraints() {

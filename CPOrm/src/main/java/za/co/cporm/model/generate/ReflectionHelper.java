@@ -2,13 +2,11 @@ package za.co.cporm.model.generate;
 
 import android.content.Context;
 import android.text.TextUtils;
+import za.co.cporm.model.annotation.ChangeListeners;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.PrimaryKey;
 import za.co.cporm.model.annotation.Column.Unique;
-import za.co.cporm.model.annotation.Index;
-import za.co.cporm.model.annotation.Indices;
-import za.co.cporm.model.annotation.Table;
-import za.co.cporm.model.annotation.TableConstraint;
+import za.co.cporm.model.annotation.*;
 import za.co.cporm.model.map.SqlColumnMapping;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 import za.co.cporm.model.util.ManifestHelper;
@@ -67,6 +65,14 @@ public class ReflectionHelper {
             for (Index index : dataModelObject.getAnnotation(Indices.class).indices()) {
 
                 tableDetails.addIndex(index);
+            }
+        }
+
+        if(dataModelObject.isAnnotationPresent(ChangeListeners.class)){
+
+            for (Class<?> changeListener : dataModelObject.getAnnotation(ChangeListeners.class).changeListeners()) {
+
+                tableDetails.addChangeListener(changeListener);
             }
         }
 

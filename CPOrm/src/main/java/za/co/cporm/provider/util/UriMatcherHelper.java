@@ -1,5 +1,6 @@
 package za.co.cporm.provider.util;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.net.Uri;
@@ -90,6 +91,16 @@ public class UriMatcherHelper {
         return isSingleItemRequested(uriMatcher.match(uri));
     }
 
+    public Uri generateItemUri(TableDetails tableDetails){
+
+        return new Uri.Builder()
+                .scheme("content")
+                .authority(authority)
+                .appendEncodedPath(tableDetails.getTableName())
+                .build();
+
+    }
+
     public Uri generateSingleItemUri(TableDetails tableDetails, String itemId){
 
         return new Uri.Builder()
@@ -98,6 +109,12 @@ public class UriMatcherHelper {
                 .appendEncodedPath(tableDetails.getTableName() + "/")
                 .appendEncodedPath(itemId)
                 .build();
+
+    }
+
+    public Uri generateSingleItemUri(TableDetails tableDetails, long itemId){
+
+        return ContentUris.withAppendedId(generateItemUri(tableDetails), itemId);
 
     }
 

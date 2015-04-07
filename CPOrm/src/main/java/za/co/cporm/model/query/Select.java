@@ -6,9 +6,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import za.co.cporm.model.CPHelper;
 import za.co.cporm.model.generate.TableDetails;
+import za.co.cporm.model.map.SqlColumnMappingFactory;
 import za.co.cporm.model.util.CPOrmCursor;
 import za.co.cporm.model.util.ContentResolverValues;
 import za.co.cporm.model.util.CursorIterator;
+import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.provider.CPOrmContentProvider;
 import za.co.cporm.provider.util.UriMatcherHelper;
 
@@ -301,7 +303,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
 
-        QueryBuilder where = buildWhereClause(context);
+        QueryBuilder where = buildWhereClause(context, ManifestHelper.getMappingFactory(context));
         QueryBuilder sort = buildSort();
 
         Uri.Builder itemUri = UriMatcherHelper.generateItemUri(context, tableDetails);
@@ -405,7 +407,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
 
         QueryBuilder select = new QueryBuilder();
-        QueryBuilder where = context == null ? new QueryBuilder(getWhereClause()) : buildWhereClause(context);
+        QueryBuilder where = context == null ? new QueryBuilder(getWhereClause()) : buildWhereClause(context, ManifestHelper.getMappingFactory(context));
 
         select.append("SELECT ");
 
@@ -436,8 +438,8 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      * The where clause for this query
      */
     @Override
-    public QueryBuilder buildWhereClause(Context context) {
-        return filterCriteria.buildWhereClause(context);
+    public QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory) {
+        return filterCriteria.buildWhereClause(context, columnMappingFactory);
     }
 
     @Override

@@ -4,11 +4,15 @@ import android.content.Context;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.PrimaryKey;
 
+import java.io.Serializable;
+
 /**
  * Basic Content Provider Record implementation that contains a id field
  * that will be android list view compatible, and some helper methods.
+ * This class implements Serializable, so domain objects can be passed as
+ * serializable objects in android bundles.
  */
-public abstract class CPDefaultRecord<T> extends CPRecord<T> {
+public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializable {
 
     @Column(columnName = "_id")
     @PrimaryKey(autoIncrement = true)

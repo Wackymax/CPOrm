@@ -13,7 +13,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-version 2.1
+version 2.2
 
 repositories {
     jcenter()
@@ -24,7 +24,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 11
         targetSdkVersion 15
         versionCode 1
         versionName project.version.toString()
@@ -62,7 +62,6 @@ bintray {
         publish = true
         version {
             name = project.version.toString() //Bintray logical version name
-            desc = 'Firts Release'
         }
     }
 }

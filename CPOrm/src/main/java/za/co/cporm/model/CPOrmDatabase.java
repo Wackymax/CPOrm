@@ -111,7 +111,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
      * Returns the table details cache that can be used to lookup table details for java objects.  This
      * should be used instead of {@link za.co.cporm.model.generate.ReflectionHelper}, so that we do not
      * try to do reflection to much
-     * @return
+     * @return The table details cache object that can be used to obtain table details
      */
     public TableDetailsCache getTableDetailsCache() {
         return tableDetailsCache;

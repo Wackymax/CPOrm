@@ -58,7 +58,12 @@ public class QueryBuilder implements Serializable{
 
     public String[] getQueryArgsAsArray(){
 
-        return getQueryArgs().toArray(new String[]{});
+        String[] args = new String[argsStore.size()];
+
+        for (int i = 0; i < argsStore.size(); i++) {
+            args[i] = String.valueOf(argsStore.get(i));
+        }
+        return args;
     }
 
     @Override

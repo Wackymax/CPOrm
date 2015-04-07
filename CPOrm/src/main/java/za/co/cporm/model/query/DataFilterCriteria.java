@@ -1,6 +1,7 @@
 package za.co.cporm.model.query;
 
 import android.content.Context;
+import za.co.cporm.model.map.SqlColumnMappingFactory;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -48,7 +49,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
     }
 
     @Override
-    public QueryBuilder buildWhereClause(Context context) {
+    public QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory) {
 
         QueryBuilder builder = new QueryBuilder();
 
@@ -66,7 +67,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
                 }
                 else isFirst = false;
 
-                builder.append(clause.buildWhereClause(context));
+                builder.append(clause.buildWhereClause(context, columnMappingFactory));
 
                 if(clauseIterator.hasNext()) builder.append(" ");
             }
@@ -167,7 +168,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
         }
 
         @Override
-        public QueryBuilder buildWhereClause(Context context) {
+        public QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory) {
             throw new UnsupportedOperationException("This cannot be called on a builder");
         }
 

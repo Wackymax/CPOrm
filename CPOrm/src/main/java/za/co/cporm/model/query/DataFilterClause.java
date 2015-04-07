@@ -1,6 +1,7 @@
 package za.co.cporm.model.query;
 
 import android.content.Context;
+import za.co.cporm.model.map.SqlColumnMappingFactory;
 
 import java.io.Serializable;
 
@@ -15,7 +16,7 @@ public interface DataFilterClause<T extends DataFilterClause> extends Serializab
     public enum DataFilterConjunction{AND, OR};
 
     /** The where clause for this query */
-    QueryBuilder buildWhereClause(Context context);
+    QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory);
 
     /** The where clause for this query, without parameters */
     String getWhereClause();

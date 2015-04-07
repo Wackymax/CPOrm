@@ -2,7 +2,7 @@ package za.co.cporm.model.query;
 
 import android.content.Context;
 import android.text.TextUtils;
-import za.co.cporm.model.util.ManifestHelper;
+import za.co.cporm.model.map.SqlColumnMappingFactory;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -38,7 +38,7 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
     }
 
     @Override
-    public QueryBuilder buildWhereClause(Context context) {
+    public QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory) {
 
         QueryBuilder builder = new QueryBuilder();
         builder.append(filterColumn);
@@ -54,7 +54,7 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
 
                 while(collectionIterator.hasNext()){
 
-                    builder.append("?", convertToSQLFormat(context, collectionIterator.next()));
+                    builder.append("?", convertToSQLFormat(columnMappingFactory, collectionIterator.next()));
 
                     if(collectionIterator.hasNext()) builder.append(", ");
                 }
@@ -72,7 +72,7 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
                 builder.append((innerSelect).getSelectQuery(context));
                 builder.append(")");
             }
-            else builder.append(" ?", convertToSQLFormat(context, filterValue));
+            else builder.append(" ?", convertToSQLFormat(columnMappingFactory, filterValue));
         }
 
         return builder;
@@ -130,12 +130,12 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
         throw new UnsupportedOperationException("Clauses cannot be added to a data filter criterion");
     }
 
-    private Object convertToSQLFormat(Context context, Object object){
+    private Object convertToSQLFormat(SqlColumnMappingFactory columnMappingFactory, Object object){
 
         if(filterOperator == DataFilterOperator.LIKE || filterOperator == DataFilterOperator.NOT_LIKE) return "%" + object + "%";
         else if(filterOperator == DataFilterOperator.BEGINS_WITH) return object + "%";
         else if(filterOperator == DataFilterOperator.ENDS_WITH) return "%" + object;
-        else return ManifestHelper.getMappingFactory(context).findColumnMapping(object.getClass()).toSqlType(object);
+        else return columnMappingFactory.findColumnMapping(object.getClass()).toSqlType(object);
     }
 
     private void validate()

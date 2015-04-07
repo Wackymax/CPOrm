@@ -2,7 +2,7 @@ package za.co.cporm.model.query;
 
 import android.content.Context;
 import android.text.TextUtils;
-import za.co.cporm.model.util.ManifestHelper;
+import za.co.cporm.model.map.SqlColumnMappingFactory;
 
 /**
  * Created by hennie.brink on 2015-03-20.
@@ -20,11 +20,11 @@ public class SQLSegment implements DataFilterClause {
     }
 
     @Override
-    public QueryBuilder buildWhereClause(Context context) {
+    public QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory) {
 
         for (int i = 0; i < args.length; i++) {
             Object argObject = args[i];
-            args[i] = ManifestHelper.getMappingFactory(context).findColumnMapping(argObject.getClass()).toSqlType(argObject);
+            args[i] = columnMappingFactory.findColumnMapping(argObject.getClass()).toSqlType(argObject);
         }
 
         return new QueryBuilder(sqlSegment, args);

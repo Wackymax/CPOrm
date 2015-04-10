@@ -63,9 +63,7 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
     public T getInflatedItem(int position) {
 
         CPOrmCursor<T> cursor = (CPOrmCursor<T>) getCursor();
-        if(cursor.moveToPosition(position)) {
-            return cursor.inflate();
-        }
-        return null;
+
+        return cursor != null && cursor.moveToPosition(position) ? cursor.inflate() : null;
     }
 }

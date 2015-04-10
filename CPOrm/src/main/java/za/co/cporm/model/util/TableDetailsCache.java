@@ -46,7 +46,7 @@ public class TableDetailsCache {
                 cache.put(object, ReflectionHelper.getTableDetails(context, object));
             }
             catch (Exception ex){
-                throw new IllegalArgumentException("Failed load table details for object " + object.getSimpleName());
+                throw new IllegalArgumentException("Failed load table details for object " + object.getSimpleName(), ex);
             }
 
             //Check if it exists after we attempted to add it

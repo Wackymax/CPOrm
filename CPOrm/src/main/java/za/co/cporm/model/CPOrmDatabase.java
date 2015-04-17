@@ -11,7 +11,6 @@ import za.co.cporm.model.generate.TableGenerator;
 import za.co.cporm.model.generate.TableView;
 import za.co.cporm.model.generate.TableViewGenerator;
 import za.co.cporm.model.util.CPOrmCursorFactory;
-import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.model.util.TableDetailsCache;
 
 /**
@@ -21,28 +20,26 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
     private static final String TAG = "CPOrmDatabase";
 
     private final Context context;
-    private final ModelFactory modelFactory;
+    private final CPOrmConfiguration cPOrmConfiguration;
     private final TableDetailsCache tableDetailsCache;
-    private final boolean debugEnabled;
 
-    public CPOrmDatabase(Context context, boolean debugEnabled) {
-        super(context, ManifestHelper.getDatabaseName(context), new CPOrmCursorFactory(debugEnabled), ManifestHelper.getDatabaseVersion(context));
-        this.modelFactory = ManifestHelper.getModelFactory(context);
+    public CPOrmDatabase(Context context, CPOrmConfiguration cPOrmConfiguration) {
+        super(context, cPOrmConfiguration.getDatabaseName(), new CPOrmCursorFactory(cPOrmConfiguration.isQueryLoggingEnabled()), cPOrmConfiguration.getDatabaseVersion());
+        this.cPOrmConfiguration = cPOrmConfiguration;
         this.context = context;
         this.tableDetailsCache = new TableDetailsCache();
-        this.tableDetailsCache.init(context, modelFactory.getDataModelObjects());
-        this.debugEnabled = debugEnabled;
+        this.tableDetailsCache.init(context, cPOrmConfiguration.getDataModelObjects());
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 
-        for (Class<?> dataModelObject : modelFactory.getDataModelObjects()) {
+        for (Class<?> dataModelObject : cPOrmConfiguration.getDataModelObjects()) {
 
             if(TableView.class.isAssignableFrom(dataModelObject)){
                 String createStatement = TableViewGenerator.createViewStatement(findTableDetails(dataModelObject), (Class<? extends TableView>) dataModelObject);
 
-                if(debugEnabled) {
+                if(cPOrmConfiguration.isQueryLoggingEnabled()) {
                     Log.d(TAG, "Creating View: " + createStatement);
                 }
                 sqLiteDatabase.execSQL(createStatement);
@@ -50,7 +47,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
             else {
                 String createStatement = TableGenerator.generateTableCreate(findTableDetails(dataModelObject), false);
 
-                if(debugEnabled) {
+                if(cPOrmConfiguration.isQueryLoggingEnabled()) {
                     Log.d(TAG, "Creating Table: " + createStatement);
                 }
                 sqLiteDatabase.execSQL(createStatement);
@@ -61,17 +58,17 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
-        for (Class<?> dataModelObject : modelFactory.getDataModelObjects()) {
+        for (Class<?> dataModelObject : cPOrmConfiguration.getDataModelObjects()) {
 
             if(TableView.class.isAssignableFrom(dataModelObject)){
                 String statement = TableViewGenerator.createDropViewStatement(findTableDetails(dataModelObject));
-                if(debugEnabled) {
+                if(cPOrmConfiguration.isQueryLoggingEnabled()) {
                     Log.d(TAG, "Dropping View: " + statement);
                 }
                 sqLiteDatabase.execSQL(statement);
             } else {
                 String statement = TableGenerator.generateTableDrop(findTableDetails(dataModelObject), false);
-                if(debugEnabled) {
+                if(cPOrmConfiguration.isQueryLoggingEnabled()) {
                     Log.d(TAG, "Dropping Table: " + statement);
                 }
                 sqLiteDatabase.execSQL(statement);
@@ -120,7 +117,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
     /**
      * @return the model factory that contains all of the model objects. This should be accessed sparingly.
      */
-    public ModelFactory getModelFactory() {
-        return modelFactory;
+    public CPOrmConfiguration getcPOrmConfiguration() {
+        return cPOrmConfiguration;
     }
 }

@@ -9,10 +9,7 @@
         android:theme="@style/AppTheme" >
 
         <meta-data android:name="AUTHORITY" android:value="za.co.cporm.example"/>
-        <meta-data android:name="MODEL_FACTORY" android:value="za.co.cporm.example.app.model.MyModelFactory"/>
-        <meta-data android:name="DATABASE" android:value="example.db"/>
-        <meta-data android:name="VERSION" android:value="1"/>
-        <meta-data android:name="QUERY_LOG" android:value="false"/>
+        <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.app.model.MyCPOrmConfiguration"/>
 
         <activity
             android:name="za.co.cporm.example.app.ExampleActivity"

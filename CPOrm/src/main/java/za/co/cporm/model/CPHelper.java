@@ -13,6 +13,7 @@ import za.co.cporm.model.util.TableDetailsCache;
 import za.co.cporm.provider.util.UriMatcherHelper;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Contains helper methods that will query contents on the Content Provider
@@ -46,6 +47,24 @@ public class CPHelper {
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
         return findSingleItem(context, itemUri, tableDetails);
+    }
+
+    public static <T> int insertAll(Context context, List<T> dataModelObjects) {
+
+        if(dataModelObjects == null || dataModelObjects.isEmpty())
+            return 0;
+
+        TableDetails tableDetails = findTableDetails(context, dataModelObjects.get(0).getClass());
+        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
+
+        ContentValues[] values = new ContentValues[dataModelObjects.size()];
+        for (int i = 0; i < dataModelObjects.size(); i++) {
+
+            values[i] = ModelInflater.deflate(tableDetails, dataModelObjects.get(i));
+        }
+
+        ContentResolver contentResolver = context.getContentResolver();
+        return contentResolver.bulkInsert(insertUri, values);
     }
 
     public static <T> void insert(Context context, T dataModelObject) {

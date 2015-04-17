@@ -5,7 +5,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Log;
-import za.co.cporm.model.ModelFactory;
+import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 
 /**
@@ -14,11 +14,8 @@ import za.co.cporm.model.map.SqlColumnMappingFactory;
 public class ManifestHelper {
 
     public static final String METADATA_AUTHORITY = "AUTHORITY";
-    public static final String METADATA_MODEL_FACTORY = "MODEL_FACTORY";
+    public static final String METADATA_CPORM_CONFIG = "CPORM_CONFIG";
     public static final String METADATA_MAPPING_FACTORY = "MAPPING_FACTORY";
-    public static final String METADATA_DATABASE = "DATABASE";
-    public static final String METADATA_VERSION = "VERSION";
-    public static final String METADATA_QUERY_LOG = "QUERY_LOG";
 
     public static final String DATABASE_DEFAULT_NAME = "CPOrm.db";
 
@@ -31,21 +28,21 @@ public class ManifestHelper {
     }
 
     /**
-     * This will try to instantiate the model factory base on a valid
+     * This will try to instantiate the configuration base on a valid
      * Java Class name.
      * @param context the {@link android.content.Context} of the Android application
-     * @return The model factory specified by the {@link #METADATA_MODEL_FACTORY}
+     * @return The model factory specified by the {@link #METADATA_CPORM_CONFIG}
      */
-    public static ModelFactory getModelFactory(Context context) throws IllegalArgumentException{
-        String className = getMetaDataString(context, METADATA_MODEL_FACTORY);
+    public static CPOrmConfiguration getConfiguration(Context context) throws IllegalArgumentException{
+        String className = getMetaDataString(context, METADATA_CPORM_CONFIG);
         try{
             Class modelFactory = Class.forName(className);
-            if(ModelFactory.class.isAssignableFrom(modelFactory)){
-                return (ModelFactory)modelFactory.getConstructor().newInstance();
+            if(CPOrmConfiguration.class.isAssignableFrom(modelFactory)){
+                return (CPOrmConfiguration)modelFactory.getConstructor().newInstance();
             }
-            else throw new IllegalArgumentException("The class provided is not and instance of ModelFactory: " + className);
+            else throw new IllegalArgumentException("The class provided is not and instance of CPOrmConfiguration: " + className);
         } catch (Exception ex){
-            throw new IllegalArgumentException("Failed to create ModelFactory instance", ex);
+            throw new IllegalArgumentException("Failed to create CPOrmConfiguration instance, is the meta data tag added to the application?", ex);
         }
     }
 
@@ -71,50 +68,6 @@ public class ManifestHelper {
         } catch (Exception ex){
             throw new IllegalArgumentException("Failed to create ModelFactory instance", ex);
         }
-    }
-
-    /**
-     * Grabs the database version from the manifest.
-     *
-     * @param context  the {@link android.content.Context} of the Android application
-     * @return the database version as specified by the {@link #METADATA_VERSION} version or 1 of
-     *         not present
-     */
-    public static int getDatabaseVersion(Context context) {
-        Integer databaseVersion = getMetaDataInteger(context, METADATA_VERSION);
-
-        if ((databaseVersion == null) || (databaseVersion == 0)) {
-            databaseVersion = 1;
-        }
-
-        return databaseVersion;
-    }
-
-    /**
-     * Grabs the name of the database file specified in the manifest.
-     *
-     * @param context  the {@link android.content.Context} of the Android application
-     * @return the value for the {@value #METADATA_DATABASE} meta data in the AndroidManifest or
-     *         {@link #DATABASE_DEFAULT_NAME} if not present
-     */
-    public static String getDatabaseName(Context context) {
-        String databaseName = getMetaDataString(context, METADATA_DATABASE);
-
-        if (databaseName == null) {
-            databaseName = DATABASE_DEFAULT_NAME;
-        }
-
-        return databaseName;
-    }
-
-    /**
-     * Grabs the debug flag from the manifest.
-     *
-     * @param context  the {@link android.content.Context} of the Android application
-     * @return true if the debug flag is enabled
-     */
-    public static boolean getDebugEnabled(Context context) {
-        return getMetaDataBoolean(context, METADATA_QUERY_LOG);
     }
 
     private static String getMetaDataString(Context context, String name) {

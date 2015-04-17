@@ -6,7 +6,9 @@ Content Provider ORM for android.  This ORM uses an android sqlite database as a
 2. Supports view creation from the data model.
 3. Advanced querying capabilities, allowing you to created complex queries easily.
 4. It is extendable, allowing you to define custom column type mappings.
-5. Most importantly, it is easy to use.
+5. It is really quick to query, as well as doing bulk inserts. From my own tests you can insert around 5000 objects per second and queries return around 9 000 objects per second.
+6. Allows you to add table change listeners for views.
+7. Most importantly, it is easy to use.
 
 ## Install it
 
@@ -17,7 +19,7 @@ There are four ways to install Sugar:
 This is the preferred way. Simply add:
 
 ```groovy
-compile 'za.co.cporm:CPOrm:1.3'
+compile 'za.co.cporm:CPOrm:2.5'
 ```
 
 to your project dependencies and run `gradle build` or `gradle assemble`.
@@ -30,7 +32,7 @@ Declare the dependency in Maven:
 <dependency>
     <groupId>za.co.cporm</groupId>
     <artifactId>CPOrm</artifactId>
-    <version>1.3</version>
+    <version>2.5</version>
 </dependency>
 ```
 
@@ -45,13 +47,10 @@ Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to downloa
 ===================
 
 ## Use it
-To use the ORM, include it as a library in you project.  Create a Model Factory class by implementing ModelFactory, this will tell the ORM which classes belong to the model.  You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. Now all that is left to do is define the meta tags that will tell the ORM all the important stuff. Add these as part of the application element in the Android Manifest
+To use the ORM, include it as a library in you project. Create a configuration that will tell the ORM all the important stuff like the domain model objects, database name etc. You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. Now all that is left to do is define the meta tags that will tell the ORM all the important stuff. Add these as part of the application element in the Android Manifest
 
 ```xml
-      <meta-data android:name="DATABASE" android:value="example.db" />
-      <meta-data android:name="VERSION" android:value="1" /> <!-- Increase this to have the db recreated with new model changes -->
-      <meta-data android:name="QUERY_LOG" android:value="true" />
-      <meta-data android:name="MODEL_FACTORY" android:value="om.cp.orm.example.MyModelFactory" />
+      <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.model.MyCPOrmConfiguration" />
       <meta-data android:name="MAPPING_FACTORY" android:value="om.cp.orm.example.MyMappingFactory" /><!-- This is optional-->
       <meta-data android:name="AUTHORITY" android:value="om.cp.orm.example" /> <!-- Should match provider-->
       
@@ -63,6 +62,6 @@ To use the ORM, include it as a library in you project.  Create a Model Factory 
 ```
 Now that the setup is done, all you need to do is create your model objects, stick on some annotations, link them to the model factory, and you are done.  Some notable annotations are Table, Column, and Primary Key.
 
-To interact with the ORM you can extend the CPRecord class, this will make it easy to do CRUD operations, or you can use the CPHelper class if you can't extend CPRecord. To perform queries use the Select class.  To take advantage of the built in support for content providers on android, extends the CPDefaultRecord class, this already has a _id column defined.
+To interact with the ORM you can extend the CPRecord class, this will make it easy to do CRUD operations, or you can use the CPHelper class if you can't extend CPRecord. To perform queries use the Select class.  To take advantage of the built in support for content providers on android, extend the CPDefaultRecord class, this already has a _id column defined, as well as some usefull methods to interact with the objects.
 
 For more information, check out the example app.

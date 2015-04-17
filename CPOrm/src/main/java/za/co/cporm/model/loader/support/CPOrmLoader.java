@@ -13,6 +13,7 @@ import za.co.cporm.model.util.ContentResolverValues;
 public class CPOrmLoader<T> extends CursorLoader {
 
     private TableDetails tableDetails;
+    private int cacheSize = -1;
 
     public CPOrmLoader(Context context, Select<T> select) {
         super(context);
@@ -27,9 +28,22 @@ public class CPOrmLoader<T> extends CursorLoader {
         tableDetails = resolverValues.getTableDetails();
     }
 
+    public CPOrmLoader(Context context, Select<T> select, int cacheSize) {
+        this(context, select);
+
+        enableCursorCache(cacheSize);
+    }
+
+    public void enableCursorCache(int size) {
+
+        cacheSize = size;
+    }
+
     @Override
     public CPOrmCursor loadInBackground() {
 
-        return new CPOrmCursor<T>(tableDetails, super.loadInBackground());
+        return cacheSize == -1 ?
+                new CPOrmCursor<T>(tableDetails, super.loadInBackground())
+                : new CPOrmCursor<T>(tableDetails, super.loadInBackground(), cacheSize);
     }
 }

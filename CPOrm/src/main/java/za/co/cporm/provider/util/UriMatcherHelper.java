@@ -4,7 +4,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.net.Uri;
-import za.co.cporm.model.ModelFactory;
+import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.model.util.TableDetailsCache;
@@ -35,12 +35,12 @@ public class UriMatcherHelper {
         authority = ManifestHelper.getAuthority(context);
     }
 
-    public void init(Context context, ModelFactory modelFactory, TableDetailsCache detailsCache){
+    public void init(Context context, CPOrmConfiguration CPOrmConfiguration, TableDetailsCache detailsCache){
 
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         int matcherInterval = MATCHER_CODE_INTERVALS;
 
-        for (Class<?> dataModelObject : modelFactory.getDataModelObjects()) {
+        for (Class<?> dataModelObject : CPOrmConfiguration.getDataModelObjects()) {
 
             TableDetails tableDetails = detailsCache.findTableDetails(context, dataModelObject);
 

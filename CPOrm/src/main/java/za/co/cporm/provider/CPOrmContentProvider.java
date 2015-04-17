@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.util.ManifestHelper;
@@ -24,18 +25,22 @@ public class CPOrmContentProvider extends ContentProvider {
 
     public static final String PARAMETER_OFFSET = "OFFSET";
     public static final String PARAMETER_LIMIT = "LIMIT";
-    public static final String PARAMETER_SYNC = "SYNC";
+    public static final String PARAMETER_SYNC = "IS_SYNC";
 
+    private CPOrmConfiguration cPOrmConfiguration;
     private CPOrmDatabase database;
     private UriMatcherHelper uriMatcherHelper;
     private boolean debugEnabled;
 
     @Override
     public boolean onCreate() {
-        debugEnabled = ManifestHelper.getDebugEnabled(getContext());
-        database = new CPOrmDatabase(getContext(), debugEnabled);
+
+        cPOrmConfiguration = ManifestHelper.getConfiguration(getContext());
+        database = new CPOrmDatabase(getContext(), cPOrmConfiguration);
         uriMatcherHelper = new UriMatcherHelper(getContext());
-        uriMatcherHelper.init(getContext(), database.getModelFactory(), database.getTableDetailsCache());
+        uriMatcherHelper.init(getContext(), database.getcPOrmConfiguration(), database.getTableDetailsCache());
+
+        debugEnabled = cPOrmConfiguration.isQueryLoggingEnabled();
         return true;
     }
 
@@ -46,7 +51,7 @@ public class CPOrmContentProvider extends ContentProvider {
         SQLiteDatabase db = database.getReadableDatabase();
         String limit = constructLimit(uri);
 
-        if(debugEnabled){
+        if (debugEnabled) {
             Log.d(TAG, "********* Query **********");
             Log.d(TAG, "Uri: " + uri);
             Log.d(TAG, "Projection: " + Arrays.toString(projection));
@@ -58,13 +63,13 @@ public class CPOrmContentProvider extends ContentProvider {
 
         Cursor cursor;
 
-        if(uriMatcherHelper.isSingleItemRequested(uri)){
+        if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
             cursor = db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
-        }
-        else cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
+        } else
+            cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
@@ -73,6 +78,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
+
         return uriMatcherHelper.getType(uri);
     }
 
@@ -83,7 +89,7 @@ public class CPOrmContentProvider extends ContentProvider {
         SQLiteDatabase db = database.getWritableDatabase();
         Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
-        if(debugEnabled){
+        if (debugEnabled) {
             Log.d(TAG, "********* Insert **********");
             Log.d(TAG, "Uri: " + uri);
             Log.d(TAG, "Content Values: " + contentValues);
@@ -91,18 +97,18 @@ public class CPOrmContentProvider extends ContentProvider {
 
         long insertId = db.insertOrThrow(tableDetails.getTableName(), null, contentValues);
 
-        if(insertId == -1)
-            throw new IllegalArgumentException("Failed to insert row for uri " + uri + " using values " + contentValues);
+        if (insertId == -1)
+            throw new IllegalArgumentException("Failed to insert row for into table " + tableDetails.getTableName() + " using values " + contentValues);
 
         getContext().getContentResolver().notifyChange(uri, null, sync);
 
-        if(!tableDetails.getChangeListeners().isEmpty()) {
+        if (!tableDetails.getChangeListeners().isEmpty()) {
 
             for (Class<?> changeListener : tableDetails.getChangeListeners()) {
 
                 TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
 
-                if(changeListenerDetails == null)
+                if (changeListenerDetails == null)
                     continue;
 
                 Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
@@ -111,7 +117,7 @@ public class CPOrmContentProvider extends ContentProvider {
         }
 
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-        if(primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
+        if (primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
         else {
 
             String primaryKeyValue = contentValues.getAsString(primaryKeyColumn.getColumnName());
@@ -126,32 +132,32 @@ public class CPOrmContentProvider extends ContentProvider {
         SQLiteDatabase db = database.getWritableDatabase();
         Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
-        if(debugEnabled){
+        if (debugEnabled) {
             Log.d(TAG, "********* Delete **********");
             Log.d(TAG, "Uri: " + uri);
             Log.d(TAG, "Where: " + where);
             Log.d(TAG, "Args: " + Arrays.toString(args));
         }
 
-        int deleteCount = 0;
-        if(uriMatcherHelper.isSingleItemRequested(uri)){
+        int deleteCount;
+
+        if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
             deleteCount = db.delete(tableDetails.getTableName(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
-        }
-        else deleteCount = db.delete(tableDetails.getTableName(), where, args);
+        } else deleteCount = db.delete(tableDetails.getTableName(), where, args);
 
-        if(deleteCount > 0) {
+        if (deleteCount > 0) {
             getContext().getContentResolver().notifyChange(uri, null, sync);
 
-            if(!tableDetails.getChangeListeners().isEmpty()) {
+            if (!tableDetails.getChangeListeners().isEmpty()) {
 
                 for (Class<?> changeListener : tableDetails.getChangeListeners()) {
 
                     TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
 
-                    if(changeListenerDetails == null)
+                    if (changeListenerDetails == null)
                         continue;
 
                     Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
@@ -159,6 +165,7 @@ public class CPOrmContentProvider extends ContentProvider {
                 }
             }
         }
+
 
         return deleteCount;
     }
@@ -170,7 +177,7 @@ public class CPOrmContentProvider extends ContentProvider {
         SQLiteDatabase db = database.getWritableDatabase();
         Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
-        if(debugEnabled){
+        if (debugEnabled) {
             Log.d(TAG, "********* Update **********");
             Log.d(TAG, "Uri: " + uri);
             Log.d(TAG, "Content Values: " + contentValues);
@@ -179,39 +186,88 @@ public class CPOrmContentProvider extends ContentProvider {
         }
 
         int updateCount = 0;
-        if(uriMatcherHelper.isSingleItemRequested(uri)){
+
+        if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
             updateCount = db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
-        }
-        else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
+        } else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
-        if(updateCount > 0) {
+        if (updateCount > 0) {
             getContext().getContentResolver().notifyChange(uri, null, sync);
 
-            if(!tableDetails.getChangeListeners().isEmpty()) {
+            if (!tableDetails.getChangeListeners().isEmpty()) {
 
                 String itemId = uri.getLastPathSegment();
                 for (Class<?> changeListener : tableDetails.getChangeListeners()) {
 
                     TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
 
-                    if(changeListenerDetails == null)
+                    if (changeListenerDetails == null)
                         continue;
 
                     Uri changeUri;
-                    if(TextUtils.isEmpty(itemId)) changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
+                    if (TextUtils.isEmpty(itemId))
+                        changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
                     else changeUri = uriMatcherHelper.generateSingleItemUri(changeListenerDetails, itemId);
                     getContext().getContentResolver().notifyChange(changeUri, null, sync);
                 }
             }
         }
 
+
         return updateCount;
     }
 
-    private String constructLimit(Uri uri){
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+
+        TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
+        SQLiteDatabase db = database.getWritableDatabase();
+        db.beginTransactionNonExclusive();
+        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
+
+        if (debugEnabled) {
+            Log.d(TAG, "********* Bulk Insert **********");
+            Log.d(TAG, "Uri: " + uri);
+        }
+
+        int count = 0;
+
+        try {
+            for (ContentValues contentValues : values) {
+
+                db.insertOrThrow(tableDetails.getTableName(), null, contentValues);
+                count++;
+            }
+
+            db.setTransactionSuccessful();
+
+            getContext().getContentResolver().notifyChange(uri, null, sync);
+
+            if (!tableDetails.getChangeListeners().isEmpty()) {
+
+                for (Class<?> changeListener : tableDetails.getChangeListeners()) {
+
+                    TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
+
+                    if (changeListenerDetails == null)
+                        continue;
+
+                    Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
+                    getContext().getContentResolver().notifyChange(changeUri, null, sync);
+                }
+            }
+        }
+        finally {
+            db.endTransaction();
+        }
+
+        return count;
+    }
+
+    private String constructLimit(Uri uri) {
 
         String offsetParam = uri.getQueryParameter(PARAMETER_OFFSET);
         String limitParam = uri.getQueryParameter(PARAMETER_LIMIT);
@@ -219,29 +275,25 @@ public class CPOrmContentProvider extends ContentProvider {
         Integer offset = null;
         Integer limit = null;
 
-        if(!TextUtils.isEmpty(offsetParam) && TextUtils.isDigitsOnly(offsetParam)){
+        if (!TextUtils.isEmpty(offsetParam) && TextUtils.isDigitsOnly(offsetParam)) {
             offset = Integer.valueOf(offsetParam);
         }
-        if(!TextUtils.isEmpty(limitParam) && TextUtils.isDigitsOnly(limitParam)){
+        if (!TextUtils.isEmpty(limitParam) && TextUtils.isDigitsOnly(limitParam)) {
             limit = Integer.valueOf(limitParam);
         }
 
-        if(limit == null && offset == null)
+        if (limit == null && offset == null)
             return null;
 
         StringBuilder limitStatement = new StringBuilder();
 
-        if(limit != null && offset != null)
-        {
+        if (limit != null && offset != null) {
             limitStatement.append(offset);
             limitStatement.append(",");
             limitStatement.append(limit);
-        }
-        else if(limit != null)
-        {
+        } else if (limit != null) {
             limitStatement.append(limit);
-        }
-        else throw new IllegalArgumentException("A limit must also be provided when setting an offset");
+        } else throw new IllegalArgumentException("A limit must also be provided when setting an offset");
 
         return limitStatement.toString();
     }

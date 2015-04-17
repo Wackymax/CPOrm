@@ -2,7 +2,7 @@ package za.co.cporm.example.app.model;
 
 import za.co.cporm.example.app.model.domain.Role;
 import za.co.cporm.example.app.model.domain.User;
-import za.co.cporm.model.ModelFactory;
+import za.co.cporm.model.CPOrmConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,25 @@ import java.util.List;
 /**
  * Created by hennie.brink on 2015-03-20.
  */
-public class MyModelFactory implements ModelFactory {
+public class MyCPOrmConfiguration implements CPOrmConfiguration {
+
+    @Override
+    public String getDatabaseName() {
+
+        return "example.db";
+    }
+
+    @Override
+    public int getDatabaseVersion() {
+
+        return 1;
+    }
+
+    @Override
+    public boolean isQueryLoggingEnabled() {
+
+        return false;
+    }
 
     @Override
     public List<Class<?>> getDataModelObjects() {

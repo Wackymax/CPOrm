@@ -1,17 +1,16 @@
 package za.co.cporm.model;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.RemoteException;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.query.Select;
-import za.co.cporm.model.util.CursorIterator;
-import za.co.cporm.model.util.ModelInflater;
-import za.co.cporm.model.util.TableDetailsCache;
+import za.co.cporm.model.util.*;
 import za.co.cporm.provider.util.UriMatcherHelper;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -87,6 +86,18 @@ public class CPHelper {
         return findSingleItem(context, itemUri, tableDetails);
     }
 
+    public static <T> ContentProviderOperation prepareInsert(Context context, T dataModelObject) {
+
+        TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
+        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
+        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
+
+        return ContentProviderOperation.newInsert(insertUri)
+                .withExpectedCount(1)
+                .withValues(contentValues)
+                .build();
+    }
+
     public static <T> void update(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
@@ -97,14 +108,53 @@ public class CPHelper {
         contentResolver.update(itemUri, contentValues, null, null);
     }
 
-    public static <T> void delete(Context context, T dataModelObject){
+    public static <T> ContentProviderOperation prepareUpdate(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 
+        return ContentProviderOperation.newUpdate(itemUri)
+                .withExpectedCount(1)
+                .withValues(contentValues)
+                .build();
+    }
+
+    public static <T> void delete(Context context, T dataModelObject){
+        TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
+
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);
+    }
+
+    public static <T> void delete(Context context, Select<T> select){
+
+        ContentResolverValues contentResolverValues = select.asContentResolverValue(context);
+
+        ContentResolver contentResolver = context.getContentResolver();
+        contentResolver.delete(contentResolverValues.getItemUri(), contentResolverValues.getWhere(), contentResolverValues.getWhereArgs());
+    }
+
+    public static <T> ContentProviderOperation prepareDelete(Context context, T dataModelObject){
+        TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
+        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
+
+        return ContentProviderOperation.newDelete(itemUri)
+                .withExpectedCount(1)
+                .build();
+    }
+
+    public static <T> ContentProviderOperation prepareDelete(Context context, Select<T> select){
+
+        ContentResolverValues contentResolverValues = select.asContentResolverValue(context);
+
+        return ContentProviderOperation.newDelete(contentResolverValues.getItemUri())
+                .withSelection(contentResolverValues.getWhere(), contentResolverValues.getWhereArgs())
+                .build();
     }
 
     public static <T> void deleteAll(Context context, Class<T> dataModel){
@@ -113,6 +163,13 @@ public class CPHelper {
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);
+    }
+
+    public static ContentProviderResult[] applyPreparedOperations(Context context, Collection<ContentProviderOperation> operations) throws RemoteException, OperationApplicationException {
+
+        return context
+                .getContentResolver()
+                .applyBatch(ManifestHelper.getAuthority(context), new ArrayList<ContentProviderOperation>(operations));
     }
 
     protected static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails){

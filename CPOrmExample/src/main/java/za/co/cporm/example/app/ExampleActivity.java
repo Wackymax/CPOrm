@@ -62,7 +62,11 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
                 .greaterThan("_id", 0); //Specify the criterion column, type and value
         selectUser.and().in("role_id", selectRole); //Add role selection as inner query
         selectUser.limit(1000); //Limit the select to 1000 records
-        return new CPOrmLoader<User>(this, selectUser, 100); //Give the select to the cursor loader to load the data
+
+        CPOrmLoader<User> userCPOrmLoader = new CPOrmLoader<>(this, selectUser);//Give the select to the cursor loader to load the data
+        userCPOrmLoader.setUpdateThrottle(200); //Set an update throttle because we will be inserting a lot of data causing frequent changes
+
+        return userCPOrmLoader;
     }
 
     @Override

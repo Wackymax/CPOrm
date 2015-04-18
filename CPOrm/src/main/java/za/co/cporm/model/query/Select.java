@@ -228,7 +228,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     /**
-     * Executes the query and returns the results as a cursor. The {@link za.co.cporm.model.util.CPOrmCursor} is a wrappper for the normal cursor,
+     * Executes the query and returns the results as a cursor. The {@link za.co.cporm.model.util.CPOrmCursor} is a wrapper for the normal cursor,
      * and in addition to providing the normal cursor functionality, it also has methods to manipulate model objects, such as inflating the current cursor
      * values to a model object.
      * @return The {@link za.co.cporm.model.util.CPOrmCursor} containing the results

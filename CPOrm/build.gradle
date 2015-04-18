@@ -2,9 +2,6 @@ buildscript {
     repositories {
         jcenter()
         mavenLocal()
-        maven {
-            url  "http://dl.bintray.com/wackymax/maven"
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.1.1'

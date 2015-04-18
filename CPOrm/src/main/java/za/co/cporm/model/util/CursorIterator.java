@@ -1,8 +1,11 @@
 package za.co.cporm.model.util;
 
 import android.database.Cursor;
+import android.database.SQLException;
 import za.co.cporm.model.generate.TableDetails;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -11,7 +14,7 @@ import java.util.NoSuchElementException;
  * if the cursor is open and not after the last item.  If the cursor is can fetch a next item, that item is returned in next,
  * if the returned item is the last one, the cursor is automatically closed.
  */
-public class CursorIterator<T> implements Iterator<T> {
+public class CursorIterator<T> implements Iterator<T>, Closeable {
     private final TableDetails tableDetails;
     private final Cursor cursor;
 
@@ -22,6 +25,10 @@ public class CursorIterator<T> implements Iterator<T> {
 
     @Override
     public boolean hasNext() {
+
+        if(cursor != null && cursor.isAfterLast())
+            cursor.close();//Close the cursor if we reached the last position
+
         return cursor != null && !cursor.isClosed() && !cursor.isAfterLast();
     }
 
@@ -32,19 +39,22 @@ public class CursorIterator<T> implements Iterator<T> {
             throw new NoSuchElementException();
         }
 
-        if (cursor.isBeforeFirst()) {
-            cursor.moveToFirst();
-        }
-
         try {
-
-            entity = ModelInflater.inflate(cursor, tableDetails);
-        }
-        finally {
-            cursor.moveToNext();
-            if (cursor.isAfterLast()) {
-                cursor.close();
+            if (cursor.isBeforeFirst()) {
+                cursor.moveToFirst();
             }
+
+            try {
+
+                entity = ModelInflater.inflate(cursor, tableDetails);
+            } finally {
+                cursor.moveToNext();
+            }
+        }
+        catch (SQLException sqle) {
+
+            cursor.close();
+            throw sqle;
         }
 
         return entity;
@@ -53,5 +63,12 @@ public class CursorIterator<T> implements Iterator<T> {
     @Override
     public void remove() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void close() throws IOException {
+
+        if(!cursor.isClosed())
+            cursor.close();
     }
 }

@@ -248,10 +248,11 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
     /**
      * Does the same as query cursor, but wraps the cursor in an iterator, and inflates the objects automatically. This iterator will close the cursor
-     * once all of the objects have been retrieved, so it is important to always iterate over all the objects so the cursor can close.
+     * once all of the objects have been retrieved, so it is important to always iterate over all the objects so the cursor can close. If an exception
+     * is thrown that will prevent this iterator from completing, then please close it manually.
      * @return The iterator containing the results
      */
-    public Iterator<T> queryAsIterator(Context context){
+    public CursorIterator<T> queryAsIterator(Context context){
         CPOrmCursor<T> cursor = queryAsCursor(context);
         return new CursorIterator<T>(cursor.getTableDetails(), cursor);
     }

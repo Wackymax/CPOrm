@@ -82,6 +82,10 @@ public class CPOrmCursor<T> extends CursorWrapper {
         return cachedObject;
     }
 
+    /**
+     * Inflates the object at the current cursor position, and inserts it into the cache with the position as ID
+     * @return The inflated object
+     */
     private T insertCacheObject() {
 
         T cachedObject = ModelInflater.inflate(this, tableDetails);

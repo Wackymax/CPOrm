@@ -5,13 +5,15 @@ import android.database.CursorWrapper;
 import android.support.v4.util.LruCache;
 import za.co.cporm.model.generate.TableDetails;
 
+import java.lang.ref.SoftReference;
+
 /**
  * This class is a wrapper for cursor returned by the ORM, it has some helper methods like inflating to an object from the cursor
  */
 public class CPOrmCursor<T> extends CursorWrapper {
 
     private final TableDetails tableDetails;
-    private LruCache<Integer, T> objectCache;
+    private LruCache<Integer, SoftReference<T>> objectCache;
 
     public CPOrmCursor(TableDetails tableDetails, Cursor cursor) {
         super(cursor);
@@ -34,8 +36,9 @@ public class CPOrmCursor<T> extends CursorWrapper {
     }
 
     /**
-     * Initializes the cache with the cursor's count.  This should not be used for cursors
-     * that could contain a lot values, and setting the size is the preferred way of enabling the cache.
+     * Initializes the cache with the cursor's count.  The cached values are
+     * stored using soft references, and should not cause any memory issues,
+     * but setting the size is the preferred way of enabling the cache.
      * @see #enableCache(int)
      */
     public void enableCache() {
@@ -68,13 +71,25 @@ public class CPOrmCursor<T> extends CursorWrapper {
 
         if(objectCache == null) return ModelInflater.inflate(this, tableDetails);
 
-        T cachedObject = objectCache.get(getPosition());
+        SoftReference<T> objectReference = objectCache.get(getPosition());
 
-        if(cachedObject == null) {
+        T cachedObject = null;
+        if(objectReference == null) cachedObject = insertCacheObject();
+        else cachedObject = objectReference.get();
 
-            cachedObject = ModelInflater.inflate(this, tableDetails);
-            objectCache.put(getPosition(), cachedObject);
-        }
+        if(cachedObject == null) cachedObject = insertCacheObject();
+
+        return cachedObject;
+    }
+
+    /**
+     * Inflates the object at the current cursor position, and inserts it into the cache with the position as ID
+     * @return The inflated object
+     */
+    private T insertCacheObject() {
+
+        T cachedObject = ModelInflater.inflate(this, tableDetails);
+        objectCache.put(getPosition(), new SoftReference<T>(cachedObject));
 
         return cachedObject;
     }

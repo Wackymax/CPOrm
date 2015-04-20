@@ -32,7 +32,8 @@ public class CPOrmCursor<T> extends CursorWrapper {
      */
     public void enableCache(int size) {
 
-        this.objectCache = new LruCache<>(size);
+        if(size > 0)
+            this.objectCache = new LruCache<>(size);
     }
 
     /**

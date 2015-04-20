@@ -1,7 +1,12 @@
 package za.co.cporm.model;
 
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.Context;
+import android.content.OperationApplicationException;
+import android.os.RemoteException;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 /**
@@ -26,6 +31,10 @@ public abstract class CPRecord<T> {
         CPHelper.insert(context, this);
     }
 
+    public ContentProviderOperation prepareInsert(Context context) {
+        return CPHelper.prepareInsert(context, this);
+    }
+
     public T insertAndReturn(Context context){
         return (T)CPHelper.insertAndReturn(context, this);
     }
@@ -34,7 +43,20 @@ public abstract class CPRecord<T> {
         CPHelper.update(context, this);
     }
 
+    public ContentProviderOperation prepareUpdate(Context context) {
+        return CPHelper.prepareUpdate(context, this);
+    }
+
     public void delete(Context context){
         CPHelper.delete(context, this);
+    }
+
+    public ContentProviderOperation prepareDelete(Context context) {
+        return CPHelper.prepareDelete(context, this);
+    }
+
+    public ContentProviderResult[] applyPreparedOperations(Context context, Collection<ContentProviderOperation> operations) throws RemoteException, OperationApplicationException {
+
+        return CPHelper.applyPreparedOperations(context, operations);
     }
 }

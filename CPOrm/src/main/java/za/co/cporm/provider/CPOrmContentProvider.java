@@ -185,7 +185,7 @@ public class CPOrmContentProvider extends ContentProvider {
             Log.d(TAG, "Args: " + Arrays.toString(args));
         }
 
-        int updateCount = 0;
+        int updateCount;
 
         if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
@@ -194,7 +194,8 @@ public class CPOrmContentProvider extends ContentProvider {
             updateCount = db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         } else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
-        if (updateCount > 0) {
+        if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues)) {
+
             getContext().getContentResolver().notifyChange(uri, null, sync);
 
             if (!tableDetails.getChangeListeners().isEmpty()) {
@@ -211,6 +212,7 @@ public class CPOrmContentProvider extends ContentProvider {
                     if (TextUtils.isEmpty(itemId))
                         changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
                     else changeUri = uriMatcherHelper.generateSingleItemUri(changeListenerDetails, itemId);
+
                     getContext().getContentResolver().notifyChange(changeUri, null, sync);
                 }
             }
@@ -296,5 +298,19 @@ public class CPOrmContentProvider extends ContentProvider {
         } else throw new IllegalArgumentException("A limit must also be provided when setting an offset");
 
         return limitStatement.toString();
+    }
+
+    private boolean shouldChangesBeNotified(TableDetails tableDetails, ContentValues contentValues) {
+
+        boolean notify = false;
+
+        for (String columnName : contentValues.keySet()) {
+
+            TableDetails.ColumnDetails column = tableDetails.findColumn(columnName);
+            if(column != null)
+                notify = notify || column.notifyChanges();
+        }
+
+        return notify;
     }
 }

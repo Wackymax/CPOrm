@@ -48,6 +48,45 @@ public class CPSyncHelper {
         provider.update(itemUri, contentValues, null, null);
     }
 
+    public static <T> void updateColumns(Context context, ContentProviderClient provider, T dataModelObject, String... columns) throws RemoteException {
+        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
+                .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
+
+        for (String contentColumn : tableDetails.getColumnNames()) {
+
+            boolean includeColumn = false;
+            for (String column : columns) {
+                if(contentColumn.equals(column)) {
+                    includeColumn = true;
+                    break;
+                }
+            }
+
+            if(!includeColumn)
+                contentValues.remove(contentColumn);
+        }
+
+        provider.update(itemUri, contentValues, null, null);
+    }
+
+    public static <T> void updateColumnsExcluding(Context context, ContentProviderClient provider, T dataModelObject, String... columnsToExclude) throws RemoteException {
+        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
+                .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
+
+        for (String columnToExclude : columnsToExclude) {
+
+            contentValues.remove(columnToExclude);
+        }
+
+        provider.update(itemUri, contentValues, null, null);
+    }
+
     public static <T> void delete(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
         TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);

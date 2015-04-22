@@ -56,6 +56,16 @@ public class TableDetails {
         return Collections.unmodifiableCollection(columns);
     }
 
+    public ColumnDetails findColumn(String name) {
+
+        for (ColumnDetails column : columns) {
+            if(column.getColumnName().equals(name))
+                return column;
+        }
+
+        return null;
+    }
+
     public void addColumn(ColumnDetails column){
         columns.add(column);
 
@@ -104,8 +114,9 @@ public class TableDetails {
         private final boolean unique;
         private final boolean required;
         private final boolean autoIncrement;
+        private final boolean notifyChanges;
 
-        public ColumnDetails(String columnName, Field columnField, SqlColumnMapping columnTypeMapping, boolean primaryKey, boolean unique, boolean required, boolean autoIncrement) {
+        public ColumnDetails(String columnName, Field columnField, SqlColumnMapping columnTypeMapping, boolean primaryKey, boolean unique, boolean required, boolean autoIncrement, boolean notifyChanges) {
             this.columnName = columnName;
             this.columnField = columnField;
             this.columnTypeMapping = columnTypeMapping;
@@ -113,6 +124,7 @@ public class TableDetails {
             this.unique = unique;
             this.required = required;
             this.autoIncrement = autoIncrement;
+            this.notifyChanges = notifyChanges;
 
             if(primaryKey && !required) throw new IllegalStateException("Column must be not required if primary key is set");
 
@@ -146,6 +158,11 @@ public class TableDetails {
 
         public boolean isAutoIncrement() {
             return autoIncrement;
+        }
+
+        public boolean notifyChanges() {
+
+            return notifyChanges;
         }
     }
 }

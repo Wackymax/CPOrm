@@ -16,4 +16,11 @@ public @interface Column {
 
     /**If the field should be set required/nullable, the default is true*/
     boolean required() default true;
+
+    /**If this setting is set to true, changes will be notified on the content resolver, if it is false it will not.
+     * If more than one column is passed through on updates, changes will be notified if at least one of the columns being
+     * updated is set to true.
+     * @return true if changes are to be notified, false otherwise. Default is true.
+     */
+    boolean notifyChanges() default true;
 }

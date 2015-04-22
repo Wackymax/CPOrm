@@ -108,6 +108,45 @@ public class CPHelper {
         contentResolver.update(itemUri, contentValues, null, null);
     }
 
+    public static <T> void updateColumns(Context context, T dataModelObject, String... columns){
+        TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
+        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
+
+        for (String contentColumn : tableDetails.getColumnNames()) {
+
+            boolean includeColumn = false;
+            for (String column : columns) {
+                if(contentColumn.equals(column)) {
+                    includeColumn = true;
+                    break;
+                }
+            }
+
+            if(!includeColumn)
+                contentValues.remove(contentColumn);
+        }
+
+        ContentResolver contentResolver = context.getContentResolver();
+        contentResolver.update(itemUri, contentValues, null, null);
+    }
+
+    public static <T> void updateColumnsExcluding(Context context, T dataModelObject, String... columnsToExclude){
+        TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
+        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
+        Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
+
+        for (String columnToExclude : columnsToExclude) {
+
+            contentValues.remove(columnToExclude);
+        }
+
+        ContentResolver contentResolver = context.getContentResolver();
+        contentResolver.update(itemUri, contentValues, null, null);
+    }
+
     public static <T> ContentProviderOperation prepareUpdate(Context context, T dataModelObject){
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);

@@ -29,6 +29,13 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
     }
 
     /**
+     * @see #findById(Context, Class, long)
+     */
+    public static <T> T findById(Class<T> object, long id){
+        return CPHelper.findByPrimaryKey(object, id);
+    }
+
+    /**
      * Checks if this record has an id, if the id is present this record will be updated,
      * if it is null, it will be inserted instead, and the inserted id assigned to this one.
      * @param context The context used to save the record.
@@ -41,6 +48,15 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
         }
         else CPHelper.update(context, this);
     }
+
+    /**
+     * @see #save(Context)
+     */
+    public void save() {
+
+        save(CPHelper.getApplicationContext());
+    }
+
 
     public Long getId() {
         return _id;

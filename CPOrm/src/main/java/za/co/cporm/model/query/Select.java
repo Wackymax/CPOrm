@@ -228,6 +228,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     /**
+     * @see #queryAsCursor(Context)
+     */
+    public CPOrmCursor<T> queryAsCursor() {
+
+        return queryAsCursor(CPHelper.getApplicationContext());
+    }
+
+    /**
      * Executes the query and returns the results as a cursor. The {@link za.co.cporm.model.util.CPOrmCursor} is a wrapper for the normal cursor,
      * and in addition to providing the normal cursor functionality, it also has methods to manipulate model objects, such as inflating the current cursor
      * values to a model object.
@@ -247,6 +255,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     /**
+     * @see #queryAsIterator(Context)
+     */
+    public CursorIterator<T> queryAsIterator(){
+
+        return queryAsIterator(CPHelper.getApplicationContext());
+    }
+
+    /**
      * Does the same as query cursor, but wraps the cursor in an iterator, and inflates the objects automatically. This iterator will close the cursor
      * once all of the objects have been retrieved, so it is important to always iterate over all the objects so the cursor can close. If an exception
      * is thrown that will prevent this iterator from completing, then please close it manually.
@@ -255,6 +271,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     public CursorIterator<T> queryAsIterator(Context context){
         CPOrmCursor<T> cursor = queryAsCursor(context);
         return new CursorIterator<T>(cursor.getTableDetails(), cursor);
+    }
+
+    /**
+     * @see #queryAsList(Context)
+     */
+    public List<T> queryAsList() {
+
+        return queryAsList(CPHelper.getApplicationContext());
     }
 
     /**
@@ -278,6 +302,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     /**
+     * @see #queryAsCount(Context)
+     */
+    public int queryAsCount() {
+
+        return queryAsCount(CPHelper.getApplicationContext());
+    }
+
+    /**
      * Executes the query as a cursor, and then retrieves the row count from the cursor, the cursor is then closed and the count returned.
      * @return The count indicating the amount of results for this select
      */
@@ -290,6 +322,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         finally {
             cursor.close();
         }
+    }
+
+    /**
+     * @see #asContentResolverValue(Context)
+     */
+    public ContentResolverValues asContentResolverValue() {
+
+        return asContentResolverValue(CPHelper.getApplicationContext());
     }
 
     /**
@@ -316,6 +356,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     /**
+     * @see #first(Context)
+     */
+    public T first(){
+
+        return first(CPHelper.getApplicationContext());
+    }
+
+    /**
      * Gets the results as a cursor, and returns the first item it finds.  The cursor is closed before the item is returned.  If now item is found mathing the query
      * null is returned instead.
      * @return The first result if found, null otherwise.
@@ -334,6 +382,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         finally {
             cursor.close();
         }
+    }
+
+    /**
+     * @see #last(Context)
+     */
+    public T last(){
+
+        return last(CPHelper.getApplicationContext());
     }
 
     /**
@@ -464,6 +520,14 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
     @Override
     public String toString() {
-        return getWhereClause().toString();
+        Context applicationContext = null;
+
+        try {
+            applicationContext = CPHelper.getApplicationContext();
+        }
+        catch(IllegalArgumentException ignore){}
+
+        if(applicationContext == null) return getWhereClause();
+        return getSelectQuery(applicationContext).toString();
     }
 }

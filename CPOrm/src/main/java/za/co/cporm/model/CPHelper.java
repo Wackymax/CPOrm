@@ -1,5 +1,6 @@
 package za.co.cporm.model;
 
+import android.app.Application;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
@@ -22,13 +23,50 @@ import java.util.List;
  */
 public class CPHelper {
 
+    private static Context applicationContext;
     private static TableDetailsCache tableDetailsCache;
 
-    public static <T> long countAll(Context context, Class<T> dataModel){
+
+    /**
+     * This is an optional initialize method that can be used to set the application context.
+     * All the context related methods will then use the application context where available.
+     *
+     * @param application The application that will be using the orm.
+     */
+    public static void initialize(Application application) {
+
+        applicationContext = application;
+    }
+
+    /**
+     * Gets the inialized application context that can be used to perform querying.
+     *
+     * @return The application context if available, throws an Illegal Argument Exception if no initialization has been done.
+     */
+    public static Context getApplicationContext() {
+
+        if (applicationContext == null)
+            throw new IllegalArgumentException("You must call CPHelper.initialize() before using this method.");
+
+        return applicationContext;
+    }
+
+    public static <T> long countAll(Class<T> dataModel) {
+
+        return countAll(getApplicationContext(), dataModel);
+    }
+
+    public static <T> long countAll(Context context, Class<T> dataModel) {
+
         return Select.from(dataModel).queryAsCount(context);
     }
 
-    public static <T> Iterator<T> findAll(Context context, Class<T> dataModel){
+    public static <T> Iterator<T> findAll(Class<T> dataModel) {
+
+        return findAll(getApplicationContext(), dataModel);
+    }
+
+    public static <T> Iterator<T> findAll(Context context, Class<T> dataModel) {
 
         TableDetails tableDetails = findTableDetails(context, dataModel);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
@@ -38,7 +76,12 @@ public class CPHelper {
         return new CursorIterator<T>(tableDetails, cursor);
     }
 
-    public static <T> T findByPrimaryKey(Context context, Class<T> dataModel, Object key){
+    public static <T> T findByPrimaryKey(Class<T> dataModel, Object key) {
+
+        return findByPrimaryKey(getApplicationContext(), dataModel, key);
+    }
+
+    public static <T> T findByPrimaryKey(Context context, Class<T> dataModel, Object key) {
 
         TableDetails tableDetails = findTableDetails(context, dataModel);
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
@@ -48,9 +91,14 @@ public class CPHelper {
         return findSingleItem(context, itemUri, tableDetails);
     }
 
+    public static <T> int insertAll(List<T> dataModelObjects) {
+
+        return insertAll(getApplicationContext(), dataModelObjects);
+    }
+
     public static <T> int insertAll(Context context, List<T> dataModelObjects) {
 
-        if(dataModelObjects == null || dataModelObjects.isEmpty())
+        if (dataModelObjects == null || dataModelObjects.isEmpty())
             return 0;
 
         TableDetails tableDetails = findTableDetails(context, dataModelObjects.get(0).getClass());
@@ -66,7 +114,13 @@ public class CPHelper {
         return contentResolver.bulkInsert(insertUri, values);
     }
 
+    public static <T> void insert(T dataModelObject) {
+
+        insert(getApplicationContext(), dataModelObject);
+    }
+
     public static <T> void insert(Context context, T dataModelObject) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
@@ -75,7 +129,13 @@ public class CPHelper {
         Uri itemUri = contentResolver.insert(insertUri, contentValues);
     }
 
-    public static <T> T insertAndReturn(Context context, T dataModelObject){
+    public static <T> T insertAndReturn(T dataModelObject) {
+
+        return insertAndReturn(getApplicationContext(), dataModelObject);
+    }
+
+    public static <T> T insertAndReturn(Context context, T dataModelObject) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
@@ -84,6 +144,11 @@ public class CPHelper {
         Uri itemUri = contentResolver.insert(insertUri, contentValues);
 
         return findSingleItem(context, itemUri, tableDetails);
+    }
+
+    public static <T> ContentProviderOperation prepareInsert(T dataModelObject) {
+
+        return prepareInsert(getApplicationContext(), dataModelObject);
     }
 
     public static <T> ContentProviderOperation prepareInsert(Context context, T dataModelObject) {
@@ -98,7 +163,13 @@ public class CPHelper {
                 .build();
     }
 
-    public static <T> void update(Context context, T dataModelObject){
+    public static <T> void update(T dataModelObject) {
+
+        update(getApplicationContext(), dataModelObject);
+    }
+
+    public static <T> void update(Context context, T dataModelObject) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
@@ -108,7 +179,13 @@ public class CPHelper {
         contentResolver.update(itemUri, contentValues, null, null);
     }
 
-    public static <T> void updateColumns(Context context, T dataModelObject, String... columns){
+    public static <T> void updateColumns(T dataModelObject, String... columns) {
+
+        updateColumns(getApplicationContext(), dataModelObject, columns);
+    }
+
+    public static <T> void updateColumns(Context context, T dataModelObject, String... columns) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
@@ -118,13 +195,13 @@ public class CPHelper {
 
             boolean includeColumn = false;
             for (String column : columns) {
-                if(contentColumn.equals(column)) {
+                if (contentColumn.equals(column)) {
                     includeColumn = true;
                     break;
                 }
             }
 
-            if(!includeColumn)
+            if (!includeColumn)
                 contentValues.remove(contentColumn);
         }
 
@@ -132,7 +209,13 @@ public class CPHelper {
         contentResolver.update(itemUri, contentValues, null, null);
     }
 
-    public static <T> void updateColumnsExcluding(Context context, T dataModelObject, String... columnsToExclude){
+    public static <T> void updateColumnsExcluding(T dataModelObject, String... columnsToExclude) {
+
+        updateColumnsExcluding(getApplicationContext(), dataModelObject, columnsToExclude);
+    }
+
+    public static <T> void updateColumnsExcluding(Context context, T dataModelObject, String... columnsToExclude) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
@@ -147,7 +230,13 @@ public class CPHelper {
         contentResolver.update(itemUri, contentValues, null, null);
     }
 
-    public static <T> ContentProviderOperation prepareUpdate(Context context, T dataModelObject){
+    public static <T> ContentProviderOperation prepareUpdate(T dataModelObject) {
+
+        return prepareUpdate(getApplicationContext(), dataModelObject);
+    }
+
+    public static <T> ContentProviderOperation prepareUpdate(Context context, T dataModelObject) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
@@ -159,7 +248,13 @@ public class CPHelper {
                 .build();
     }
 
-    public static <T> void delete(Context context, T dataModelObject){
+    public static <T> void delete(T dataModelObject) {
+
+        delete(getApplicationContext(), dataModelObject);
+    }
+
+    public static <T> void delete(Context context, T dataModelObject) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
@@ -168,7 +263,12 @@ public class CPHelper {
         contentResolver.delete(itemUri, null, null);
     }
 
-    public static <T> void delete(Context context, Select<T> select){
+    public static <T> void delete(Select<T> select) {
+
+        delete(getApplicationContext(), select);
+    }
+
+    public static <T> void delete(Context context, Select<T> select) {
 
         ContentResolverValues contentResolverValues = select.asContentResolverValue(context);
 
@@ -176,7 +276,13 @@ public class CPHelper {
         contentResolver.delete(contentResolverValues.getItemUri(), contentResolverValues.getWhere(), contentResolverValues.getWhereArgs());
     }
 
-    public static <T> ContentProviderOperation prepareDelete(Context context, T dataModelObject){
+    public static <T> ContentProviderOperation prepareDelete(T dataModelObject) {
+
+        return prepareDelete(getApplicationContext(), dataModelObject);
+    }
+
+    public static <T> ContentProviderOperation prepareDelete(Context context, T dataModelObject) {
+
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
@@ -187,7 +293,12 @@ public class CPHelper {
                 .build();
     }
 
-    public static <T> ContentProviderOperation prepareDelete(Context context, Select<T> select){
+    public static <T> ContentProviderOperation prepareDelete(Select<T> select) {
+
+        return prepareDelete(getApplicationContext(), select);
+    }
+
+    public static <T> ContentProviderOperation prepareDelete(Context context, Select<T> select) {
 
         ContentResolverValues contentResolverValues = select.asContentResolverValue(context);
 
@@ -196,12 +307,23 @@ public class CPHelper {
                 .build();
     }
 
-    public static <T> void deleteAll(Context context, Class<T> dataModel){
+    public static <T> void deleteAll(Class<T> dataModel) {
+
+        deleteAll(getApplicationContext(), dataModel);
+    }
+
+    public static <T> void deleteAll(Context context, Class<T> dataModel) {
+
         TableDetails tableDetails = findTableDetails(context, dataModel);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.delete(itemUri, null, null);
+    }
+
+    public static ContentProviderResult[] applyPreparedOperations(Collection<ContentProviderOperation> operations) throws RemoteException, OperationApplicationException {
+
+        return applyPreparedOperations(getApplicationContext(), operations);
     }
 
     public static ContentProviderResult[] applyPreparedOperations(Context context, Collection<ContentProviderOperation> operations) throws RemoteException, OperationApplicationException {
@@ -211,24 +333,29 @@ public class CPHelper {
                 .applyBatch(ManifestHelper.getAuthority(context), new ArrayList<ContentProviderOperation>(operations));
     }
 
-    protected static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails){
+    protected static <T> T findSingleItem(Uri itemUri, TableDetails tableDetails) {
+
+        return findSingleItem(getApplicationContext(), itemUri, tableDetails);
+    }
+
+    protected static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails) {
+
         ContentResolver contentResolver = context.getContentResolver();
 
         Cursor cursor = null;
-        try{
+        try {
             cursor = contentResolver.query(itemUri, null, null, null, null);
 
-            if(cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
+            if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
             else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());
-        }
-        finally {
-            if(cursor != null) cursor.close();
+        } finally {
+            if (cursor != null) cursor.close();
         }
     }
 
-    public static synchronized TableDetails findTableDetails(Context context, Class<?> item){
+    public static synchronized TableDetails findTableDetails(Context context, Class<?> item) {
 
-        if(tableDetailsCache == null){
+        if (tableDetailsCache == null) {
             tableDetailsCache = new TableDetailsCache();
         }
         return tableDetailsCache.findTableDetails(context, item);

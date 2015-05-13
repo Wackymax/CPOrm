@@ -4,7 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import za.co.cporm.model.CPHelper;
+import za.co.cporm.model.CPOrm;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 import za.co.cporm.model.util.CPOrmCursor;
@@ -232,7 +232,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public CPOrmCursor<T> queryAsCursor() {
 
-        return queryAsCursor(CPHelper.getApplicationContext());
+        return queryAsCursor(CPOrm.getApplicationContext());
     }
 
     /**
@@ -259,7 +259,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public CursorIterator<T> queryAsIterator(){
 
-        return queryAsIterator(CPHelper.getApplicationContext());
+        return queryAsIterator(CPOrm.getApplicationContext());
     }
 
     /**
@@ -278,7 +278,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public List<T> queryAsList() {
 
-        return queryAsList(CPHelper.getApplicationContext());
+        return queryAsList(CPOrm.getApplicationContext());
     }
 
     /**
@@ -306,7 +306,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public int queryAsCount() {
 
-        return queryAsCount(CPHelper.getApplicationContext());
+        return queryAsCount(CPOrm.getApplicationContext());
     }
 
     /**
@@ -329,7 +329,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public ContentResolverValues asContentResolverValue() {
 
-        return asContentResolverValue(CPHelper.getApplicationContext());
+        return asContentResolverValue(CPOrm.getApplicationContext());
     }
 
     /**
@@ -342,7 +342,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         if(context == null)
             throw new IllegalArgumentException("Attempt to query with a null context");
 
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataObjectClass);
 
         QueryBuilder where = buildWhereClause(context, ManifestHelper.getMappingFactory(context));
         QueryBuilder sort = buildSort();
@@ -360,7 +360,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public T first(){
 
-        return first(CPHelper.getApplicationContext());
+        return first(CPOrm.getApplicationContext());
     }
 
     /**
@@ -389,7 +389,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public T last(){
 
-        return last(CPHelper.getApplicationContext());
+        return last(CPOrm.getApplicationContext());
     }
 
     /**
@@ -461,7 +461,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         if(context == null)
             throw new IllegalArgumentException("Attempt to query with a null context");
 
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataObjectClass);
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataObjectClass);
 
         QueryBuilder select = new QueryBuilder();
         QueryBuilder where = context == null ? new QueryBuilder(getWhereClause()) : buildWhereClause(context, ManifestHelper.getMappingFactory(context));
@@ -523,7 +523,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         Context applicationContext = null;
 
         try {
-            applicationContext = CPHelper.getApplicationContext();
+            applicationContext = CPOrm.getApplicationContext();
         }
         catch(IllegalArgumentException ignore){}
 

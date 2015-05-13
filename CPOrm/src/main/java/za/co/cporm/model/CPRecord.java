@@ -6,98 +6,89 @@ import android.content.Context;
 import java.util.Iterator;
 
 /**
- * This class is just a wrapper for {@link za.co.cporm.model.CPHelper}, sub classes can extend this
+ * This class is just a wrapper for {@link CPOrm}, sub classes can extend this
  * to invoke the basic crud operations on the class itself.
  */
 public abstract class CPRecord<T> {
 
-    public long countAll(){
-
-        return countAll(CPHelper.getApplicationContext());
-    }
-
-    public long countAll(Context context){
-        return CPHelper.countAll(context, getClass());
-    }
-
     public Iterator<T> findAll() {
 
-        return findAll(CPHelper.getApplicationContext());
+        return findAll(CPOrm.getApplicationContext());
     }
 
     public Iterator<T> findAll(Context context){
-        return (Iterator<T>)CPHelper.findAll(context, getClass());
+        return (Iterator<T>) CPOrm.findAll(context, getClass());
     }
 
     public T findByPrimaryKey(Object key){
 
-        return findByPrimaryKey(CPHelper.getApplicationContext(), key);
+        return findByPrimaryKey(CPOrm.getApplicationContext(), key);
     }
 
     public T findByPrimaryKey(Context context, Object key){
-        return (T)CPHelper.findByPrimaryKey(context, getClass(), key);
+        return (T) CPOrm.findByPrimaryKey(context, getClass(), key);
     }
 
     public void insert() {
 
-        insert(CPHelper.getApplicationContext());
+        insert(CPOrm.getApplicationContext());
     }
 
     public void insert(Context context){
-        CPHelper.insert(context, this);
+        CPOrm.insert(context, this);
     }
 
     public ContentProviderOperation prepareInsert(){
 
-        return prepareInsert(CPHelper.getApplicationContext());
+        return prepareInsert(CPOrm.getApplicationContext());
     }
 
     public ContentProviderOperation prepareInsert(Context context) {
-        return CPHelper.prepareInsert(context, this);
+        return CPOrm.prepareInsert(context, this);
     }
 
     public T insertAndReturn(){
 
-        return insertAndReturn(CPHelper.getApplicationContext());
+        return insertAndReturn(CPOrm.getApplicationContext());
     }
 
     public T insertAndReturn(Context context){
-        return (T)CPHelper.insertAndReturn(context, this);
+        return (T) CPOrm.insertAndReturn(context, this);
     }
 
     public void update() {
 
-        update(CPHelper.getApplicationContext());
+        update(CPOrm.getApplicationContext());
     }
 
     public void update(Context context){
-        CPHelper.update(context, this);
+        CPOrm.update(context, this);
     }
 
     public ContentProviderOperation prepareUpdate() {
 
-        return prepareUpdate(CPHelper.getApplicationContext());
+        return prepareUpdate(CPOrm.getApplicationContext());
     }
 
     public ContentProviderOperation prepareUpdate(Context context) {
-        return CPHelper.prepareUpdate(context, this);
+        return CPOrm.prepareUpdate(context, this);
     }
 
     public void delete() {
 
-        delete(CPHelper.getApplicationContext());
+        delete(CPOrm.getApplicationContext());
     }
 
     public void delete(Context context){
-        CPHelper.delete(context, this);
+        CPOrm.delete(context, this);
     }
 
     public ContentProviderOperation prepareDelete() {
 
-        return prepareDelete(CPHelper.getApplicationContext());
+        return prepareDelete(CPOrm.getApplicationContext());
     }
 
     public ContentProviderOperation prepareDelete(Context context) {
-        return CPHelper.prepareDelete(context, this);
+        return CPOrm.prepareDelete(context, this);
     }
 }

@@ -12,34 +12,58 @@ import za.co.cporm.provider.util.UriMatcherHelper;
 
 /**
  * This class contains basic helper functions to assist with data synchronization.  What
- * differentiates this class from {@link za.co.cporm.model.CPHelper} is that all
+ * differentiates this class from {@link CPOrm} is that all
  * operations will be passed with a special parameter telling the content provider
  * that a network sync should not be scheduled when notifying content observers.
  */
 public class CPSyncHelper {
 
-    public static <T> void insert(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
-        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
-        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails)
-                .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
+    public static <T> void insert(Context context, ContentProviderClient provider, T... dataModelObjects) throws RemoteException {
 
-        Uri itemUri = provider.insert(insertUri, contentValues);
+        if(dataModelObjects.length == 1) {
+
+            T modelObject = dataModelObjects[0];
+            TableDetails tableDetails = CPOrm.findTableDetails(context, modelObject.getClass());
+            ContentValues contentValues = ModelInflater.deflate(tableDetails, modelObject);
+            Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails)
+                    .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
+
+            provider.insert(insertUri, contentValues);
+        }
+        else {
+
+            ContentValues[] insertObjects = new ContentValues[dataModelObjects.length];
+            TableDetails tableDetails = null;
+
+            for (int i = 0; i < dataModelObjects.length; i++) {
+
+                T modelObject = dataModelObjects[i];
+                tableDetails = CPOrm.findTableDetails(context, modelObject.getClass());
+                insertObjects[i] = ModelInflater.deflate(tableDetails, modelObject);
+            }
+
+            if(tableDetails != null) {
+
+                Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails)
+                        .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
+                provider.bulkInsert(insertUri, insertObjects);
+            }
+        }
     }
 
     public static <T> T insertAndReturn(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails)
                 .appendQueryParameter(CPOrmContentProvider.PARAMETER_SYNC, "false").build();
 
         Uri itemUri = provider.insert(insertUri, contentValues);
 
-        return CPHelper.findSingleItem(context, itemUri, tableDetails);
+        return CPOrm.findSingleItem(context, itemUri, tableDetails);
     }
 
     public static <T> void update(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
@@ -49,7 +73,7 @@ public class CPSyncHelper {
     }
 
     public static <T> void updateColumns(Context context, ContentProviderClient provider, T dataModelObject, String... columns) throws RemoteException {
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
@@ -73,7 +97,7 @@ public class CPSyncHelper {
     }
 
     public static <T> void updateColumnsExcluding(Context context, ContentProviderClient provider, T dataModelObject, String... columnsToExclude) throws RemoteException {
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))
@@ -88,7 +112,7 @@ public class CPSyncHelper {
     }
 
     public static <T> void delete(Context context, ContentProviderClient provider, T dataModelObject) throws RemoteException {
-        TableDetails tableDetails = CPHelper.findTableDetails(context, dataModelObject.getClass());
+        TableDetails tableDetails = CPOrm.findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue))

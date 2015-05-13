@@ -1,6 +1,8 @@
 package za.co.cporm.model;
 
+import android.content.ContentUris;
 import android.content.Context;
+import android.net.Uri;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.PrimaryKey;
 
@@ -25,14 +27,14 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
      * @return The record, if found.
      */
     public static <T> T findById(Context context, Class<T> object, long id){
-        return CPHelper.findByPrimaryKey(context, object, id);
+        return CPOrm.findByPrimaryKey(context, object, id);
     }
 
     /**
      * @see #findById(Context, Class, long)
      */
     public static <T> T findById(Class<T> object, long id){
-        return CPHelper.findByPrimaryKey(object, id);
+        return CPOrm.findByPrimaryKey(object, id);
     }
 
     /**
@@ -44,9 +46,9 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
 
         if(_id == null) {
 
-            _id = CPHelper.insertAndReturn(context, this)._id;
+            _id = CPOrm.insertAndReturn(context, this)._id;
         }
-        else CPHelper.update(context, this);
+        else CPOrm.update(context, this);
     }
 
     /**
@@ -54,11 +56,15 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
      */
     public void save() {
 
-        save(CPHelper.getApplicationContext());
+        save(CPOrm.getApplicationContext());
     }
-
 
     public Long getId() {
         return _id;
+    }
+
+    public <T> Uri getItemUri() {
+
+        return ContentUris.withAppendedId(CPOrm.getItemUri(getClass()), getId());
     }
 }

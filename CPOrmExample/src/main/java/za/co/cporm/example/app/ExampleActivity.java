@@ -13,7 +13,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import za.co.cporm.example.app.model.domain.Role;
 import za.co.cporm.example.app.model.domain.User;
-import za.co.cporm.model.CPHelper;
+import za.co.cporm.model.CPOrm;
 import za.co.cporm.model.loader.CPOrmLoader;
 import za.co.cporm.model.query.Select;
 import za.co.cporm.model.util.CPOrmCursor;
@@ -96,8 +96,8 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
         @Override
         protected Void doInBackground(Void... voids) {
 
-            CPHelper.deleteAll(context, Role.class);
-            CPHelper.deleteAll(context, User.class);
+            CPOrm.deleteAll(context, Role.class);
+            CPOrm.deleteAll(context, User.class);
 
             Role role = new Role();
             role.setRoleName("role " + Select.from(Role.class).queryAsCount(context));
@@ -140,7 +140,7 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
                     recordsToInsert.add(user);
                 }
 
-                recordCount += CPHelper.insertAll(context, recordsToInsert);
+                recordCount += CPOrm.insertAll(context, recordsToInsert);
                 recordsToInsert.clear();
             }
 

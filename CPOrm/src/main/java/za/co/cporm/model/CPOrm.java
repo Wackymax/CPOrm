@@ -21,7 +21,7 @@ import java.util.List;
  * to perform Create, Update, Delete operations. To perform
  * Queries the {@link za.co.cporm.model.query.Select} class should be used instead.
  */
-public class CPHelper {
+public class CPOrm {
 
     private static Context applicationContext;
     private static TableDetailsCache tableDetailsCache;
@@ -331,6 +331,12 @@ public class CPHelper {
         return context
                 .getContentResolver()
                 .applyBatch(ManifestHelper.getAuthority(context), new ArrayList<ContentProviderOperation>(operations));
+    }
+
+    public static <T> Uri getItemUri(Class<T> dataModel) {
+
+        TableDetails tableDetails = findTableDetails(getApplicationContext(), dataModel);
+        return UriMatcherHelper.generateItemUri(getApplicationContext(), tableDetails).build();
     }
 
     protected static <T> T findSingleItem(Uri itemUri, TableDetails tableDetails) {

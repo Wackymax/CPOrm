@@ -12,7 +12,7 @@ Content Provider ORM for android.  This ORM uses an android sqlite database as a
 
 ## Install it
 
-There are four ways to install Sugar:
+There are four ways to install CPOrm:
 
 #### As a Gradle dependency
 

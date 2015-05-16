@@ -2,22 +2,19 @@ package za.co.cporm.model.generate;
 
 import android.content.Context;
 import android.text.TextUtils;
-import za.co.cporm.model.annotation.ChangeListeners;
+import za.co.cporm.model.annotation.*;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.PrimaryKey;
 import za.co.cporm.model.annotation.Column.Unique;
-import za.co.cporm.model.annotation.*;
 import za.co.cporm.model.map.SqlColumnMapping;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.model.util.NamingUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class will convert any valid Java Object marked with the {@link za.co.cporm.model.annotation.Table} annotation
@@ -60,9 +57,10 @@ public class ReflectionHelper {
         if(tableDetails.getColumns().isEmpty()) throw new IllegalStateException("No columns are defined for table " + tableDetails.getTableName());
         if(tableDetails.findPrimaryKeyColumn() == null && !TableView.class.isAssignableFrom(dataModelObject)) throw new IllegalStateException("No primary key column defined for table " + tableDetails.getTableName());
 
-        if(dataModelObject.isAnnotationPresent(Indices.class)){
 
-            for (Index index : dataModelObject.getAnnotation(Indices.class).indices()) {
+        for (Indices indices : inspectObjectAnnotations(Indices.class, dataModelObject)) {
+
+            for (Index index : indices.indices()) {
 
                 tableDetails.addIndex(index);
             }
@@ -112,5 +110,23 @@ public class ReflectionHelper {
         }
 
         return objectFields;
+    }
+
+    private static <T extends Annotation> Collection<T> inspectObjectAnnotations(Class<T> annotation, Class<?> object) {
+
+        List<T> annotations = new LinkedList<T>();
+
+        if(object.isAnnotationPresent(annotation)) {
+
+            annotations.add(object.getAnnotation(annotation));
+        }
+
+        Class<?> superclass = object.getSuperclass();
+        if(superclass != null) {
+
+            annotations.addAll(inspectObjectAnnotations(annotation, superclass));
+        }
+
+        return annotations;
     }
 }

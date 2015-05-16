@@ -10,6 +10,7 @@
 
         <meta-data android:name="AUTHORITY" android:value="za.co.cporm.example"/>
         <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.app.model.MyCPOrmConfiguration"/>
+        <meta-data android:name="MAPPING_FACTORY" android:value="za.co.cporm.example.app.mapping.CustomColumnMapper"/>
 
         <activity
             android:name="za.co.cporm.example.app.ExampleActivity"

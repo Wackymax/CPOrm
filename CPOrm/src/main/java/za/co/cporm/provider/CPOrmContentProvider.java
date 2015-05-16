@@ -6,12 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.provider.util.UriMatcherHelper;
+import za.co.cporm.util.CPOrmLog;
 
 import java.util.Arrays;
 
@@ -20,8 +20,6 @@ import java.util.Arrays;
  * Objects are expose in the form of authority/table_name/*
  */
 public class CPOrmContentProvider extends ContentProvider {
-
-    private static final String TAG = "CPOrmContentProvider";
 
     public static final String PARAMETER_OFFSET = "OFFSET";
     public static final String PARAMETER_LIMIT = "LIMIT";
@@ -52,13 +50,13 @@ public class CPOrmContentProvider extends ContentProvider {
         String limit = constructLimit(uri);
 
         if (debugEnabled) {
-            Log.d(TAG, "********* Query **********");
-            Log.d(TAG, "Uri: " + uri);
-            Log.d(TAG, "Projection: " + Arrays.toString(projection));
-            Log.d(TAG, "Selection: " + selection);
-            Log.d(TAG, "Args: " + Arrays.toString(selectionArgs));
-            Log.d(TAG, "Sort: " + sortOrder);
-            Log.d(TAG, "Limit: " + limit);
+            CPOrmLog.d("********* Query **********");
+            CPOrmLog.d("Uri: " + uri);
+            CPOrmLog.d("Projection: " + Arrays.toString(projection));
+            CPOrmLog.d("Selection: " + selection);
+            CPOrmLog.d("Args: " + Arrays.toString(selectionArgs));
+            CPOrmLog.d("Sort: " + sortOrder);
+            CPOrmLog.d("Limit: " + limit);
         }
 
         Cursor cursor;
@@ -87,12 +85,11 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
-        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
         if (debugEnabled) {
-            Log.d(TAG, "********* Insert **********");
-            Log.d(TAG, "Uri: " + uri);
-            Log.d(TAG, "Content Values: " + contentValues);
+            CPOrmLog.d("********* Insert **********");
+            CPOrmLog.d("Uri: " + uri);
+            CPOrmLog.d("Content Values: " + contentValues);
         }
 
         long insertId = db.insertOrThrow(tableDetails.getTableName(), null, contentValues);
@@ -100,21 +97,7 @@ public class CPOrmContentProvider extends ContentProvider {
         if (insertId == -1)
             throw new IllegalArgumentException("Failed to insert row for into table " + tableDetails.getTableName() + " using values " + contentValues);
 
-        getContext().getContentResolver().notifyChange(uri, null, sync);
-
-        if (!tableDetails.getChangeListeners().isEmpty()) {
-
-            for (Class<?> changeListener : tableDetails.getChangeListeners()) {
-
-                TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
-
-                if (changeListenerDetails == null)
-                    continue;
-
-                Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
-                getContext().getContentResolver().notifyChange(changeUri, null, sync);
-            }
-        }
+        notifyChanges(uri, tableDetails);
 
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
         if (primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
@@ -130,13 +113,12 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
-        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
         if (debugEnabled) {
-            Log.d(TAG, "********* Delete **********");
-            Log.d(TAG, "Uri: " + uri);
-            Log.d(TAG, "Where: " + where);
-            Log.d(TAG, "Args: " + Arrays.toString(args));
+            CPOrmLog.d("********* Delete **********");
+            CPOrmLog.d("Uri: " + uri);
+            CPOrmLog.d("Where: " + where);
+            CPOrmLog.d("Args: " + Arrays.toString(args));
         }
 
         int deleteCount;
@@ -148,23 +130,10 @@ public class CPOrmContentProvider extends ContentProvider {
             deleteCount = db.delete(tableDetails.getTableName(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         } else deleteCount = db.delete(tableDetails.getTableName(), where, args);
 
-        if (deleteCount > 0) {
-            getContext().getContentResolver().notifyChange(uri, null, sync);
+        if (deleteCount == 0)
+            return deleteCount;
 
-            if (!tableDetails.getChangeListeners().isEmpty()) {
-
-                for (Class<?> changeListener : tableDetails.getChangeListeners()) {
-
-                    TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
-
-                    if (changeListenerDetails == null)
-                        continue;
-
-                    Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
-                    getContext().getContentResolver().notifyChange(changeUri, null, sync);
-                }
-            }
-        }
+        notifyChanges(uri, tableDetails);
 
 
         return deleteCount;
@@ -175,14 +144,13 @@ public class CPOrmContentProvider extends ContentProvider {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
-        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
         if (debugEnabled) {
-            Log.d(TAG, "********* Update **********");
-            Log.d(TAG, "Uri: " + uri);
-            Log.d(TAG, "Content Values: " + contentValues);
-            Log.d(TAG, "Where: " + where);
-            Log.d(TAG, "Args: " + Arrays.toString(args));
+            CPOrmLog.d("********* Update **********");
+            CPOrmLog.d("Uri: " + uri);
+            CPOrmLog.d("Content Values: " + contentValues);
+            CPOrmLog.d("Where: " + where);
+            CPOrmLog.d("Args: " + Arrays.toString(args));
         }
 
         int updateCount;
@@ -195,29 +163,8 @@ public class CPOrmContentProvider extends ContentProvider {
         } else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
         if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues)) {
-
-            getContext().getContentResolver().notifyChange(uri, null, sync);
-
-            if (!tableDetails.getChangeListeners().isEmpty()) {
-
-                String itemId = uri.getLastPathSegment();
-                for (Class<?> changeListener : tableDetails.getChangeListeners()) {
-
-                    TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
-
-                    if (changeListenerDetails == null)
-                        continue;
-
-                    Uri changeUri;
-                    if (TextUtils.isEmpty(itemId))
-                        changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
-                    else changeUri = uriMatcherHelper.generateSingleItemUri(changeListenerDetails, itemId);
-
-                    getContext().getContentResolver().notifyChange(changeUri, null, sync);
-                }
-            }
+            notifyChanges(uri, tableDetails);
         }
-
 
         return updateCount;
     }
@@ -228,11 +175,10 @@ public class CPOrmContentProvider extends ContentProvider {
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
         db.beginTransactionNonExclusive();
-        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
 
         if (debugEnabled) {
-            Log.d(TAG, "********* Bulk Insert **********");
-            Log.d(TAG, "Uri: " + uri);
+            CPOrmLog.d("********* Bulk Insert **********");
+            CPOrmLog.d("Uri: " + uri);
         }
 
         int count = 0;
@@ -246,23 +192,8 @@ public class CPOrmContentProvider extends ContentProvider {
 
             db.setTransactionSuccessful();
 
-            getContext().getContentResolver().notifyChange(uri, null, sync);
-
-            if (!tableDetails.getChangeListeners().isEmpty()) {
-
-                for (Class<?> changeListener : tableDetails.getChangeListeners()) {
-
-                    TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
-
-                    if (changeListenerDetails == null)
-                        continue;
-
-                    Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
-                    getContext().getContentResolver().notifyChange(changeUri, null, sync);
-                }
-            }
-        }
-        finally {
+            notifyChanges(uri, tableDetails);
+        } finally {
             db.endTransaction();
         }
 
@@ -307,10 +238,31 @@ public class CPOrmContentProvider extends ContentProvider {
         for (String columnName : contentValues.keySet()) {
 
             TableDetails.ColumnDetails column = tableDetails.findColumn(columnName);
-            if(column != null)
+            if (column != null)
                 notify = notify || column.notifyChanges();
         }
 
         return notify;
+    }
+
+    private void notifyChanges(Uri uri, TableDetails tableDetails) {
+
+        Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
+        getContext().getContentResolver().notifyChange(uri, null, sync);
+
+        if (!tableDetails.getChangeListeners().isEmpty()) {
+
+            for (Class<?> changeListener : tableDetails.getChangeListeners()) {
+
+                TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
+
+                if (changeListenerDetails == null)
+                    continue;
+
+                //Change listeners are registered on views, so the entire view needs to be updated if changes to its data occurs
+                Uri changeUri = uriMatcherHelper.generateItemUri(changeListenerDetails);
+                getContext().getContentResolver().notifyChange(changeUri, null, sync);
+            }
+        }
     }
 }

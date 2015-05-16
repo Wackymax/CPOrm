@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteCursorDriver;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQuery;
-import android.util.Log;
+import za.co.cporm.util.CPOrmLog;
 
 /**
  * Created by hennie.brink on 2015-03-18.
@@ -26,7 +26,7 @@ public class CPOrmCursorFactory implements SQLiteDatabase.CursorFactory {
     public Cursor newCursor(SQLiteDatabase sqLiteDatabase, SQLiteCursorDriver sqLiteCursorDriver, String tableName, SQLiteQuery sqLiteQuery) {
 
         if (debugEnabled) {
-            Log.d("SQL Log", sqLiteQuery.toString());
+            CPOrmLog.d(sqLiteQuery.toString());
         }
 
         return new SQLiteCursor(sqLiteCursorDriver, tableName, sqLiteQuery);

@@ -25,4 +25,10 @@ public class Role extends CPDefaultRecord<Role> {
     public void setRoleName(String roleName) {
         this.roleName = roleName;
     }
+
+    @Override
+    public String toString() {
+
+        return roleName;
+    }
 }

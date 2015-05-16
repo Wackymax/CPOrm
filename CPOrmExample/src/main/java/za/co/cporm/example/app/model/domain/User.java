@@ -5,6 +5,7 @@ import za.co.cporm.model.CPDefaultRecord;
 import za.co.cporm.model.annotation.ChangeListeners;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.Unique;
+import za.co.cporm.model.annotation.References;
 import za.co.cporm.model.annotation.Table;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class User extends CPDefaultRecord<User> {
     private String familyName;
 
     @Column
+    @References(Role.class)
     private long roleId;
 
     @Column(required = false)

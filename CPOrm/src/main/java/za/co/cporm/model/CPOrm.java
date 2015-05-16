@@ -46,7 +46,7 @@ public class CPOrm {
     public static Context getApplicationContext() {
 
         if (applicationContext == null)
-            throw new IllegalArgumentException("You must call CPHelper.initialize() before using this method.");
+            throw new IllegalArgumentException("You must call initialize() before using this method.");
 
         return applicationContext;
     }

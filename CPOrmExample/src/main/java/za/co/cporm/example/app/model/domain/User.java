@@ -7,6 +7,8 @@ import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.Unique;
 import za.co.cporm.model.annotation.Table;
 
+import java.util.List;
+
 /**
  * Created by hennie.brink on 2015-03-20.
  */
@@ -26,6 +28,9 @@ public class User extends CPDefaultRecord<User> {
 
     @Column
     private long roleId;
+
+    @Column(required = false)
+    private List<String> mobileNumbers;
 
     public String getUserName() {
         return userName;
@@ -57,5 +62,15 @@ public class User extends CPDefaultRecord<User> {
 
     public void setRoleId(long roleId) {
         this.roleId = roleId;
+    }
+
+    public List<String> getMobileNumbers() {
+
+        return mobileNumbers;
+    }
+
+    public void setMobileNumbers(List<String> mobileNumbers) {
+
+        this.mobileNumbers = mobileNumbers;
     }
 }

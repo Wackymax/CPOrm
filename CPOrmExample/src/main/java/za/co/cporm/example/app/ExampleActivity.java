@@ -103,7 +103,9 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             role.setRoleName("role " + Select.from(Role.class).queryAsCount(context));
             role = role.insertAndReturn(context); //We need the returned object to get the database assigned id
 
-
+            List<String> mobileNumbers = new ArrayList<>();
+            mobileNumbers.add("12345");
+            mobileNumbers.add("67890");
             //Demonstrates cursor begin notified of data source changes
             Log.i(TAG, "Testing single insert performance");
             long time = System.currentTimeMillis();
@@ -115,6 +117,7 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
                 user.setGivenName("Loading " + recordCount);
                 user.setFamilyName("User");
                 user.setRoleId(role.getId());
+                user.setMobileNumbers(mobileNumbers);
                 user.insert(context);
                 recordCount++;
             }

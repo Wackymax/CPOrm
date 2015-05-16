@@ -18,6 +18,16 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
 
     private final int layoutId;
 
+    public CPOrmCursorAdaptor(Context context, int layoutId) {
+
+        this(context, null, layoutId);
+    }
+
+    public CPOrmCursorAdaptor(Context context, Cursor c, int layoutId) {
+
+        this(context, c, layoutId, 0);
+    }
+
     public CPOrmCursorAdaptor(Context context, Cursor c, int layoutId, int flags) {
 
         super(context, c, flags);

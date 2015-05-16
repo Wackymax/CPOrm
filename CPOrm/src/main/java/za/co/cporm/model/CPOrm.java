@@ -350,7 +350,7 @@ public class CPOrm {
 
         Cursor cursor = null;
         try {
-            cursor = contentResolver.query(itemUri, null, null, null, null);
+            cursor = contentResolver.query(itemUri, tableDetails.getColumnNames(), null, null, null);
 
             if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
             else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());

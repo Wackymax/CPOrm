@@ -67,7 +67,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            cursor = db.query(tableDetails.getTableName(), tableDetails.getColumnNames(), primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
+            cursor = db.query(tableDetails.getTableName(), projection, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, sortOrder, limit);
         } else
             cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
 

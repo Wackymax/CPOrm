@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-version 2.91
+version 2.92
 
 repositories {
     jcenter()

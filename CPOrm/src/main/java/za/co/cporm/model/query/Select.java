@@ -45,7 +45,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      * @return The current Select instance
      */
     public static <T> Select<T> from(Class<T> dataObjectClass){
-        return new Select(dataObjectClass);
+        return new Select<T>(dataObjectClass);
     }
 
     /**

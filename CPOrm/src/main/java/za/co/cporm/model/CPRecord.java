@@ -14,6 +14,8 @@ public abstract class CPRecord<T> {
 
     private ReferenceMap referenceMap;
 
+    public CPRecord() {}
+
     public Iterator<T> findAll() {
 
         return findAll(CPOrm.getApplicationContext());

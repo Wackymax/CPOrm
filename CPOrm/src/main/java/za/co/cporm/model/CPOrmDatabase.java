@@ -5,19 +5,18 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
-import android.util.Log;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.generate.TableGenerator;
 import za.co.cporm.model.generate.TableView;
 import za.co.cporm.model.generate.TableViewGenerator;
 import za.co.cporm.model.util.CPOrmCursorFactory;
 import za.co.cporm.model.util.TableDetailsCache;
+import za.co.cporm.util.CPOrmLog;
 
 /**
  * Handles the creation of the database and all of its objects
  */
 public class CPOrmDatabase extends SQLiteOpenHelper {
-    private static final String TAG = "CPOrmDatabase";
 
     private final Context context;
     private final CPOrmConfiguration cPOrmConfiguration;
@@ -40,7 +39,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                 String createStatement = TableViewGenerator.createViewStatement(findTableDetails(dataModelObject), (Class<? extends TableView>) dataModelObject);
 
                 if(cPOrmConfiguration.isQueryLoggingEnabled()) {
-                    Log.d(TAG, "Creating View: " + createStatement);
+                    CPOrmLog.d("Creating View: " + createStatement);
                 }
                 sqLiteDatabase.execSQL(createStatement);
             }
@@ -48,7 +47,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                 String createStatement = TableGenerator.generateTableCreate(findTableDetails(dataModelObject), false);
 
                 if(cPOrmConfiguration.isQueryLoggingEnabled()) {
-                    Log.d(TAG, "Creating Table: " + createStatement);
+                    CPOrmLog.d("Creating Table: " + createStatement);
                 }
                 sqLiteDatabase.execSQL(createStatement);
             }
@@ -63,13 +62,13 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
             if(TableView.class.isAssignableFrom(dataModelObject)){
                 String statement = TableViewGenerator.createDropViewStatement(findTableDetails(dataModelObject));
                 if(cPOrmConfiguration.isQueryLoggingEnabled()) {
-                    Log.d(TAG, "Dropping View: " + statement);
+                    CPOrmLog.d("Dropping View: " + statement);
                 }
                 sqLiteDatabase.execSQL(statement);
             } else {
                 String statement = TableGenerator.generateTableDrop(findTableDetails(dataModelObject), false);
                 if(cPOrmConfiguration.isQueryLoggingEnabled()) {
-                    Log.d(TAG, "Dropping Table: " + statement);
+                    CPOrmLog.d("Dropping Table: " + statement);
                 }
                 sqLiteDatabase.execSQL(statement);
             }

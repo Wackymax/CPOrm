@@ -95,7 +95,7 @@ public class ReflectionHelper {
         return columns;
     }
 
-    private static List<Field> getAllObjectFields(Class<?> object){
+    public static List<Field> getAllObjectFields(Class<?> object){
 
         if(object.isInterface() && object.isEnum()) return new LinkedList<Field>();
 
@@ -112,7 +112,7 @@ public class ReflectionHelper {
         return objectFields;
     }
 
-    private static <T extends Annotation> Collection<T> inspectObjectAnnotations(Class<T> annotation, Class<?> object) {
+    public static <T extends Annotation> Collection<T> inspectObjectAnnotations(Class<T> annotation, Class<?> object) {
 
         List<T> annotations = new LinkedList<T>();
 

@@ -2,6 +2,7 @@ package za.co.cporm.model;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
+import za.co.cporm.model.util.ReferenceMap;
 
 import java.util.Iterator;
 
@@ -11,21 +12,27 @@ import java.util.Iterator;
  */
 public abstract class CPRecord<T> {
 
+    private ReferenceMap referenceMap;
+
+    public CPRecord() {}
+
     public Iterator<T> findAll() {
 
         return findAll(CPOrm.getApplicationContext());
     }
 
-    public Iterator<T> findAll(Context context){
+    public Iterator<T> findAll(Context context) {
+
         return (Iterator<T>) CPOrm.findAll(context, getClass());
     }
 
-    public T findByPrimaryKey(Object key){
+    public T findByPrimaryKey(Object key) {
 
         return findByPrimaryKey(CPOrm.getApplicationContext(), key);
     }
 
-    public T findByPrimaryKey(Context context, Object key){
+    public T findByPrimaryKey(Context context, Object key) {
+
         return (T) CPOrm.findByPrimaryKey(context, getClass(), key);
     }
 
@@ -34,25 +41,28 @@ public abstract class CPRecord<T> {
         insert(CPOrm.getApplicationContext());
     }
 
-    public void insert(Context context){
+    public void insert(Context context) {
+
         CPOrm.insert(context, this);
     }
 
-    public ContentProviderOperation prepareInsert(){
+    public ContentProviderOperation prepareInsert() {
 
         return prepareInsert(CPOrm.getApplicationContext());
     }
 
     public ContentProviderOperation prepareInsert(Context context) {
+
         return CPOrm.prepareInsert(context, this);
     }
 
-    public T insertAndReturn(){
+    public T insertAndReturn() {
 
         return insertAndReturn(CPOrm.getApplicationContext());
     }
 
-    public T insertAndReturn(Context context){
+    public T insertAndReturn(Context context) {
+
         return (T) CPOrm.insertAndReturn(context, this);
     }
 
@@ -61,7 +71,8 @@ public abstract class CPRecord<T> {
         update(CPOrm.getApplicationContext());
     }
 
-    public void update(Context context){
+    public void update(Context context) {
+
         CPOrm.update(context, this);
     }
 
@@ -71,6 +82,7 @@ public abstract class CPRecord<T> {
     }
 
     public ContentProviderOperation prepareUpdate(Context context) {
+
         return CPOrm.prepareUpdate(context, this);
     }
 
@@ -79,7 +91,8 @@ public abstract class CPRecord<T> {
         delete(CPOrm.getApplicationContext());
     }
 
-    public void delete(Context context){
+    public void delete(Context context) {
+
         CPOrm.delete(context, this);
     }
 
@@ -89,6 +102,23 @@ public abstract class CPRecord<T> {
     }
 
     public ContentProviderOperation prepareDelete(Context context) {
+
         return CPOrm.prepareDelete(context, this);
+    }
+
+    public <T> T findReferent(Class<T> referenceToFind) {
+
+        return findReferent(CPOrm.getApplicationContext(), referenceToFind);
+    }
+
+
+    public <T> T findReferent(Context context, Class<T> referenceToFind) {
+
+        //To save memory only load the reference map once used, garbage collection is expensive on android
+        if(referenceMap == null) {
+            referenceMap = new ReferenceMap(this);
+        }
+
+        return referenceMap.findReferent(context, referenceToFind);
     }
 }

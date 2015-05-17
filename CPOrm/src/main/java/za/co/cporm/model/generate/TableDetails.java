@@ -129,6 +129,8 @@ public class TableDetails {
             if(primaryKey && !required) throw new IllegalStateException("Column must be not required if primary key is set");
 
             if(TextUtils.isEmpty(columnName)) throw new IllegalArgumentException("A valid column name needs to be provided");
+
+            columnField.setAccessible(true);
         }
 
         public String getColumnName() {
@@ -140,7 +142,6 @@ public class TableDetails {
         }
 
         public Field getColumnField() {
-            columnField.setAccessible(true);
             return columnField;
         }
 

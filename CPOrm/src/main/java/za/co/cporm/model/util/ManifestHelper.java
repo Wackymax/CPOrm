@@ -4,9 +4,9 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
-import android.util.Log;
 import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
+import za.co.cporm.util.CPOrmLog;
 
 /**
  * Created by hennie.brink on 2015-03-18.
@@ -19,10 +19,15 @@ public class ManifestHelper {
 
     public static final String DATABASE_DEFAULT_NAME = "CPOrm.db";
 
+    private static String authority;
+
     public static String getAuthority(Context context){
 
-        String authority = getMetaDataString(context, METADATA_AUTHORITY);
-        if(TextUtils.isEmpty(authority)) throw new IllegalArgumentException("Authority must be provided as part of the meta data");
+        if(authority == null) {
+            authority = getMetaDataString(context, METADATA_AUTHORITY);
+            if (TextUtils.isEmpty(authority))
+                throw new IllegalArgumentException("Authority must be provided as part of the meta data");
+        }
 
         return authority;
     }
@@ -79,7 +84,7 @@ public class ManifestHelper {
                     PackageManager.GET_META_DATA);
             value = ai.metaData.getString(name);
         } catch (Exception e) {
-            Log.d("sugar", "Couldn't find config value: " + name);
+            CPOrmLog.d("Couldn't find config value: " + name);
         }
 
         return value;
@@ -94,7 +99,7 @@ public class ManifestHelper {
                     PackageManager.GET_META_DATA);
             value = ai.metaData.getInt(name);
         } catch (Exception e) {
-            Log.d("sugar", "Couldn't find config value: " + name);
+            CPOrmLog.d("Couldn't find config value: " + name);
         }
 
         return value;
@@ -109,7 +114,7 @@ public class ManifestHelper {
                     PackageManager.GET_META_DATA);
             value = ai.metaData.getBoolean(name);
         } catch (Exception e) {
-            Log.d("CPOrm", "Couldn't find config value: " + name);
+            CPOrmLog.d("Couldn't find config value: " + name);
         }
 
         return value;

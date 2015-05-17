@@ -1,10 +1,9 @@
 package za.co.cporm.example.app.model.domain;
 
-import za.co.cporm.example.app.model.domain.view.UserRole;
 import za.co.cporm.model.CPDefaultRecord;
-import za.co.cporm.model.annotation.ChangeListeners;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.Unique;
+import za.co.cporm.model.annotation.References;
 import za.co.cporm.model.annotation.Table;
 
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.List;
  * Created by hennie.brink on 2015-03-20.
  */
 @Table
-@ChangeListeners(changeListeners = UserRole.class)
 public class User extends CPDefaultRecord<User> {
 
     @Column
@@ -27,6 +25,7 @@ public class User extends CPDefaultRecord<User> {
     private String familyName;
 
     @Column
+    @References(Role.class)
     private long roleId;
 
     @Column(required = false)

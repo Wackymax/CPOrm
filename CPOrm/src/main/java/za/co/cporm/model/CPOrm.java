@@ -46,7 +46,7 @@ public class CPOrm {
     public static Context getApplicationContext() {
 
         if (applicationContext == null)
-            throw new IllegalArgumentException("You must call CPHelper.initialize() before using this method.");
+            throw new IllegalArgumentException("You must call initialize() before using this method.");
 
         return applicationContext;
     }
@@ -112,6 +112,23 @@ public class CPOrm {
 
         ContentResolver contentResolver = context.getContentResolver();
         return contentResolver.bulkInsert(insertUri, values);
+    }
+
+    public static <T> int insertAll(Context context, ContentProviderClient providerClient, List<T> dataModelObjects) throws RemoteException {
+
+        if (dataModelObjects == null || dataModelObjects.isEmpty())
+            return 0;
+
+        TableDetails tableDetails = findTableDetails(context, dataModelObjects.get(0).getClass());
+        Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
+
+        ContentValues[] values = new ContentValues[dataModelObjects.size()];
+        for (int i = 0; i < dataModelObjects.size(); i++) {
+
+            values[i] = ModelInflater.deflate(tableDetails, dataModelObjects.get(i));
+        }
+
+        return providerClient.bulkInsert(insertUri, values);
     }
 
     public static <T> void insert(T dataModelObject) {
@@ -335,8 +352,13 @@ public class CPOrm {
 
     public static <T> Uri getItemUri(Class<T> dataModel) {
 
-        TableDetails tableDetails = findTableDetails(getApplicationContext(), dataModel);
-        return UriMatcherHelper.generateItemUri(getApplicationContext(), tableDetails).build();
+        return getItemUri(getApplicationContext(), dataModel);
+    }
+
+    public static <T> Uri getItemUri(Context context, Class<T> dataModel) {
+
+        TableDetails tableDetails = findTableDetails(context, dataModel);
+        return UriMatcherHelper.generateItemUri(context, tableDetails).build();
     }
 
     protected static <T> T findSingleItem(Uri itemUri, TableDetails tableDetails) {

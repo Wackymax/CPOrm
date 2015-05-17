@@ -27,7 +27,7 @@ public class ModelInflater {
 
     public static ContentValues deflate(TableDetails tableDetails, Object dataModelObject){
 
-        ContentValues contentValues = new ContentValues();
+        ContentValues contentValues = new ContentValues(tableDetails.getColumns().size());
 
         for (TableDetails.ColumnDetails columnDetails : tableDetails.getColumns()) {
 
@@ -68,7 +68,7 @@ public class ModelInflater {
         return dataModelObject;
     }
 
-    private static <T> void inflateColumn(Cursor cursor,T dataModelObject, TableDetails.ColumnDetails columnDetails){
+    private static <T> void inflateColumn(Cursor cursor, T dataModelObject, TableDetails.ColumnDetails columnDetails){
 
         int columnIndex = cursor.getColumnIndex(columnDetails.getColumnName());
 
@@ -78,8 +78,6 @@ public class ModelInflater {
 
         Field columnField = columnDetails.getColumnField();
         try {
-
-
             columnField.set(dataModelObject, columnDetails.getColumnTypeMapping().getColumnValue(cursor,columnIndex));
         }
         catch (IllegalAccessException e) {

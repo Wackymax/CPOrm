@@ -1,8 +1,6 @@
 package za.co.cporm.example.app.model.domain;
 
-import za.co.cporm.example.app.model.domain.view.UserRole;
 import za.co.cporm.model.CPDefaultRecord;
-import za.co.cporm.model.annotation.ChangeListeners;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.Unique;
 import za.co.cporm.model.annotation.References;
@@ -14,7 +12,6 @@ import java.util.List;
  * Created by hennie.brink on 2015-03-20.
  */
 @Table
-@ChangeListeners(changeListeners = UserRole.class)
 public class User extends CPDefaultRecord<User> {
 
     @Column

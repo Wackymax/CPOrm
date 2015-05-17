@@ -35,7 +35,9 @@ public class ReferenceMap extends IdentityHashMap<Class<?>, SoftReference<Object
             try {
                 if (field.isAnnotationPresent(References.class) && field.getAnnotation(References.class).value() == referenceToFind) {
 
-                    field.setAccessible(true);
+                    if(!field.isAccessible())
+                        field.setAccessible(true);
+
                     T reference = CPOrm.findByPrimaryKey(context, referenceToFind, field.get(referenceObject));
 
                     if(reference != null)

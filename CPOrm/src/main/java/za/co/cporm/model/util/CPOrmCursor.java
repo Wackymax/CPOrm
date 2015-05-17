@@ -75,8 +75,7 @@ public class CPOrmCursor<T> extends CursorWrapper {
         SoftReference<T> objectReference = objectCache.get(getPosition());
 
         T cachedObject = null;
-        if(objectReference == null) cachedObject = insertCacheObject();
-        else cachedObject = objectReference.get();
+        if(objectReference != null) cachedObject = objectReference.get();
 
         if(cachedObject == null) cachedObject = insertCacheObject();
 

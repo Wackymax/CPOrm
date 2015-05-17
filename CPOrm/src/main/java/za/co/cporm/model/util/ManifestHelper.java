@@ -19,10 +19,15 @@ public class ManifestHelper {
 
     public static final String DATABASE_DEFAULT_NAME = "CPOrm.db";
 
+    private static String authority;
+
     public static String getAuthority(Context context){
 
-        String authority = getMetaDataString(context, METADATA_AUTHORITY);
-        if(TextUtils.isEmpty(authority)) throw new IllegalArgumentException("Authority must be provided as part of the meta data");
+        if(authority == null) {
+            authority = getMetaDataString(context, METADATA_AUTHORITY);
+            if (TextUtils.isEmpty(authority))
+                throw new IllegalArgumentException("Authority must be provided as part of the meta data");
+        }
 
         return authority;
     }

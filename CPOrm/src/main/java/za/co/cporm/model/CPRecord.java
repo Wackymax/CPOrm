@@ -2,14 +2,9 @@ package za.co.cporm.model;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
-import za.co.cporm.model.annotation.References;
-import za.co.cporm.model.generate.ReflectionHelper;
-import za.co.cporm.util.CPOrmLog;
+import za.co.cporm.model.util.ReferenceMap;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 /**
  * This class is just a wrapper for {@link CPOrm}, sub classes can extend this
@@ -17,7 +12,7 @@ import java.util.Map;
  */
 public abstract class CPRecord<T> {
 
-    private Map<Class<?>, Object> references = new HashMap<>();
+    private ReferenceMap referenceMap;
 
     public Iterator<T> findAll() {
 
@@ -109,32 +104,19 @@ public abstract class CPRecord<T> {
         return CPOrm.prepareDelete(context, this);
     }
 
-    public <T> T findByReference(Class<T> referenceToFind) {
+    public <T> T findReferent(Class<T> referenceToFind) {
 
-        return findByReference(CPOrm.getApplicationContext(), referenceToFind);
+        return findReferent(CPOrm.getApplicationContext(), referenceToFind);
     }
 
-    public <T> T findByReference(Context context, Class<T> referenceToFind) {
 
-        if(references.containsKey(referenceToFind))
-            return (T)references.get(referenceToFind);
+    public <T> T findReferent(Context context, Class<T> referenceToFind) {
 
-        try {
-            for (Field field : ReflectionHelper.getAllObjectFields(getClass())) {
-
-                if (field.isAnnotationPresent(References.class) && field.getAnnotation(References.class).value() == referenceToFind) {
-
-                    field.setAccessible(true);
-                    T reference = CPOrm.findByPrimaryKey(context, referenceToFind, field.get(this));
-                    references.put(referenceToFind, reference);
-
-                    return reference;
-                }
-            }
-        } catch (IllegalAccessException e) {
-            CPOrmLog.e("Could not access field", e);
+        //To save memory only load the reference map once used, garbage collection is expensive on android
+        if(referenceMap == null) {
+            referenceMap = new ReferenceMap(this);
         }
 
-        return null;
+        return referenceMap.findReferent(context, referenceToFind);
     }
 }

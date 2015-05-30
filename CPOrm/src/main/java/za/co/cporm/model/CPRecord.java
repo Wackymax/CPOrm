@@ -2,7 +2,6 @@ package za.co.cporm.model;
 
 import android.content.ContentProviderOperation;
 import android.content.Context;
-import za.co.cporm.model.util.ReferenceMap;
 
 import java.util.Iterator;
 
@@ -11,8 +10,6 @@ import java.util.Iterator;
  * to invoke the basic crud operations on the class itself.
  */
 public abstract class CPRecord<T> {
-
-    private ReferenceMap referenceMap;
 
     public CPRecord() {}
 
@@ -104,21 +101,5 @@ public abstract class CPRecord<T> {
     public ContentProviderOperation prepareDelete(Context context) {
 
         return CPOrm.prepareDelete(context, this);
-    }
-
-    public <T> T findReferent(Class<T> referenceToFind) {
-
-        return findReferent(CPOrm.getApplicationContext(), referenceToFind);
-    }
-
-
-    public <T> T findReferent(Context context, Class<T> referenceToFind) {
-
-        //To save memory only load the reference map once used, garbage collection is expensive on android
-        if(referenceMap == null) {
-            referenceMap = new ReferenceMap(this);
-        }
-
-        return referenceMap.findReferent(context, referenceToFind);
     }
 }

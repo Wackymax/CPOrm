@@ -17,10 +17,10 @@ public class TableDetails {
 
     private final String tableName;
     private final Class tableClass;
-    private final Collection<ColumnDetails> columns = new LinkedList<ColumnDetails>();
-    private final Collection<Index> indices = new LinkedList<Index>();
-    private final Collection<TableConstraint> constraints = new LinkedList<TableConstraint>();
-    private final Collection<Class<?>> changeListener = new LinkedList<Class<?>>();
+    private final List<ColumnDetails> columns = new LinkedList<ColumnDetails>();
+    private final List<Index> indices = new LinkedList<Index>();
+    private final List<TableConstraint> constraints = new LinkedList<TableConstraint>();
+    private final List<Class<?>> changeListener = new LinkedList<Class<?>>();
 
     public TableDetails(String tableName, Class tableClass){
         this.tableName = tableName;
@@ -36,7 +36,9 @@ public class TableDetails {
     }
 
     public ColumnDetails findPrimaryKeyColumn(){
-        for (ColumnDetails column : columns) {
+
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDetails column = columns.get(i);
             if(column.isPrimaryKey()) return column;
         }
 
@@ -44,22 +46,25 @@ public class TableDetails {
     }
 
     public String[] getColumnNames(){
-        List<String> columnNames = new ArrayList<String>(columns.size());
-        for (ColumnDetails column : columns) {
-            columnNames.add(column.getColumnName());
+
+        String[] columnNames = new String[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDetails columnDetails = columns.get(i);
+            columnNames[i] = columnDetails.getColumnName();
         }
 
-        return columnNames.toArray(new String[]{});
+        return columnNames;
     }
 
-    public Collection<ColumnDetails> getColumns() {
-        return Collections.unmodifiableCollection(columns);
+    public List<ColumnDetails> getColumns() {
+        return Collections.unmodifiableList(columns);
     }
 
     public ColumnDetails findColumn(String name) {
 
-        for (ColumnDetails column : columns) {
-            if(column.getColumnName().equals(name))
+        for (int i = 0; i < columns.size(); i++) {
+            ColumnDetails column =  columns.get(i);
+            if(column.getColumnName().equalsIgnoreCase(name))
                 return column;
         }
 
@@ -72,22 +77,22 @@ public class TableDetails {
         boolean hasPrimaryKey = false;
 
         for (ColumnDetails columnDetails : columns) {
-            if(hasPrimaryKey && columnDetails.isPrimaryKey()) throw new IllegalStateException("Table may only have one primary key contraint on column definition, is a table constraints to specify more than one");
+            if(hasPrimaryKey && columnDetails.isPrimaryKey()) throw new IllegalStateException("Table may only have one primary key constraint on column definition, is a table constraints to specify more than one");
 
             hasPrimaryKey = hasPrimaryKey || columnDetails.isPrimaryKey();
         }
     }
 
-    public Collection<Index> getIndices() {
-        return Collections.unmodifiableCollection(indices);
+    public List<Index> getIndices() {
+        return Collections.unmodifiableList(indices);
     }
 
     public void addIndex(Index index) {
         indices.add(index);
     }
 
-    public Collection<Class<?>> getChangeListeners() {
-        return Collections.unmodifiableCollection(changeListener);
+    public List<Class<?>> getChangeListeners() {
+        return Collections.unmodifiableList(changeListener);
     }
 
     public void addChangeListener(Class<?> clazz) {

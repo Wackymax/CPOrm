@@ -100,10 +100,7 @@ public class ReflectionHelper {
         if(object.isInterface() && object.isEnum()) return new LinkedList<Field>();
 
         List<Field> objectFields = new LinkedList<Field>();
-        for (Field field : object.getDeclaredFields()) {
-
-            objectFields.add(field);
-        }
+        Collections.addAll(objectFields, object.getDeclaredFields());
 
         if(object.getSuperclass() != null){
             objectFields.addAll(getAllObjectFields(object.getSuperclass()));

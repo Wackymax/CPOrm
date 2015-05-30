@@ -2,7 +2,7 @@ package za.co.cporm.model.util;
 
 import android.database.Cursor;
 import android.database.CursorWrapper;
-import android.support.v4.util.LruCache;
+import android.util.LruCache;
 import za.co.cporm.model.generate.TableDetails;
 
 import java.lang.ref.SoftReference;

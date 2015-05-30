@@ -205,9 +205,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public Select<T> include(String... columns){
 
-        for (String column : columns) {
-            includedColumns.add(column);
-        }
+        Collections.addAll(includedColumns, columns);
 
         return this;
     }
@@ -220,9 +218,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public Select<T> exclude(String... columns){
 
-        for (String column : columns) {
-            excludedColumns.add(column);
-        }
+        Collections.addAll(excludedColumns, columns);
 
         return this;
     }
@@ -420,7 +416,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
         if(!includedColumns.isEmpty()){
 
-            return includedColumns.toArray(new String[]{});
+            return includedColumns.toArray(new String[includedColumns.size()]);
         }
         else if(!excludedColumns.isEmpty()){
 
@@ -432,7 +428,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
                     columns.add(column);
             }
 
-            return columns.toArray(new String[]{});
+            return columns.toArray(new String[columns.size()]);
         }
         else return tableDetails.getColumnNames();
     }
@@ -464,7 +460,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         TableDetails tableDetails = CPOrm.findTableDetails(context, dataObjectClass);
 
         QueryBuilder select = new QueryBuilder();
-        QueryBuilder where = context == null ? new QueryBuilder(getWhereClause()) : buildWhereClause(context, ManifestHelper.getMappingFactory(context));
+        QueryBuilder where = buildWhereClause(context, ManifestHelper.getMappingFactory(context));
 
         select.append("SELECT ");
 

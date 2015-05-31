@@ -312,12 +312,28 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     public int queryAsCount(Context context){
         CPOrmCursor<T> cursor = queryAsCursor(context);
 
+        List<String> includedColumnsTemp = new ArrayList<String>();
+        List<String> excludedColumnsTemp = new ArrayList<String>();
+        Collections.copy(includedColumnsTemp, includedColumns);
+        Collections.copy(excludedColumnsTemp, excludedColumns);
+
+        includedColumns.clear();
+        excludedColumns.clear();
+
+        String columnName = CPOrm.findTableDetails(context, dataObjectClass).findPrimaryKeyColumn().getColumnName();
+        includedColumns.add(columnName);
         try {
             return cursor.getCount();
         }
         finally {
             cursor.close();
+            includedColumns.clear();
+
+            //Restore the previous includes and excludes
+            Collections.copy(includedColumns, includedColumns);
+            Collections.copy(excludedColumnsTemp, excludedColumns);
         }
+
     }
 
     /**
@@ -366,6 +382,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public T first(Context context){
 
+        Integer currentLimit = limit;
         limit(1); //Add a default limit for the user
         CPOrmCursor<T> cursor = queryAsCursor(context);
         try{
@@ -377,6 +394,8 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         }
         finally {
             cursor.close();
+            //Restore the previous limit
+            limit = currentLimit;
         }
     }
 

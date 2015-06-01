@@ -258,9 +258,6 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
 
             User first = Select.from(User.class).first(context);
             long timeInNanos = System.nanoTime();
-            Log.i(TAG, "Found referenced record " + first.findReferent(context, Role.class) + " in " + (System.nanoTime() - timeInNanos) + "ns");
-            timeInNanos = System.nanoTime();
-            Log.i(TAG, "Found referenced record: " + first.findReferent(context, Role.class) + " in " + (System.nanoTime() - timeInNanos) + "ns");
             Log.i(TAG, "Performance tests complete");
             return null;
         }

@@ -143,7 +143,7 @@ public class CPOrm {
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
-        Uri itemUri = contentResolver.insert(insertUri, contentValues);
+        contentResolver.insert(insertUri, contentValues);
     }
 
     public static <T> T insertAndReturn(T dataModelObject) {
@@ -301,7 +301,6 @@ public class CPOrm {
     public static <T> ContentProviderOperation prepareDelete(Context context, T dataModelObject) {
 
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
-        ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Object columnValue = ModelInflater.deflateColumn(tableDetails, tableDetails.findPrimaryKeyColumn(), dataModelObject);
         Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails, String.valueOf(columnValue)).build();
 

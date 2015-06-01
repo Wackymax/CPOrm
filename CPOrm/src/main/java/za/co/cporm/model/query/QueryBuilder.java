@@ -42,10 +42,7 @@ public class QueryBuilder implements Serializable{
 
     public String getQueryString(){
 
-        StringBuilder queryString = new StringBuilder();
-        queryString.append(queryBuffer);
-
-        return queryString.toString();
+        return String.valueOf(queryBuffer);
     }
 
     private Collection<Object> getQueryArgs(){

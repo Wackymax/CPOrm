@@ -67,4 +67,10 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
 
         return ContentUris.withAppendedId(CPOrm.getItemUri(getClass()), getId());
     }
+
+    @Override
+    public String toString() {
+
+        return getClass().getSimpleName() + ": " + getId();
+    }
 }

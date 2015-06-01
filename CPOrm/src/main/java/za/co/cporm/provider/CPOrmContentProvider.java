@@ -14,6 +14,7 @@ import za.co.cporm.provider.util.UriMatcherHelper;
 import za.co.cporm.util.CPOrmLog;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * The base content provided that will expose all of the model objects.
@@ -184,8 +185,8 @@ public class CPOrmContentProvider extends ContentProvider {
         int count = 0;
 
         try {
-            for (ContentValues contentValues : values) {
-
+            for (int i = 0; i < values.length; i++) {
+                ContentValues contentValues = values[i];
                 db.insertOrThrow(tableDetails.getTableName(), null, contentValues);
                 count++;
             }
@@ -250,10 +251,11 @@ public class CPOrmContentProvider extends ContentProvider {
         Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
         getContext().getContentResolver().notifyChange(uri, null, sync);
 
-        if (!tableDetails.getChangeListeners().isEmpty()) {
+        List<Class<?>> changeListeners = tableDetails.getChangeListeners();
+        if (!changeListeners.isEmpty()) {
 
-            for (Class<?> changeListener : tableDetails.getChangeListeners()) {
-
+            for (int i = 0; i < changeListeners.size(); i++) {
+                Class<?> changeListener = changeListeners.get(i);
                 TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
 
                 if (changeListenerDetails == null)

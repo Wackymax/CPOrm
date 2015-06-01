@@ -29,7 +29,8 @@ public class TableDetailsCache {
      */
     public synchronized void init(Context context, List<Class<?>> objects){
 
-        for (Class<?> object : objects) {
+        for (int i = 0; i < objects.size(); i++) {
+            Class<?> object = objects.get(i);
             findTableDetails(context, object);
         }
     }

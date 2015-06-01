@@ -205,9 +205,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public Select<T> include(String... columns){
 
-        for (String column : columns) {
-            includedColumns.add(column);
-        }
+        Collections.addAll(includedColumns, columns);
 
         return this;
     }
@@ -220,9 +218,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public Select<T> exclude(String... columns){
 
-        for (String column : columns) {
-            excludedColumns.add(column);
-        }
+        Collections.addAll(excludedColumns, columns);
 
         return this;
     }
@@ -316,12 +312,28 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     public int queryAsCount(Context context){
         CPOrmCursor<T> cursor = queryAsCursor(context);
 
+        List<String> includedColumnsTemp = new ArrayList<String>();
+        List<String> excludedColumnsTemp = new ArrayList<String>();
+        Collections.copy(includedColumnsTemp, includedColumns);
+        Collections.copy(excludedColumnsTemp, excludedColumns);
+
+        includedColumns.clear();
+        excludedColumns.clear();
+
+        String columnName = CPOrm.findTableDetails(context, dataObjectClass).findPrimaryKeyColumn().getColumnName();
+        includedColumns.add(columnName);
         try {
             return cursor.getCount();
         }
         finally {
             cursor.close();
+            includedColumns.clear();
+
+            //Restore the previous includes and excludes
+            Collections.copy(includedColumns, includedColumns);
+            Collections.copy(excludedColumnsTemp, excludedColumns);
         }
+
     }
 
     /**
@@ -370,6 +382,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public T first(Context context){
 
+        Integer currentLimit = limit;
         limit(1); //Add a default limit for the user
         CPOrmCursor<T> cursor = queryAsCursor(context);
         try{
@@ -381,6 +394,8 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         }
         finally {
             cursor.close();
+            //Restore the previous limit
+            limit = currentLimit;
         }
     }
 
@@ -420,7 +435,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
         if(!includedColumns.isEmpty()){
 
-            return includedColumns.toArray(new String[]{});
+            return includedColumns.toArray(new String[includedColumns.size()]);
         }
         else if(!excludedColumns.isEmpty()){
 
@@ -432,7 +447,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
                     columns.add(column);
             }
 
-            return columns.toArray(new String[]{});
+            return columns.toArray(new String[columns.size()]);
         }
         else return tableDetails.getColumnNames();
     }
@@ -464,7 +479,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         TableDetails tableDetails = CPOrm.findTableDetails(context, dataObjectClass);
 
         QueryBuilder select = new QueryBuilder();
-        QueryBuilder where = context == null ? new QueryBuilder(getWhereClause()) : buildWhereClause(context, ManifestHelper.getMappingFactory(context));
+        QueryBuilder where = buildWhereClause(context, ManifestHelper.getMappingFactory(context));
 
         select.append("SELECT ");
 

@@ -95,7 +95,7 @@ public class UriMatcherHelper {
 
         return new Uri.Builder()
                 .scheme("content")
-                .authority(authority)
+                .authority(tableDetails.getAuthority())
                 .appendEncodedPath(tableDetails.getTableName())
                 .build();
 
@@ -105,7 +105,7 @@ public class UriMatcherHelper {
 
         return new Uri.Builder()
                 .scheme("content")
-                .authority(authority)
+                .authority(tableDetails.getAuthority())
                 .appendEncodedPath(tableDetails.getTableName() + "/")
                 .appendEncodedPath(itemId)
                 .build();
@@ -128,7 +128,7 @@ public class UriMatcherHelper {
 
     public static Uri.Builder generateItemUri(Context context, TableDetails tableDetails){
 
-        String authority = ManifestHelper.getAuthority(context);
+        String authority = tableDetails.getAuthority();
         return new Uri.Builder()
                 .scheme("content")
                 .authority(authority)
@@ -137,7 +137,7 @@ public class UriMatcherHelper {
 
     public static Uri.Builder generateItemUri(Context context, TableDetails tableDetails, String itemId){
 
-        String authority = ManifestHelper.getAuthority(context);
+        String authority = tableDetails.getAuthority();
 
         return new Uri.Builder()
                 .scheme("content")

@@ -33,8 +33,11 @@ public class ReflectionHelper {
         Table table = dataModelObject.getAnnotation(Table.class);
         if(table == null) throw new IllegalArgumentException("Object does not have Table annotation: " + dataModelObject.getSimpleName());
 
+        Authority authority = dataModelObject.getAnnotation(Authority.class);
+        String authorityName = authority == null ? ManifestHelper.getAuthority(context) : authority.value();
+
         String tableName = TextUtils.isEmpty(table.tableName()) ? NamingUtils.getSQLName(dataModelObject.getSimpleName()) : table.tableName();
-        TableDetails tableDetails = new TableDetails(tableName, dataModelObject);
+        TableDetails tableDetails = new TableDetails(tableName, authorityName, dataModelObject);
         SqlColumnMappingFactory columnMappingFactory = ManifestHelper.getMappingFactory(context);
 
         for (Map.Entry<Field, Column> columnFieldEntry : getColumns(dataModelObject).entrySet()) {

@@ -3,6 +3,7 @@ package za.co.cporm.model.util;
 import android.content.ContentValues;
 import android.database.Cursor;
 import za.co.cporm.model.generate.TableDetails;
+import za.co.cporm.model.map.SqlColumnMapping;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -48,6 +49,44 @@ public class ModelInflater {
         }
 
         return contentValues;
+    }
+
+    public static ContentValues[] deflateAll(TableDetails tableDetails, Object... dataModelObjects) {
+
+        List<TableDetails.ColumnDetails> columns = tableDetails.getColumns();
+        ContentValues[] contentValuesArray = new ContentValues[dataModelObjects.length];
+
+        for (int i = 0; i < dataModelObjects.length; i++) {
+
+            contentValuesArray[i] = new ContentValues(columns.size());
+        }
+
+        for (int i = 0; i < columns.size(); i++) {
+
+            TableDetails.ColumnDetails columnDetails = columns.get(i);
+
+            if (columnDetails.isAutoIncrement()) continue;
+
+            String key = columnDetails.getColumnName();
+            Field columnField = columnDetails.getColumnField();
+            SqlColumnMapping columnMapping = columnDetails.getColumnTypeMapping();
+
+            for (int j = 0; j < dataModelObjects.length; j++) {
+
+                try {
+                    Object dataModelObject = dataModelObjects[j];
+                    Object value = columnField.get(dataModelObject);
+                    ContentValues contentValues = contentValuesArray[j];
+
+                    if (value == null) contentValues.putNull(key);
+                    else columnMapping.setColumnValue(contentValues, key, value);
+                } catch (IllegalAccessException e) {
+                    throw new IllegalArgumentException("Unable to access protected field, change the access level: " + columnDetails.getColumnName());
+                }
+            }
+        }
+
+        return contentValuesArray;
     }
 
     public static <T> T inflate(Cursor cursor, TableDetails tableDetails) {

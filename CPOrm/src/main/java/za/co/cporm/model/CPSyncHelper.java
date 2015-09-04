@@ -32,14 +32,8 @@ public class CPSyncHelper {
         }
         else {
 
-            ContentValues[] insertObjects = new ContentValues[dataModelObjects.length];
             TableDetails tableDetails = CPOrm.findTableDetails(context, dataModelObjects[0].getClass());
-
-            for (int i = 0; i < dataModelObjects.length; i++) {
-
-                T modelObject = dataModelObjects[i];
-                insertObjects[i] = ModelInflater.deflate(tableDetails, modelObject);
-            }
+            ContentValues[] insertObjects = ModelInflater.deflateAll(tableDetails, dataModelObjects);
 
             if(tableDetails != null) {
 

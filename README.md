@@ -21,7 +21,7 @@ There are four ways to install CPOrm:
 This is the preferred way. Simply add:
 
 ```groovy
-compile 'za.co.cporm:CPOrm:2.94'
+compile 'za.co.cporm:CPOrm:2.95'
 ```
 
 to your project dependencies and run `gradle build` or `gradle assemble`.
@@ -34,7 +34,7 @@ Declare the dependency in Maven:
 <dependency>
     <groupId>za.co.cporm</groupId>
     <artifactId>CPOrm</artifactId>
-    <version>2.94</version>
+    <version>2.95</version>
 </dependency>
 ```
 
@@ -54,7 +54,7 @@ To use the ORM, include it as a library in you project. Create a configuration t
 ```xml
       <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.model.MyCPOrmConfiguration" />
       <meta-data android:name="MAPPING_FACTORY" android:value="om.cp.orm.example.MyMappingFactory" /><!-- This is optional-->
-      <meta-data android:name="AUTHORITY" android:value="om.cp.orm.example" /> <!-- Should match provider-->
+      <meta-data android:name="AUTHORITY" android:value="za.co.cporm.example" /> <!-- Should match provider-->
       
       <provider
             android:authorities="za.co.cporm.example"

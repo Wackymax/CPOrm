@@ -71,11 +71,7 @@ public class CPOrmBatchDispatcher<T> extends ArrayList<T> {
         try {
             if (isSync) CPSyncHelper.insert(context, provider, toArray());
             else {
-                ContentValues[] values = new ContentValues[size()];
-                for (int i = 0; i < size(); i++) {
-
-                    values[i] = ModelInflater.deflate(tableDetails, get(i));
-                }
+                ContentValues[] values = ModelInflater.deflateAll(tableDetails, toArray());
 
                 provider.bulkInsert(itemUri, values);
             }

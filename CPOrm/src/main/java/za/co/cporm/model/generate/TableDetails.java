@@ -16,19 +16,26 @@ import java.util.*;
 public class TableDetails {
 
     private final String tableName;
+    private final String authority;
     private final Class tableClass;
     private final List<ColumnDetails> columns = new LinkedList<ColumnDetails>();
     private final List<Index> indices = new LinkedList<Index>();
     private final List<TableConstraint> constraints = new LinkedList<TableConstraint>();
     private final List<Class<?>> changeListener = new LinkedList<Class<?>>();
 
-    public TableDetails(String tableName, Class tableClass){
+    public TableDetails(String tableName, String authority, Class tableClass){
         this.tableName = tableName;
+        this.authority = authority;
         this.tableClass = tableClass;
     }
 
     public String getTableName() {
         return tableName;
+    }
+
+    public String getAuthority() {
+
+        return authority;
     }
 
     public Class getTableClass() {

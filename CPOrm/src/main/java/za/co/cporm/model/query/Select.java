@@ -282,19 +282,20 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      * @return The list containing the results
      */
     public List<T> queryAsList(Context context){
-        List<T> resultList = new ArrayList<T>();
         CPOrmCursor<T> cursor = queryAsCursor(context);
 
         try {
+            List<T> resultList = new ArrayList<T>(cursor.getCount());
+
             while (cursor.moveToNext()) {
                 resultList.add(cursor.inflate());
             }
+
+            return resultList;
         }
         finally {
             cursor.close();
         }
-
-        return resultList;
     }
 
     /**

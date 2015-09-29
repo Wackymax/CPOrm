@@ -173,9 +173,11 @@ public class CPOrmContentProvider extends ContentProvider {
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
 
+        if(values.length == 0)
+            return 0;
+
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
-        db.beginTransactionNonExclusive();
 
         if (debugEnabled) {
             CPOrmLog.d("********* Bulk Insert **********");
@@ -185,9 +187,11 @@ public class CPOrmContentProvider extends ContentProvider {
         int count = 0;
 
         try {
+            db.beginTransactionNonExclusive();
+            String tableName = tableDetails.getTableName();
             for (int i = 0; i < values.length; i++) {
-                ContentValues contentValues = values[i];
-                db.insertOrThrow(tableDetails.getTableName(), null, contentValues);
+
+                db.insertOrThrow(tableName, null, values[i]);
                 count++;
             }
 

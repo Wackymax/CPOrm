@@ -67,7 +67,7 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
         selectUser.limit(1000); //Limit the select to 1000 records
 
         CPOrmLoader<User> userCPOrmLoader = new CPOrmLoader<>(this, selectUser);//Give the select to the cursor loader to load the data
-        userCPOrmLoader.setUpdateThrottle(200); //Set an update throttle because we will be inserting a lot of data causing frequent changes
+        userCPOrmLoader.setUpdateThrottle(1000); //Set an update throttle because we will be inserting a lot of data causing frequent changes
 
         return userCPOrmLoader;
     }

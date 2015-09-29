@@ -1,11 +1,15 @@
 package za.co.cporm.model.generate;
 
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.text.TextUtils;
 import za.co.cporm.model.annotation.Index;
 import za.co.cporm.model.annotation.TableConstraint;
 import za.co.cporm.model.map.SqlColumnMapping;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
@@ -18,6 +22,7 @@ public class TableDetails {
     private final String tableName;
     private final String authority;
     private final Class tableClass;
+    private final Constructor tableClassConstructor;
     private final List<ColumnDetails> columns = new LinkedList<ColumnDetails>();
     private final List<Index> indices = new LinkedList<Index>();
     private final List<TableConstraint> constraints = new LinkedList<TableConstraint>();
@@ -27,6 +32,13 @@ public class TableDetails {
         this.tableName = tableName;
         this.authority = authority;
         this.tableClass = tableClass;
+
+        try {
+            tableClassConstructor = tableClass.getConstructor();
+            tableClassConstructor.setAccessible(true);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Could not create a new instance of data model object: " + tableName);
+        }
     }
 
     public String getTableName() {
@@ -42,11 +54,15 @@ public class TableDetails {
         return tableClass;
     }
 
+    public Object createNewModelInstance() throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        return tableClassConstructor.newInstance();
+    }
+
     public ColumnDetails findPrimaryKeyColumn(){
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnDetails column = columns.get(i);
-            if(column.isPrimaryKey()) return column;
+            if(column.primaryKey) return column;
         }
 
         return null;
@@ -57,7 +73,7 @@ public class TableDetails {
         String[] columnNames = new String[columns.size()];
         for (int i = 0; i < columns.size(); i++) {
             ColumnDetails columnDetails = columns.get(i);
-            columnNames[i] = columnDetails.getColumnName();
+            columnNames[i] = columnDetails.columnName;
         }
 
         return columnNames;
@@ -71,7 +87,8 @@ public class TableDetails {
 
         for (int i = 0; i < columns.size(); i++) {
             ColumnDetails column =  columns.get(i);
-            if(column.getColumnName().equalsIgnoreCase(name))
+
+            if(column.columnName.equalsIgnoreCase(name))
                 return column;
         }
 
@@ -176,6 +193,19 @@ public class TableDetails {
         public boolean notifyChanges() {
 
             return notifyChanges;
+        }
+
+        public void setFieldValue(Cursor cursor, int columnIndex, Object dataModelObject) throws IllegalAccessException {
+
+            columnField.set(dataModelObject, columnTypeMapping.getColumnValue(cursor, columnIndex));
+        }
+
+        public void setContentValue(ContentValues contentValues, Object dataModelObject) throws IllegalAccessException {
+
+            Object value = columnField.get(dataModelObject);
+
+            if (value == null) contentValues.putNull(columnName);
+            else columnTypeMapping.setColumnValue(contentValues, columnName, value);
         }
     }
 }

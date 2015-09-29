@@ -54,7 +54,7 @@ public class CPOrmLoader<T> extends CursorLoader {
     }
 
     @Override
-    public CPOrmCursor loadInBackground() {
+    public CPOrmCursor<T> loadInBackground() {
 
         CPOrmCursor<T> cursor = new CPOrmCursor<>(tableDetails, super.loadInBackground());
 
@@ -62,6 +62,13 @@ public class CPOrmLoader<T> extends CursorLoader {
             cursor.enableCache();
         } else if(cacheSize > 0) {
             cursor.enableCache(cacheSize);
+        }
+
+        //Prefetch at least some items in preparation for the list
+        for (int i = 0; i < cursor.getCount() && cursor.isCacheEnabled() && i < 100; i++) {
+
+            cursor.moveToPosition(i);
+            T inflate = cursor.inflate();
         }
 
         return cursor;

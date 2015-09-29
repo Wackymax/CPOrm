@@ -47,6 +47,10 @@ public class CPOrmCursor<T> extends CursorWrapper {
         enableCache(getCount());
     }
 
+    public boolean isCacheEnabled(){
+        return objectCache != null;
+    }
+
     /**
      * Inflates an object at the current cursor position.  If the cache is enabled, and the object exists in the
      * cache, then that object wil be returned, otherwise it is inflated and added to the cache before returning.

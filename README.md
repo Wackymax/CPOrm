@@ -21,7 +21,7 @@ There are four ways to install CPOrm:
 This is the preferred way. Simply add:
 
 ```groovy
-compile 'za.co.cporm:CPOrm:2.95'
+compile 'za.co.cporm:CPOrm:2.96'
 ```
 
 to your project dependencies and run `gradle build` or `gradle assemble`.
@@ -34,7 +34,7 @@ Declare the dependency in Maven:
 <dependency>
     <groupId>za.co.cporm</groupId>
     <artifactId>CPOrm</artifactId>
-    <version>2.95</version>
+    <version>2.96</version>
 </dependency>
 ```
 
@@ -62,7 +62,7 @@ To use the ORM, include it as a library in you project. Create a configuration t
             android:exported="false"
             android:permission="true"/>
 ```
-Now that the setup is done, all you need to do is create your model objects, stick on some annotations, link them to the model factory, and you are done.  Some notable annotations are Table, Column, and Primary Key.
+Now that the setup is done, all you need to do is create your model objects, add the annotations, link them to the model factory, and you are done.  Some notable annotations are Table, Column, and Primary Key.
 
 To interact with the ORM you can extend the CPRecord class, this will make it easy to do CRUD operations, or you can use the CPHelper class if you can't extend CPRecord. To perform queries use the Select class.  To take advantage of the built in support for content providers on android, extend the CPDefaultRecord class, this already has a _id column defined, as well as some usefull methods to interact with the objects.
 

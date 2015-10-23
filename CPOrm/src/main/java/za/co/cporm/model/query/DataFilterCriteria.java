@@ -62,7 +62,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
 
                 DataFilterClause clause = clauseIterator.next();
                 if(!isFirst){
-                    builder.append(filterClauses.get(clause).toString());
+                    builder.append(filterClauses.get(clause).name());
                     builder.append(" ");
                 }
                 else isFirst = false;
@@ -79,7 +79,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
     }
 
     @Override
-    public String getWhereClause() {
+    public QueryBuilder getWhereClause() {
 
         QueryBuilder builder = new QueryBuilder();
 
@@ -108,7 +108,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
             builder.append(")");
         }
 
-        return builder.toString();
+        return builder;
     }
 
     @Override
@@ -173,7 +173,7 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
         }
 
         @Override
-        public String getWhereClause() {
+        public QueryBuilder getWhereClause() {
             throw new UnsupportedOperationException("This cannot be called on a builder");
         }
 

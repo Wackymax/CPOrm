@@ -199,6 +199,20 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             Log.i(TAG, "Read " + (recordCount / TimeUnit.MILLISECONDS.toSeconds(testTime)) + " records in 1 second");
 
 
+            Log.i(TAG, "Testing single read performance");
+            time = System.currentTimeMillis();
+            User firstUser = Select.from(User.class).and().isNotNull("user_name").first(context);
+            testCompleteTime = System.currentTimeMillis();
+
+            Log.i(TAG, "Read first user in " + (testCompleteTime - time) + "ms");
+
+            Log.i(TAG, "Testing find by id performance");
+            time = System.currentTimeMillis();
+            Role.findById(context, Role.class, firstUser.getRoleId());
+            testCompleteTime = System.currentTimeMillis();
+
+            Log.i(TAG, "Find role in " + (testCompleteTime - time) + "ms");
+
             Log.i(TAG, "Testing read performance (Cache Enabled - Random Read)");
             cursor = Select.from(User.class).limit(1000).queryAsCursor(context);
             cursor.enableCache();
@@ -226,7 +240,6 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
 
             Log.i(TAG, "Read " + recordCount + " records in " + (testCompleteTime - time) + " seconds");
             Log.i(TAG, "Read " + (recordCount / TimeUnit.MILLISECONDS.toSeconds(testTime)) + " records in 1 second");
-
 
             Log.i(TAG, "Testing read performance (Cache Enabled - 200 objects - Random Read)");
             cursor = Select.from(User.class).limit(1000).queryAsCursor(context);

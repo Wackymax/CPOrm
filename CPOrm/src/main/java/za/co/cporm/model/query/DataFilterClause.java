@@ -19,7 +19,7 @@ public interface DataFilterClause<T extends DataFilterClause> extends Serializab
     QueryBuilder buildWhereClause(Context context, SqlColumnMappingFactory columnMappingFactory);
 
     /** The where clause for this query, without parameters */
-    String getWhereClause();
+    QueryBuilder getWhereClause();
 
     T addClause(DataFilterClause clause, DataFilterConjunction conjunction);
 }

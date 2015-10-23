@@ -79,7 +79,7 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
     }
 
     @Override
-    public String getWhereClause() {
+    public QueryBuilder getWhereClause() {
 
         QueryBuilder builder = new QueryBuilder();
         builder.append(filterColumn);
@@ -116,7 +116,7 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
             else builder.append(" ?");
         }
 
-        return builder.toString();
+        return builder;
     }
 
     @Override

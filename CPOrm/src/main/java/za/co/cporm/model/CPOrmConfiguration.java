@@ -35,4 +35,11 @@ public interface CPOrmConfiguration {
      * @return The tables and views that should be created.
      */
     List<Class<?>> getDataModelObjects();
+
+    /**
+     * If this option is true speed improvements will be enabled by calling enhanced methods directly
+     * on the Content Provider to improve loading times of single item queries
+     * @return true if custom method calling should be allowed
+     */
+    boolean allowContentProviderMethodCalling();
 }

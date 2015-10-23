@@ -6,7 +6,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:name=".ExampleApplication">
 
         <meta-data android:name="AUTHORITY" android:value="za.co.cporm.example"/>
         <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.app.model.MyCPOrmConfiguration"/>

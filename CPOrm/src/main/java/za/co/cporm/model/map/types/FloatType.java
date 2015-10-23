@@ -2,6 +2,7 @@ package za.co.cporm.model.map.types;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Bundle;
 import za.co.cporm.model.map.SqlColumnMapping;
 
 /**
@@ -31,5 +32,16 @@ public class FloatType implements SqlColumnMapping {
     @Override
     public void setColumnValue(ContentValues contentValues, String key, Object value) {
         contentValues.put(key, (Float)value);
+    }
+
+    @Override
+    public void setBundleValue(Bundle bundle, String key, Cursor cursor, int columnIndex) {
+        bundle.putFloat(key, cursor.getFloat(columnIndex));
+    }
+
+    @Override
+    public Object getColumnValue(Bundle bundle, String columnName) {
+
+        return bundle.getFloat(columnName);
     }
 }

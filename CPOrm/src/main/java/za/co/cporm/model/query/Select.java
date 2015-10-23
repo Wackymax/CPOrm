@@ -4,13 +4,11 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import za.co.cporm.model.CPOrm;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
-import za.co.cporm.model.util.CPOrmCursor;
-import za.co.cporm.model.util.ContentResolverValues;
-import za.co.cporm.model.util.CursorIterator;
-import za.co.cporm.model.util.ManifestHelper;
+import za.co.cporm.model.util.*;
 import za.co.cporm.provider.CPOrmContentProvider;
 import za.co.cporm.provider.util.UriMatcherHelper;
 
@@ -313,8 +311,8 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     public int queryAsCount(Context context){
         CPOrmCursor<T> cursor = queryAsCursor(context);
 
-        List<String> includedColumnsTemp = new ArrayList<String>();
-        List<String> excludedColumnsTemp = new ArrayList<String>();
+        List<String> includedColumnsTemp = new ArrayList<String>(includedColumns.size());
+        List<String> excludedColumnsTemp = new ArrayList<String>(excludedColumns.size());
         Collections.copy(includedColumnsTemp, includedColumns);
         Collections.copy(excludedColumnsTemp, excludedColumns);
 
@@ -385,18 +383,35 @@ public class Select<T> implements DataFilterClause<Select<T>>{
 
         Integer currentLimit = limit;
         limit(1); //Add a default limit for the user
-        CPOrmCursor<T> cursor = queryAsCursor(context);
-        try{
 
-            if(cursor.moveToNext()){
-                return cursor.inflate();
-            }
-            else return null;
+        ContentResolverValues values = asContentResolverValue(context);
+        if(CPOrm.allowSingleItemCursorBypass() && values.getTableDetails().isSerializable()){
+
+            Uri itemUri = values.getItemUri();
+            Bundle extras = new Bundle();
+            extras.putParcelable("URI", itemUri);
+            extras.putStringArray("Projection", values.getProjection());
+            extras.putString("Selection", values.getWhere());
+            extras.putString("SortOrder", values.getSortOrder());
+            extras.putStringArray("SelectionArgs", values.getWhereArgs());
+
+            ContentResolver contentResolver = context.getContentResolver();
+            Bundle single = contentResolver.call(itemUri, "SelectFirst", null, extras);
+
+            return single == null ? null : (T) ModelInflater.inflate(single, values.getTableDetails());
         }
-        finally {
-            cursor.close();
-            //Restore the previous limit
-            limit = currentLimit;
+        else {
+            CPOrmCursor<T> cursor = queryAsCursor(context);
+            try {
+
+                if (cursor.moveToFirst()) {
+                    return cursor.inflate();
+                } else return null;
+            } finally {
+                cursor.close();
+                //Restore the previous limit
+                limit = currentLimit;
+            }
         }
     }
 
@@ -414,16 +429,32 @@ public class Select<T> implements DataFilterClause<Select<T>>{
      */
     public T last(Context context){
 
-        CPOrmCursor<T> cursor = queryAsCursor(context);
-        try{
+        ContentResolverValues values = asContentResolverValue(context);
+        if(CPOrm.allowSingleItemCursorBypass() && values.getTableDetails().isSerializable()){
 
-            if(cursor.moveToLast()){
-                return cursor.inflate();
-            }
-            else return null;
+            Uri itemUri = values.getItemUri();
+            Bundle extras = new Bundle();
+            extras.putParcelable("URI", itemUri);
+            extras.putStringArray("Projection", values.getProjection());
+            extras.putString("Selection", values.getWhere());
+            extras.putString("SortOrder", values.getSortOrder());
+            extras.putStringArray("SelectionArgs", values.getWhereArgs());
+
+            ContentResolver contentResolver = context.getContentResolver();
+            Bundle single = contentResolver.call(itemUri, "SelectLast", null, extras);
+
+            return single == null ? null : (T) ModelInflater.inflate(single, values.getTableDetails());
         }
-        finally {
-            cursor.close();
+        else {
+            CPOrmCursor<T> cursor = queryAsCursor(context);
+            try {
+
+                if (cursor.moveToLast()) {
+                    return cursor.inflate();
+                } else return null;
+            } finally {
+                cursor.close();
+            }
         }
     }
 
@@ -516,7 +547,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
     }
 
     @Override
-    public String getWhereClause() {
+    public QueryBuilder getWhereClause() {
 
         return filterCriteria.getWhereClause();
     }
@@ -543,7 +574,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
         }
         catch(IllegalArgumentException ignore){}
 
-        if(applicationContext == null) return getWhereClause();
+        if(applicationContext == null) return getWhereClause().toString();
         return getSelectQuery(applicationContext).toString();
     }
 }

@@ -65,7 +65,8 @@ public class CPOrmLoader<T> extends CursorLoader {
         }
 
         //Prefetch at least some items in preparation for the list
-        for (int i = 0; i < cursor.getCount() && cursor.isCacheEnabled() && i < 100; i++) {
+        int count = cursor.getCount();
+        for (int i = 0; i < count && cursor.isCacheEnabled() && i < 100; i++) {
 
             cursor.moveToPosition(i);
             T inflate = cursor.inflate();

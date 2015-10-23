@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.query.Select;
@@ -25,6 +26,7 @@ public class CPOrm {
 
     private static Context applicationContext;
     private static TableDetailsCache tableDetailsCache;
+    private static boolean allowContentProviderMethodCalling;
 
 
     /**
@@ -35,7 +37,13 @@ public class CPOrm {
      */
     public static void initialize(Application application) {
 
-        applicationContext = application;
+        initialize(application, false);
+    }
+
+    public static void initialize(Application application, boolean allowContentProviderMethodCalling) {
+
+        CPOrm.applicationContext = application;
+        CPOrm.allowContentProviderMethodCalling = allowContentProviderMethodCalling;
     }
 
     /**
@@ -131,19 +139,21 @@ public class CPOrm {
         return providerClient.bulkInsert(insertUri, values);
     }
 
-    public static <T> void insert(T dataModelObject) {
+    public static <T> long insert(T dataModelObject) {
 
-        insert(getApplicationContext(), dataModelObject);
+        return insert(getApplicationContext(), dataModelObject);
     }
 
-    public static <T> void insert(Context context, T dataModelObject) {
+    public static <T> long insert(Context context, T dataModelObject) {
 
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
-        contentResolver.insert(insertUri, contentValues);
+        Uri insert = contentResolver.insert(insertUri, contentValues);
+
+        return ContentUris.parseId(insert);
     }
 
     public static <T> T insertAndReturn(T dataModelObject) {
@@ -367,16 +377,27 @@ public class CPOrm {
 
     protected static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails) {
 
-        ContentResolver contentResolver = context.getContentResolver();
+        if (allowContentProviderMethodCalling && tableDetails.isSerializable()) {
 
-        Cursor cursor = null;
-        try {
-            cursor = contentResolver.query(itemUri, tableDetails.getColumnNames(), null, null, null);
+            Bundle extras = new Bundle();
+            extras.putParcelable("URI", itemUri);
 
-            if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
-            else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());
-        } finally {
-            if (cursor != null) cursor.close();
+            ContentResolver contentResolver = context.getContentResolver();
+            Bundle single = contentResolver.call(itemUri, "FindById", null, extras);
+
+            return single == null ? null : (T) ModelInflater.inflate(single, tableDetails);
+        } else {
+            ContentResolver contentResolver = context.getContentResolver();
+
+            Cursor cursor = null;
+            try {
+                cursor = contentResolver.query(itemUri, tableDetails.getColumnNames(), null, null, null);
+
+                if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
+                else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());
+            } finally {
+                if (cursor != null) cursor.close();
+            }
         }
     }
 
@@ -386,5 +407,10 @@ public class CPOrm {
             tableDetailsCache = new TableDetailsCache();
         }
         return tableDetailsCache.findTableDetails(context, item);
+    }
+
+    public static boolean allowSingleItemCursorBypass() {
+
+        return allowContentProviderMethodCalling;
     }
 }

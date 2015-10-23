@@ -5,6 +5,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.CPOrmDatabase;
@@ -66,7 +68,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
             String itemId = uri.getLastPathSegment();
             TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            cursor = db.query(tableDetails.getTableName(), projection, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, sortOrder, limit);
+            cursor = db.query(tableDetails.getTableName(), projection, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
         } else
             cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
 
@@ -171,9 +173,10 @@ public class CPOrmContentProvider extends ContentProvider {
     }
 
     @Override
-    public int bulkInsert(Uri uri, ContentValues[] values) {
+    public int bulkInsert(Uri uri, @NonNull ContentValues[] values) {
 
-        if(values.length == 0)
+        int length = values.length;
+        if (length == 0)
             return 0;
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
@@ -189,10 +192,13 @@ public class CPOrmContentProvider extends ContentProvider {
         try {
             db.beginTransactionNonExclusive();
             String tableName = tableDetails.getTableName();
-            for (int i = 0; i < values.length; i++) {
+            for (int i = 0; i < length; i++) {
 
                 db.insertOrThrow(tableName, null, values[i]);
                 count++;
+
+                if (count % 100 == 0)
+                    db.yieldIfContendedSafely();
             }
 
             db.setTransactionSuccessful();
@@ -203,6 +209,118 @@ public class CPOrmContentProvider extends ContentProvider {
         }
 
         return count;
+    }
+
+    @Override
+    public Bundle call(String method, String arg, Bundle extras) {
+
+        if ("FindById".equals(method) && cPOrmConfiguration.allowContentProviderMethodCalling()) {
+
+            if (extras == null)
+                throw new IllegalArgumentException("Extras has to be provided");
+
+            if (!extras.containsKey("URI"))
+                throw new IllegalArgumentException("Extras Key URI has to be provided");
+
+            Uri uri = extras.getParcelable("URI");
+
+            if (!uriMatcherHelper.isSingleItemRequested(uri))
+                throw new IllegalArgumentException("This is intended for single item access");
+
+            TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
+
+            if (!tableDetails.isSerializable())
+                throw new IllegalArgumentException("This model class is not serializable");
+
+            SQLiteDatabase db = database.getReadableDatabase();
+
+            if (debugEnabled) {
+                CPOrmLog.d("********* Query **********");
+                CPOrmLog.d("Uri: " + uri);
+            }
+
+            Cursor cursor;
+
+            String itemId = uri.getLastPathSegment();
+            TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
+            cursor = db.query(tableDetails.getTableName(), null, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
+
+            try {
+                if (cursor.moveToFirst()) {
+
+                    Bundle result = new Bundle();
+                    int columnCount = cursor.getColumnCount();
+                    for (int i = 0; i < columnCount; i++) {
+
+                        if (cursor.isNull(i))
+                            continue;
+
+                        String columnName = cursor.getColumnName(i);
+                        TableDetails.ColumnDetails column = tableDetails.findColumn(columnName);
+                        column.getColumnTypeMapping().setBundleValue(result, columnName, cursor, i);
+                    }
+                    return result;
+                }
+                return null;
+            } finally {
+                cursor.close();
+            }
+        } else if (("SelectFirst".equals(method) || "SelectLast".equals(method)) && cPOrmConfiguration.allowContentProviderMethodCalling()) {
+
+            if (extras == null)
+                throw new IllegalArgumentException("Extras has to be provided");
+
+            if (!extras.containsKey("URI"))
+                throw new IllegalArgumentException("Extras Key URI has to be provided");
+            if (!extras.containsKey("Projection"))
+                throw new IllegalArgumentException("Extras Key Selection has to be provided");
+            if (!extras.containsKey("Selection"))
+                throw new IllegalArgumentException("Extras Key Selection has to be provided");
+            if (!extras.containsKey("SelectionArgs"))
+                throw new IllegalArgumentException("Extras Key SelectionArgs has to be provided");
+            if (!extras.containsKey("SortOrder"))
+                throw new IllegalArgumentException("Extras Key SelectionArgs has to be provided");
+
+            Uri uri = extras.getParcelable("URI");
+            String[] projection = extras.getStringArray("Projection");
+            String selection = extras.getString("Selection");
+            String[] selectionArgs = extras.getStringArray("SelectionArgs");
+            String sortOrder = extras.getString("SortOrder");
+
+            TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
+
+            if (!tableDetails.isSerializable())
+                throw new IllegalArgumentException("This model class is not serializable");
+
+            SQLiteDatabase db = database.getReadableDatabase();
+            String limit = constructLimit(uri);
+
+            Cursor cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
+            try {
+                boolean cursorMoved;
+                if ("SelectLast".equals(method)) cursorMoved = cursor.moveToLast();
+                else cursorMoved = cursor.moveToFirst();
+
+                if (cursorMoved) {
+
+                    Bundle result = new Bundle();
+                    int columnCount = cursor.getColumnCount();
+                    for (int i = 0; i < columnCount; i++) {
+
+                        if (cursor.isNull(i))
+                            continue;
+
+                        String columnName = cursor.getColumnName(i);
+                        TableDetails.ColumnDetails column = tableDetails.findColumn(columnName);
+                        column.getColumnTypeMapping().setBundleValue(result, columnName, cursor, i);
+                    }
+                    return result;
+                }
+                return null;
+            } finally {
+                cursor.close();
+            }
+        } else return super.call(method, arg, extras);
     }
 
     private String constructLimit(Uri uri) {
@@ -258,7 +376,8 @@ public class CPOrmContentProvider extends ContentProvider {
         List<Class<?>> changeListeners = tableDetails.getChangeListeners();
         if (!changeListeners.isEmpty()) {
 
-            for (int i = 0; i < changeListeners.size(); i++) {
+            int size = changeListeners.size();
+            for (int i = 0; i < size; i++) {
                 Class<?> changeListener = changeListeners.get(i);
                 TableDetails changeListenerDetails = database.getTableDetailsCache().findTableDetails(getContext(), changeListener);
 

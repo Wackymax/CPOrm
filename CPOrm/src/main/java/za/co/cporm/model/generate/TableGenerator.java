@@ -68,12 +68,13 @@ public class TableGenerator {
             tableQuery.append(tableDetails.getTableName());
             tableQuery.append(" (");
 
-            for (int i = 0; i < index.indexColumns().length; i++) {
+            int length = index.indexColumns().length;
+            for (int i = 0; i < length; i++) {
 
                 String column = index.indexColumns()[i];
                 tableQuery.append(column);
 
-                if((i + 1) < index.indexColumns().length) tableQuery.append(", ");
+                if((i + 1) < length) tableQuery.append(", ");
             }
             tableQuery.append(");");
             prettyPrint(1, prettyPrint, tableQuery);

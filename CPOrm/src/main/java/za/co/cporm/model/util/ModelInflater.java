@@ -2,6 +2,7 @@ package za.co.cporm.model.util;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Bundle;
 import za.co.cporm.model.generate.TableDetails;
 
 import java.util.List;
@@ -27,9 +28,10 @@ public class ModelInflater {
     public static ContentValues deflate(TableDetails tableDetails, Object dataModelObject) {
 
         List<TableDetails.ColumnDetails> columns = tableDetails.getColumns();
-        ContentValues contentValues = new ContentValues(columns.size());
+        int size = columns.size();
+        ContentValues contentValues = new ContentValues(size);
 
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < size; i++) {
             TableDetails.ColumnDetails columnDetails = columns.get(i);
 
             if (columnDetails.isAutoIncrement()) continue;
@@ -50,18 +52,20 @@ public class ModelInflater {
         List<TableDetails.ColumnDetails> columns = tableDetails.getColumns();
         ContentValues[] contentValuesArray = new ContentValues[dataModelObjects.length];
 
+        int size = columns.size();
         for (int i = 0; i < dataModelObjects.length; i++) {
 
-            contentValuesArray[i] = new ContentValues(columns.size());
+            contentValuesArray[i] = new ContentValues(size);
         }
 
-        for (int i = 0; i < columns.size(); i++) {
+        for (int i = 0; i < size; i++) {
 
             TableDetails.ColumnDetails columnDetails = columns.get(i);
 
             if (columnDetails.isAutoIncrement()) continue;
 
-            for (int j = 0; j < dataModelObjects.length; j++) {
+            int length = dataModelObjects.length;
+            for (int j = 0; j < length; j++) {
 
                 try {
 
@@ -75,6 +79,24 @@ public class ModelInflater {
         return contentValuesArray;
     }
 
+    public static <T> T inflate(Bundle bundle, TableDetails tableDetails) {
+
+        T dataModelObject;
+
+        try {
+            dataModelObject = (T) tableDetails.createNewModelInstance();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Could not create a new instance of data model object: " + tableDetails.getTableName());
+        }
+
+        for (TableDetails.ColumnDetails columnDetails : tableDetails.getColumns()) {
+
+            inflateColumn(bundle, dataModelObject, columnDetails);
+        }
+
+        return dataModelObject;
+    }
+
     public static <T> T inflate(Cursor cursor, TableDetails tableDetails) {
 
         T dataModelObject;
@@ -85,7 +107,8 @@ public class ModelInflater {
             throw new IllegalArgumentException("Could not create a new instance of data model object: " + tableDetails.getTableName());
         }
 
-        for (int i = 0; i < cursor.getColumnCount(); i++) {
+        int columnCount = cursor.getColumnCount();
+        for (int i = 0; i < columnCount; i++) {
 
             String columnName = cursor.getColumnName(i);
             TableDetails.ColumnDetails columnDetails = tableDetails.findColumn(columnName);
@@ -105,6 +128,20 @@ public class ModelInflater {
 
         try {
             columnDetails.setFieldValue(cursor, columnIndex, dataModelObject);
+        } catch (IllegalAccessException e) {
+            throw new IllegalArgumentException("Not allowed to alter the value of the field, please change the access level: " + columnDetails.getColumnName());
+        }
+    }
+
+    private static <T> void inflateColumn(Bundle bundle, T dataModelObject, TableDetails.ColumnDetails columnDetails) {
+
+        //If the column details is not required, then check if it is null
+        if (!bundle.containsKey(columnDetails.getColumnName())) {
+            return;
+        }
+
+        try {
+            columnDetails.setFieldValue(bundle, columnDetails.getColumnName(), dataModelObject);
         } catch (IllegalAccessException e) {
             throw new IllegalArgumentException("Not allowed to alter the value of the field, please change the access level: " + columnDetails.getColumnName());
         }

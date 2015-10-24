@@ -12,9 +12,11 @@ import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.util.ManifestHelper;
+import za.co.cporm.model.util.ModelInflater;
 import za.co.cporm.provider.util.UriMatcherHelper;
 import za.co.cporm.util.CPOrmLog;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -249,16 +251,8 @@ public class CPOrmContentProvider extends ContentProvider {
                 if (cursor.moveToFirst()) {
 
                     Bundle result = new Bundle();
-                    int columnCount = cursor.getColumnCount();
-                    for (int i = 0; i < columnCount; i++) {
 
-                        if (cursor.isNull(i))
-                            continue;
-
-                        String columnName = cursor.getColumnName(i);
-                        TableDetails.ColumnDetails column = tableDetails.findColumn(columnName);
-                        column.getColumnTypeMapping().setBundleValue(result, columnName, cursor, i);
-                    }
+                    result.putSerializable("ITEM", (Serializable) ModelInflater.inflate(cursor, tableDetails));
                     return result;
                 }
                 return null;
@@ -304,16 +298,8 @@ public class CPOrmContentProvider extends ContentProvider {
                 if (cursorMoved) {
 
                     Bundle result = new Bundle();
-                    int columnCount = cursor.getColumnCount();
-                    for (int i = 0; i < columnCount; i++) {
 
-                        if (cursor.isNull(i))
-                            continue;
-
-                        String columnName = cursor.getColumnName(i);
-                        TableDetails.ColumnDetails column = tableDetails.findColumn(columnName);
-                        column.getColumnTypeMapping().setBundleValue(result, columnName, cursor, i);
-                    }
+                    result.putSerializable("ITEM", (Serializable) ModelInflater.inflate(cursor, tableDetails));
                     return result;
                 }
                 return null;

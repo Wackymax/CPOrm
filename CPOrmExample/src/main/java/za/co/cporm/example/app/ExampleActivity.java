@@ -4,8 +4,8 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.os.Bundle;
+import android.os.*;
+import android.os.Process;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.WindowManager;
@@ -99,6 +99,7 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
         @Override
         protected Void doInBackground(Void... voids) {
 
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             CPOrm.deleteAll(context, Role.class);
             CPOrm.deleteAll(context, User.class);
 
@@ -177,7 +178,9 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             Log.i(TAG, "Average update time " + ((testCompleteTime - time) / recordCount) + " ms");
 
             Log.i(TAG, "Testing read performance (No Cache)");
+            time = System.currentTimeMillis();
             CPOrmCursor<User> cursor = Select.from(User.class).limit(1000).queryAsCursor(context);
+            Log.i(TAG, "Read cursor returned in " + (System.currentTimeMillis() - time) + "ms");
             recordCount = 0;
             time = System.currentTimeMillis();
 
@@ -205,6 +208,13 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             testCompleteTime = System.currentTimeMillis();
 
             Log.i(TAG, "Read first user in " + (testCompleteTime - time) + "ms");
+
+            Log.i(TAG, "Testing find by id performance");
+            time = System.currentTimeMillis();
+            User.findById(context, User.class, firstUser.getId());
+            testCompleteTime = System.currentTimeMillis();
+
+            Log.i(TAG, "Find user in " + (testCompleteTime - time) + "ms");
 
             Log.i(TAG, "Testing find by id performance");
             time = System.currentTimeMillis();

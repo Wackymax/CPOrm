@@ -398,7 +398,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
             ContentResolver contentResolver = context.getContentResolver();
             Bundle single = contentResolver.call(itemUri, "SelectFirst", null, extras);
 
-            return single == null ? null : (T) ModelInflater.inflate(single, values.getTableDetails());
+            return single == null ? null : (T) single.getSerializable("ITEM");
         }
         else {
             CPOrmCursor<T> cursor = queryAsCursor(context);
@@ -443,7 +443,7 @@ public class Select<T> implements DataFilterClause<Select<T>>{
             ContentResolver contentResolver = context.getContentResolver();
             Bundle single = contentResolver.call(itemUri, "SelectLast", null, extras);
 
-            return single == null ? null : (T) ModelInflater.inflate(single, values.getTableDetails());
+            return single == null ? null : (T) single.getSerializable("ITEM");
         }
         else {
             CPOrmCursor<T> cursor = queryAsCursor(context);

@@ -26,7 +26,8 @@
             android:authorities="za.co.cporm.example"
             android:name="za.co.cporm.provider.CPOrmContentProvider"
             android:exported="false"
-            android:permission="true"/>
+            android:permission="true"
+            android:process=":provider"/>
     </application>
 
 </manifest>

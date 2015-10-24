@@ -385,7 +385,7 @@ public class CPOrm {
             ContentResolver contentResolver = context.getContentResolver();
             Bundle single = contentResolver.call(itemUri, "FindById", null, extras);
 
-            return single == null ? null : (T) ModelInflater.inflate(single, tableDetails);
+            return single == null ? null : (T) single.getSerializable("ITEM");
         } else {
             ContentResolver contentResolver = context.getContentResolver();
 

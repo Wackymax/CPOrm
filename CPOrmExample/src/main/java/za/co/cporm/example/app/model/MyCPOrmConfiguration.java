@@ -38,10 +38,4 @@ public class MyCPOrmConfiguration implements CPOrmConfiguration {
 
         return domainObjects;
     }
-
-    @Override
-    public boolean allowContentProviderMethodCalling() {
-
-        return true;
-    }
 }

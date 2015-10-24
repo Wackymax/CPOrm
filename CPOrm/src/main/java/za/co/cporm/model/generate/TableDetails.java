@@ -30,6 +30,7 @@ public class TableDetails {
     private final List<Index> indices = new LinkedList<Index>();
     private final List<TableConstraint> constraints = new LinkedList<TableConstraint>();
     private final List<Class<?>> changeListener = new LinkedList<Class<?>>();
+    private String primaryKeyClause;
 
     public TableDetails(String tableName, String authority, Class tableClass){
         this.tableName = tableName;
@@ -103,8 +104,16 @@ public class TableDetails {
         return null;
     }
 
+    public String getPrimaryKeyClause() {
+
+        return primaryKeyClause;
+    }
+
     public void addColumn(ColumnDetails column){
         columns.add(column);
+
+        if(column.isPrimaryKey())
+            primaryKeyClause = column.columnName + " = ?";
 
         boolean hasPrimaryKey = false;
 

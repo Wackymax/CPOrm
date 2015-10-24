@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.RemoteException;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.query.Select;
@@ -26,7 +25,6 @@ public class CPOrm {
 
     private static Context applicationContext;
     private static TableDetailsCache tableDetailsCache;
-    private static boolean allowContentProviderMethodCalling;
 
 
     /**
@@ -37,13 +35,7 @@ public class CPOrm {
      */
     public static void initialize(Application application) {
 
-        initialize(application, false);
-    }
-
-    public static void initialize(Application application, boolean allowContentProviderMethodCalling) {
-
-        CPOrm.applicationContext = application;
-        CPOrm.allowContentProviderMethodCalling = allowContentProviderMethodCalling;
+        applicationContext = application;
     }
 
     /**
@@ -377,27 +369,16 @@ public class CPOrm {
 
     protected static <T> T findSingleItem(Context context, Uri itemUri, TableDetails tableDetails) {
 
-        if (allowContentProviderMethodCalling && tableDetails.isSerializable()) {
+        ContentResolver contentResolver = context.getContentResolver();
 
-            Bundle extras = new Bundle();
-            extras.putParcelable("URI", itemUri);
+        Cursor cursor = null;
+        try {
+            cursor = contentResolver.query(itemUri, tableDetails.getColumnNames(), null, null, null);
 
-            ContentResolver contentResolver = context.getContentResolver();
-            Bundle single = contentResolver.call(itemUri, "FindById", null, extras);
-
-            return single == null ? null : (T) single.getSerializable("ITEM");
-        } else {
-            ContentResolver contentResolver = context.getContentResolver();
-
-            Cursor cursor = null;
-            try {
-                cursor = contentResolver.query(itemUri, tableDetails.getColumnNames(), null, null, null);
-
-                if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
-                else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());
-            } finally {
-                if (cursor != null) cursor.close();
-            }
+            if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
+            else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());
+        } finally {
+            if (cursor != null) cursor.close();
         }
     }
 
@@ -407,10 +388,5 @@ public class CPOrm {
             tableDetailsCache = new TableDetailsCache();
         }
         return tableDetailsCache.findTableDetails(context, item);
-    }
-
-    public static boolean allowSingleItemCursorBypass() {
-
-        return allowContentProviderMethodCalling;
     }
 }

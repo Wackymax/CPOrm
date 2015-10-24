@@ -5,18 +5,15 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.util.ManifestHelper;
-import za.co.cporm.model.util.ModelInflater;
 import za.co.cporm.provider.util.UriMatcherHelper;
 import za.co.cporm.util.CPOrmLog;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -69,8 +66,7 @@ public class CPOrmContentProvider extends ContentProvider {
         if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
             String itemId = uri.getLastPathSegment();
-            TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            cursor = db.query(tableDetails.getTableName(), projection, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
+            cursor = db.query(tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null);
         } else
             cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
 
@@ -211,102 +207,6 @@ public class CPOrmContentProvider extends ContentProvider {
         }
 
         return count;
-    }
-
-    @Override
-    public Bundle call(String method, String arg, Bundle extras) {
-
-        if ("FindById".equals(method) && cPOrmConfiguration.allowContentProviderMethodCalling()) {
-
-            if (extras == null)
-                throw new IllegalArgumentException("Extras has to be provided");
-
-            if (!extras.containsKey("URI"))
-                throw new IllegalArgumentException("Extras Key URI has to be provided");
-
-            Uri uri = extras.getParcelable("URI");
-
-            if (!uriMatcherHelper.isSingleItemRequested(uri))
-                throw new IllegalArgumentException("This is intended for single item access");
-
-            TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
-
-            if (!tableDetails.isSerializable())
-                throw new IllegalArgumentException("This model class is not serializable");
-
-            SQLiteDatabase db = database.getReadableDatabase();
-
-            if (debugEnabled) {
-                CPOrmLog.d("********* Query **********");
-                CPOrmLog.d("Uri: " + uri);
-            }
-
-            Cursor cursor;
-
-            String itemId = uri.getLastPathSegment();
-            TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-            cursor = db.query(tableDetails.getTableName(), null, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId}, null, null, null);
-
-            try {
-                if (cursor.moveToFirst()) {
-
-                    Bundle result = new Bundle();
-
-                    result.putSerializable("ITEM", (Serializable) ModelInflater.inflate(cursor, tableDetails));
-                    return result;
-                }
-                return null;
-            } finally {
-                cursor.close();
-            }
-        } else if (("SelectFirst".equals(method) || "SelectLast".equals(method)) && cPOrmConfiguration.allowContentProviderMethodCalling()) {
-
-            if (extras == null)
-                throw new IllegalArgumentException("Extras has to be provided");
-
-            if (!extras.containsKey("URI"))
-                throw new IllegalArgumentException("Extras Key URI has to be provided");
-            if (!extras.containsKey("Projection"))
-                throw new IllegalArgumentException("Extras Key Selection has to be provided");
-            if (!extras.containsKey("Selection"))
-                throw new IllegalArgumentException("Extras Key Selection has to be provided");
-            if (!extras.containsKey("SelectionArgs"))
-                throw new IllegalArgumentException("Extras Key SelectionArgs has to be provided");
-            if (!extras.containsKey("SortOrder"))
-                throw new IllegalArgumentException("Extras Key SelectionArgs has to be provided");
-
-            Uri uri = extras.getParcelable("URI");
-            String[] projection = extras.getStringArray("Projection");
-            String selection = extras.getString("Selection");
-            String[] selectionArgs = extras.getStringArray("SelectionArgs");
-            String sortOrder = extras.getString("SortOrder");
-
-            TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
-
-            if (!tableDetails.isSerializable())
-                throw new IllegalArgumentException("This model class is not serializable");
-
-            SQLiteDatabase db = database.getReadableDatabase();
-            String limit = constructLimit(uri);
-
-            Cursor cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
-            try {
-                boolean cursorMoved;
-                if ("SelectLast".equals(method)) cursorMoved = cursor.moveToLast();
-                else cursorMoved = cursor.moveToFirst();
-
-                if (cursorMoved) {
-
-                    Bundle result = new Bundle();
-
-                    result.putSerializable("ITEM", (Serializable) ModelInflater.inflate(cursor, tableDetails));
-                    return result;
-                }
-                return null;
-            } finally {
-                cursor.close();
-            }
-        } else return super.call(method, arg, extras);
     }
 
     private String constructLimit(Uri uri) {

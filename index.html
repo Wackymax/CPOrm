@@ -34,6 +34,8 @@
         <h1>
 <a id="cporm" class="anchor" href="#cporm" aria-hidden="true"><span class="octicon octicon-link"></span></a>CPOrm</h1>
 
+<p><a href="https://android-arsenal.com/details/1/2676"><img src="https://img.shields.io/badge/Android%20Arsenal-CPOrm-green.svg?style=flat" alt="Android Arsenal"></a></p>
+
 <p>Content Provider ORM for android.  This ORM uses an android sqlite database as a backing store, but interactes with it using  content providers.  You use it like a normal ORM, by creating java objects, and then do all of you interations through the objects. And you get the added benefits of using it like normal content providers, so integration with list views and other components are simple.</p>
 
 <p>Have look at the <a href="https://github.com/Wackymax/CPOrm/wiki">Wiki</a> for more information.</p>
@@ -91,23 +93,179 @@
 <h2>
 <a id="use-it" class="anchor" href="#use-it" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use it</h2>
 
-<p>To use the ORM, include it as a library in you project. Create a configuration that will tell the ORM all the important stuff like the domain model objects, database name etc. You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. Now all that is left to do is define the meta tags that will tell the ORM all the important stuff. Add these as part of the application element in the Android Manifest</p>
-
-<div class="highlight highlight-text-xml"><pre>      &lt;<span class="pl-ent">meta-data</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>CPORM_CONFIG<span class="pl-pds">"</span></span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.example.model.MyCPOrmConfiguration<span class="pl-pds">"</span></span> /&gt;
-      &lt;<span class="pl-ent">meta-data</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>MAPPING_FACTORY<span class="pl-pds">"</span></span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>om.cp.orm.example.MyMappingFactory<span class="pl-pds">"</span></span> /&gt;<span class="pl-c">&lt;!-- This is optional--&gt;</span>
-      &lt;<span class="pl-ent">meta-data</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>AUTHORITY<span class="pl-pds">"</span></span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.example<span class="pl-pds">"</span></span> /&gt; <span class="pl-c">&lt;!-- Should match provider--&gt;</span>
-
-      &lt;<span class="pl-ent">provider</span>
-            <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">authorities</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.example<span class="pl-pds">"</span></span>
-            <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.provider.CPOrmContentProvider<span class="pl-pds">"</span></span>
-            <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">exported</span>=<span class="pl-s"><span class="pl-pds">"</span>false<span class="pl-pds">"</span></span>
-            <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">permission</span>=<span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>/&gt;</pre></div>
-
-<p>Now that the setup is done, all you need to do is create your model objects, add the annotations, link them to the model factory, and you are done.  Some notable annotations are Table, Column, and Primary Key.</p>
-
-<p>To interact with the ORM you can extend the CPRecord class, this will make it easy to do CRUD operations, or you can use the CPHelper class if you can't extend CPRecord. To perform queries use the Select class.  To take advantage of the built in support for content providers on android, extend the CPDefaultRecord class, this already has a _id column defined, as well as some usefull methods to interact with the objects.</p>
+<p>To use the ORM, include it as a library in you project. Create a configuration that will tell the ORM all the important stuff like the domain model objects, database name etc. You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. </p>
 
 <p>For more information, check out the example app.</p>
+
+<ol>
+<li>
+<p>Install the project via any of the method above. and extend <code>Application</code> class and use it as following:</p>
+
+<pre><code>public class SampleApplication extends Application {
+   @Override
+    public void onCreate() {
+
+        super.onCreate();
+        CPOrm.initialize(this);
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>register this application class in Manifest file:</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;<span class="pl-ent">application</span>
+       <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>.SampleApplication<span class="pl-pds">"</span></span>
+       ...
+       &gt;</pre></div>
+</li>
+<li>
+<p>add following meta data in <code>&lt;application&gt;</code> tag</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;<span class="pl-ent">meta-data</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>CPORM_CONFIG<span class="pl-pds">"</span></span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.example.model.MyCPOrmConfiguration<span class="pl-pds">"</span></span> /&gt;
+&lt;<span class="pl-ent">meta-data</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>MAPPING_FACTORY<span class="pl-pds">"</span></span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>om.cp.orm.example.MyMappingFactory<span class="pl-pds">"</span></span> /&gt;<span class="pl-c">&lt;!-- This is optional--&gt;</span>
+&lt;<span class="pl-ent">meta-data</span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">name</span>=<span class="pl-s"><span class="pl-pds">"</span>AUTHORITY<span class="pl-pds">"</span></span> <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.example<span class="pl-pds">"</span></span> /&gt; <span class="pl-c">&lt;!-- Should match provider--&gt;</span></pre></div>
+</li>
+<li>
+<p>register content provider:</p>
+
+<div class="highlight highlight-text-xml"><pre>&lt;<span class="pl-ent">provider</span>
+        <span class="pl-e">android</span><span class="pl-e">:</span><span class="pl-e">authorities</span>=<span class="pl-s"><span class="pl-pds">"</span>za.co.cporm.example<span class="pl-pds">"</span></span> &lt;!-- Should match the Authority Meta Tag--&gt;
+        android:name="za.co.cporm.provider.CPOrmContentProvider"
+        android:exported="false"
+        android:process=":provider" /&gt;</pre></div>
+</li>
+<li>
+<p>Now, you just have to create model classes by:</p>
+
+<ul>
+<li>
+<p>annotation:</p>
+
+<pre><code>@Table
+public class Book {
+...
+}
+</code></pre>
+</li>
+<li>
+<p>extending class:</p>
+
+<pre><code>@Table
+public class Author extends QuantumFluxRecord&lt;Author&gt; {
+    public String name;
+    ...
+}
+</code></pre>
+</li>
+</ul>
+
+<h5>
+<a id="notes" class="anchor" href="#notes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Notes:</h5>
+
+<ul>
+<li><p>When you extend CPDefaultRecord you have access to all default access methods such as save(), update(), delete(), etc. and If you are using just <a href="https://github.com/Table" class="user-mention">@Table</a> annotation, you can use those methods from CPOrm class. for e.g. CPOrm.insert(authorObject);.</p></li>
+<li><p>When you extend CPDefaultRecord you have already a auto increment primary key with name '_id'. So while using just <a href="https://github.com/Table" class="user-mention">@Table</a> annotation, consider creating a primary key.</p></li>
+<li><p>Name of columns and tables will convert from camelCasing to under_score. for e.g. fielf bookName in a model will become book_name in database.</p></li>
+</ul>
+
+<h5>
+<a id="column-constraint-annotations" class="anchor" href="#column-constraint-annotations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Column Constraint annotations:</h5>
+
+<ul>
+<li>
+<code>@Column</code> will allow to change name of column and allow to make it NOT NULL. Default values for not null is false. for e.g. </li>
+</ul>
+
+<pre><code>@Column(columnName = "cover_name")
+private String bookName;
+</code></pre>
+
+<pre><code>@Column(required = true)
+private String isbn;
+</code></pre>
+
+<ul>
+<li>
+<code>@PrimaryKey</code> will allow to make a column as primary key, and auto increment. Default value for autoIncrement is true.  For now the library only supports keys of type long. for e.g. </li>
+</ul>
+
+<pre><code>@PrimaryKey
+private String isbn;
+</code></pre>
+
+<pre><code>@PrimaryKey(autoIncrement = false)
+private String isbn;
+</code></pre>
+
+<ul>
+<li>
+<code>@Unique</code> will allow you to make a column value unique.</li>
+</ul>
+</li>
+<li>
+<p>Register your model classes</p>
+
+<pre><code>public class MyCPOrmConfiguration implements CPOrmConfiguration {
+
+      @Override
+      public String getDatabaseName() {
+
+          return "example.db";
+      }
+
+      @Override
+      public int getDatabaseVersion() {
+
+          return 1;
+      }
+
+      @Override
+      public boolean isQueryLoggingEnabled() {
+
+          return false;
+      }
+
+      @Override
+      public List&lt;Class&lt;?&gt;&gt; getDataModelObjects() {
+          List&lt;Class&lt;?&gt;&gt; domainObjects = new ArrayList&lt;Class&lt;?&gt;&gt;();
+          domainObjects.add(Book.class);
+          domainObjects.add(Author.class);
+
+          return domainObjects;
+      }
+  }
+</code></pre>
+</li>
+<li>
+<p>Access:</p>
+
+<pre><code>Book book = new Book();
+book.name = "Sorcerer's Stone";
+book.isbn = "122342564";
+CPOrm.insert(book);
+</code></pre>
+
+<pre><code>Author author = new Author();
+author.name = "J.K. Rollings";
+author.save();
+</code></pre>
+
+<pre><code>Author first = Select.from(Author.class).first();
+first.name = "J. K. Rowling";
+first.update();
+</code></pre>
+
+<pre><code>QuantumFlux.deleteAll(Book.class);
+Author first = Select.from(Author.class).first();
+first.delete();
+</code></pre>
+</li>
+</ol>
+
+<h1></h1>
+
+<p>For detailed configuration and advance usages, go through the <a href="https://github.com/Wackymax/CPOrm/wiki">Wiki</a></p>
       </section>
     </div>
 

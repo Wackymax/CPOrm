@@ -46,7 +46,7 @@ public abstract class CPDefaultRecord<T> extends CPRecord<T> implements Serializ
 
         if(_id == null) {
 
-            _id = CPOrm.insertAndReturn(context, this)._id;
+            _id = CPOrm.insert(context, this);
         }
         else CPOrm.update(context, this);
     }

@@ -3,8 +3,10 @@ package za.co.cporm.model.generate;
 import za.co.cporm.model.annotation.Index;
 import za.co.cporm.model.annotation.TableConstraint;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import static za.co.cporm.model.generate.TableDetails.ColumnDetails;
 
@@ -56,30 +58,61 @@ public class TableGenerator {
         }
 
         prettyPrint(1, prettyPrint,  tableQuery);
-        tableQuery.append(");");
-        prettyPrint(1, prettyPrint,  tableQuery);
+        tableQuery.append(");\n");
+        prettyPrint(1, prettyPrint, tableQuery);
 
         for (Index index : tableDetails.getIndices()) {
 
             prettyPrint(1, prettyPrint,  tableQuery);
             tableQuery.append("CREATE INDEX ");
-            tableQuery.append(index.indexName());
+            tableQuery.append(index.indexName()).append("_").append(tableDetails.getTableName());
             tableQuery.append(" ON ");
             tableQuery.append(tableDetails.getTableName());
             tableQuery.append(" (");
 
-            for (int i = 0; i < index.indexColumns().length; i++) {
+            int length = index.indexColumns().length;
+            for (int i = 0; i < length; i++) {
 
                 String column = index.indexColumns()[i];
                 tableQuery.append(column);
 
-                if((i + 1) < index.indexColumns().length) tableQuery.append(", ");
+                if((i + 1) < length) tableQuery.append(", ");
             }
-            tableQuery.append(");");
+            tableQuery.append(");\n");
             prettyPrint(1, prettyPrint, tableQuery);
         }
 
         return tableQuery.toString();
+    }
+
+    public static List<String> generateIndecesCreate(TableDetails tableDetails, boolean prettyPrint) {
+
+        List<String> indeces = new ArrayList<>();
+        for (Index index : tableDetails.getIndices()) {
+
+            StringBuilder tableQuery = new StringBuilder();
+            prettyPrint(1, prettyPrint,  tableQuery);
+            tableQuery.append("CREATE INDEX ");
+            tableQuery.append("IDX_").append(tableDetails.getTableName()).append("_").append(index.indexName());
+            tableQuery.append(" ON ");
+            tableQuery.append(tableDetails.getTableName());
+            tableQuery.append(" (");
+
+            int length = index.indexColumns().length;
+            for (int i = 0; i < length; i++) {
+
+                String column = index.indexColumns()[i];
+                tableQuery.append(column);
+
+                if((i + 1) < length) tableQuery.append(", ");
+            }
+            tableQuery.append(");\n");
+            prettyPrint(1, prettyPrint, tableQuery);
+
+            indeces.add(tableQuery.toString());
+        }
+
+        return indeces;
     }
 
     private static void prettyPrint(int tabSpace, boolean prettyPrint, StringBuilder tableQuery) {

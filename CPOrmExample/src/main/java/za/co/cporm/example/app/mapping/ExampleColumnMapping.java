@@ -2,6 +2,7 @@ package za.co.cporm.example.app.mapping;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.util.Log;
 import za.co.cporm.model.map.SqlColumnMapping;
 
@@ -71,6 +72,18 @@ public class ExampleColumnMapping implements SqlColumnMapping {
     public void setColumnValue(ContentValues contentValues, String key, Object value) {
 
         contentValues.put(key, (byte[]) toSqlType(value));
+    }
+
+    @Override
+    public void setBundleValue(Bundle bundle, String key, Cursor cursor, int columnIndex) {
+
+        bundle.putSerializable(key, (Serializable) getColumnValue(cursor, columnIndex));
+    }
+
+    @Override
+    public Object getColumnValue(Bundle bundle, String columnName) {
+
+        return bundle.getSerializable(columnName);
     }
 
     private void closeStreams(Closeable... streams) {

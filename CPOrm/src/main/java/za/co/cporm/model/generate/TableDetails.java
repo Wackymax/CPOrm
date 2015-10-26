@@ -2,11 +2,13 @@ package za.co.cporm.model.generate;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.text.TextUtils;
 import za.co.cporm.model.annotation.Index;
 import za.co.cporm.model.annotation.TableConstraint;
 import za.co.cporm.model.map.SqlColumnMapping;
 
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -22,17 +24,19 @@ public class TableDetails {
     private final String tableName;
     private final String authority;
     private final Class tableClass;
+    private final boolean serializable;
     private final Constructor tableClassConstructor;
     private final List<ColumnDetails> columns = new LinkedList<ColumnDetails>();
     private final List<Index> indices = new LinkedList<Index>();
     private final List<TableConstraint> constraints = new LinkedList<TableConstraint>();
     private final List<Class<?>> changeListener = new LinkedList<Class<?>>();
+    private String primaryKeyClause;
 
     public TableDetails(String tableName, String authority, Class tableClass){
         this.tableName = tableName;
         this.authority = authority;
         this.tableClass = tableClass;
-
+        this.serializable = Serializable.class.isAssignableFrom(tableClass);
         try {
             tableClassConstructor = tableClass.getConstructor();
             tableClassConstructor.setAccessible(true);
@@ -52,6 +56,11 @@ public class TableDetails {
 
     public Class getTableClass() {
         return tableClass;
+    }
+
+    public boolean isSerializable() {
+
+        return serializable;
     }
 
     public Object createNewModelInstance() throws IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -95,8 +104,16 @@ public class TableDetails {
         return null;
     }
 
+    public String getPrimaryKeyClause() {
+
+        return primaryKeyClause;
+    }
+
     public void addColumn(ColumnDetails column){
         columns.add(column);
+
+        if(column.isPrimaryKey())
+            primaryKeyClause = column.columnName + " = ?";
 
         boolean hasPrimaryKey = false;
 
@@ -206,6 +223,11 @@ public class TableDetails {
 
             if (value == null) contentValues.putNull(columnName);
             else columnTypeMapping.setColumnValue(contentValues, columnName, value);
+        }
+
+        public <T> void setFieldValue(Bundle bundle, String columnName, T dataModelObject) throws IllegalAccessException {
+
+            columnField.set(dataModelObject, columnTypeMapping.getColumnValue(bundle, columnName));
         }
     }
 }

@@ -2,6 +2,7 @@ package za.co.cporm.model.map;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Bundle;
 
 /**
  * This allows us to handle the mapping of objects to and from sql
@@ -34,4 +35,8 @@ public interface SqlColumnMapping {
      * @param value The source object to be converted
      */
     void setColumnValue(ContentValues contentValues, String key, Object value);
+
+    void setBundleValue(Bundle bundle, String key, Cursor cursor, int columnIndex);
+
+    Object getColumnValue(Bundle bundle, String columnName);
 }

@@ -32,9 +32,9 @@ public class SQLSegment implements DataFilterClause {
 
 
     @Override
-    public String getWhereClause() {
+    public QueryBuilder getWhereClause() {
 
-        return sqlSegment;
+        return new QueryBuilder(sqlSegment);
     }
 
     @Override

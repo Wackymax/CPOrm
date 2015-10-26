@@ -44,12 +44,19 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                 sqLiteDatabase.execSQL(createStatement);
             }
             else {
-                String createStatement = TableGenerator.generateTableCreate(findTableDetails(dataModelObject), false);
+                String createStatement = TableGenerator.generateTableCreate(findTableDetails(dataModelObject), cPOrmConfiguration.isQueryLoggingEnabled());
 
                 if(cPOrmConfiguration.isQueryLoggingEnabled()) {
                     CPOrmLog.d("Creating Table: " + createStatement);
                 }
                 sqLiteDatabase.execSQL(createStatement);
+
+                for (String index : TableGenerator.generateIndecesCreate(findTableDetails(dataModelObject), cPOrmConfiguration.isQueryLoggingEnabled())) {
+
+                    CPOrmLog.d("Creating Index: " + createStatement);
+                    sqLiteDatabase.execSQL(index);
+                }
+
             }
         }
     }

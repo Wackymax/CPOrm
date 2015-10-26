@@ -3,6 +3,8 @@ package za.co.cporm.example.app.model.domain;
 import za.co.cporm.model.CPDefaultRecord;
 import za.co.cporm.model.annotation.Column.Column;
 import za.co.cporm.model.annotation.Column.Unique;
+import za.co.cporm.model.annotation.Index;
+import za.co.cporm.model.annotation.Indices;
 import za.co.cporm.model.annotation.References;
 import za.co.cporm.model.annotation.Table;
 
@@ -12,6 +14,9 @@ import java.util.List;
  * Created by hennie.brink on 2015-03-20.
  */
 @Table
+@Indices(indices = {
+        @Index(indexName = "IDX_USERNAME", indexColumns = "user_name")
+})
 public class User extends CPDefaultRecord<User> {
 
     @Column

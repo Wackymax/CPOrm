@@ -131,19 +131,21 @@ public class CPOrm {
         return providerClient.bulkInsert(insertUri, values);
     }
 
-    public static <T> void insert(T dataModelObject) {
+    public static <T> long insert(T dataModelObject) {
 
-        insert(getApplicationContext(), dataModelObject);
+        return insert(getApplicationContext(), dataModelObject);
     }
 
-    public static <T> void insert(Context context, T dataModelObject) {
+    public static <T> long insert(Context context, T dataModelObject) {
 
         TableDetails tableDetails = findTableDetails(context, dataModelObject.getClass());
         ContentValues contentValues = ModelInflater.deflate(tableDetails, dataModelObject);
         Uri insertUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
 
         ContentResolver contentResolver = context.getContentResolver();
-        contentResolver.insert(insertUri, contentValues);
+        Uri insert = contentResolver.insert(insertUri, contentValues);
+
+        return ContentUris.parseId(insert);
     }
 
     public static <T> T insertAndReturn(T dataModelObject) {

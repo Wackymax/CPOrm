@@ -18,11 +18,11 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Created by hennie.brink on 2015-05-30.
  */
-public abstract class CPOrmAsyncCursorAdaptor<T, K> extends CPOrmCursorAdaptor<T, K> {
+public abstract class CPOrmAsyncCursorAdaptor<Model, ViewHolder> extends CPOrmCursorAdaptor<Model, ViewHolder> {
 
     private final Lock lock = new ReentrantLock();
     private final Condition condition = lock.newCondition();
-    private final Queue<T> loaderQueue = new LinkedList<T>();
+    private final Queue<Model> loaderQueue = new LinkedList<Model>();
     private final LoaderThreadHandler threadHandler = new LoaderThreadHandler(this);
     private LoaderThread loaderThread;
 
@@ -53,7 +53,7 @@ public abstract class CPOrmAsyncCursorAdaptor<T, K> extends CPOrmCursorAdaptor<T
 
         startLoaderThreadIfStopped();
         lock.lock();
-        T inflate = ((CPOrmCursor<T>) getCursor()).inflate();
+        Model inflate = ((CPOrmCursor<Model>) getCursor()).inflate();
         if(!loaderQueue.contains(inflate))
             loaderQueue.offer(inflate);
         condition.signal();
@@ -80,12 +80,12 @@ public abstract class CPOrmAsyncCursorAdaptor<T, K> extends CPOrmCursorAdaptor<T
         }
     }
 
-    public abstract boolean loadAsyncInformation(T information);
+    public abstract boolean loadAsyncInformation(Model information);
 
     private class LoaderThread extends Thread {
 
         volatile boolean isCancelled = false;
-        CPOrmCursor<T> cursor = (CPOrmCursor<T>) getCursor();
+        CPOrmCursor<Model> cursor = (CPOrmCursor<Model>) getCursor();
 
         @Override
         public void run() {
@@ -104,7 +104,7 @@ public abstract class CPOrmAsyncCursorAdaptor<T, K> extends CPOrmCursorAdaptor<T
                         break;
                     }
 
-                    T item = loaderQueue.poll();
+                    Model item = loaderQueue.poll();
                     lock.unlock();
                     if(loadAsyncInformation(item))
                         threadHandler.sendEmptyMessage(0);

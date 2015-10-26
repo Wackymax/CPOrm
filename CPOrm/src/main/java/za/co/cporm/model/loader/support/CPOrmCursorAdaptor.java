@@ -14,7 +14,7 @@ import za.co.cporm.model.util.CPOrmCursor;
  *  T = Domain Model Object
  *  K = View Holder Class
  */
-public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
+public abstract class CPOrmCursorAdaptor<Model, ViewHolder> extends CursorAdapter {
 
     private final int layoutId;
 
@@ -38,7 +38,7 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
 
         View view = LayoutInflater.from(context).inflate(layoutId, viewGroup, false);
-        K viewHolder = createViewHolder(view);
+        ViewHolder viewHolder = createViewHolder(view);
         view.setTag(viewHolder);
 
         bindView(view, context, cursor);
@@ -48,13 +48,13 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
 
-        K viewHolder = (K) view.getTag();
-        setViewInformation(viewHolder, ((CPOrmCursor<T>)cursor).inflate());
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
+        setViewInformation(viewHolder, ((CPOrmCursor<Model>)cursor).inflate());
     }
 
-    public abstract K createViewHolder(View view);
+    public abstract ViewHolder createViewHolder(View view);
 
-    public abstract void setViewInformation(K viewHolder, T information);
+    public abstract void setViewInformation(ViewHolder viewHolder, Model information);
 
     @Override
     public void changeCursor(Cursor cursor) {
@@ -70,9 +70,9 @@ public abstract class CPOrmCursorAdaptor<T, K> extends CursorAdapter {
      * @param position The position to inflate
      * @return The inflated item if found, null otherwise
      */
-    public T getInflatedItem(int position) {
+    public Model getInflatedItem(int position) {
 
-        CPOrmCursor<T> cursor = (CPOrmCursor<T>) getCursor();
+        CPOrmCursor<Model> cursor = (CPOrmCursor<Model>) getCursor();
         if(cursor.moveToPosition(position)) {
             return cursor.inflate();
         }

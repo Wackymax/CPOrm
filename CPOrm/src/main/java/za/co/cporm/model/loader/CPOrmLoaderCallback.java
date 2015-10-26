@@ -11,13 +11,13 @@ import za.co.cporm.model.query.Select;
 /**
  * Created by hennie.brink on 2015-05-11.
  */
-public class CPOrmLoaderCallback<T> implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CPOrmLoaderCallback<Model> implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private final Context context;
     private final CursorAdapter listAdapter;
-    private final Select<T> select;
+    private final Select<Model> select;
 
-    public CPOrmLoaderCallback(Context context, CursorAdapter listAdapter, Select<T> select) {
+    public CPOrmLoaderCallback(Context context, CursorAdapter listAdapter, Select<Model> select) {
 
         this.context = context;
         this.listAdapter = listAdapter;
@@ -27,7 +27,7 @@ public class CPOrmLoaderCallback<T> implements LoaderManager.LoaderCallbacks<Cur
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-        return new CPOrmLoader<T>(context, select);
+        return new CPOrmLoader<Model>(context, select);
     }
 
     @Override

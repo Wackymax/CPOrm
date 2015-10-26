@@ -20,9 +20,9 @@ import java.util.*;
  * The starting point for select statements.  Contains the basic functions to do a simple select operation
  * and allows you to specify the result type you want for the query.
  */
-public class Select<T> implements DataFilterClause<Select<T>> {
+public class Select<Model> implements DataFilterClause<Select<Model>> {
 
-    private final Class<T> dataObjectClass;
+    private final Class<Model> dataObjectClass;
     private DataFilterCriteria filterCriteria;
     private List<String> sortingOrderList;
     private List<String> includedColumns;
@@ -30,7 +30,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
     private Integer offset;
     private Integer limit;
 
-    private Select(Class<T> dataObjectClass) {
+    private Select(Class<Model> dataObjectClass) {
 
         this.dataObjectClass = dataObjectClass;
         this.sortingOrderList = new LinkedList<String>();
@@ -57,7 +57,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param filterClause the filter clause to add
      * @return The current select instance
      */
-    public Select<T> where(DataFilterClause filterClause) {
+    public Select<Model> where(DataFilterClause filterClause) {
 
         this.filterCriteria.addClause(filterClause);
         return this;
@@ -70,7 +70,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param conjunction  The conjunction used to add the filter clause
      * @return The current select instance
      */
-    public Select<T> where(DataFilterClause filterClause, DataFilterClause.DataFilterConjunction conjunction) {
+    public Select<Model> where(DataFilterClause filterClause, DataFilterClause.DataFilterConjunction conjunction) {
 
         this.filterCriteria.addClause(filterClause, conjunction);
         return this;
@@ -83,7 +83,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param value  The value to compare
      * @return The current select instance
      */
-    public Select<T> whereEquals(String column, Object value) {
+    public Select<Model> whereEquals(String column, Object value) {
 
         addClause(new DataFilterCriterion(column, DataFilterCriterion.DataFilterOperator.EQUAL, value), DataFilterConjunction.AND);
         return this;
@@ -96,7 +96,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param value  The value to compare
      * @return The current select instance
      */
-    public Select<T> whereLike(String column, Object value) {
+    public Select<Model> whereLike(String column, Object value) {
 
         addClause(new DataFilterCriterion(column, DataFilterCriterion.DataFilterOperator.LIKE, value), DataFilterConjunction.AND);
         return this;
@@ -107,9 +107,9 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The current select instance
      */
-    public DataFilterCriterion.Builder<Select<T>> and() {
+    public DataFilterCriterion.Builder<Select<Model>> and() {
 
-        return new DataFilterCriterion.Builder<Select<T>>(this, DataFilterClause.DataFilterConjunction.AND);
+        return new DataFilterCriterion.Builder<Select<Model>>(this, DataFilterClause.DataFilterConjunction.AND);
     }
 
     /**
@@ -118,7 +118,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param clause The clause to add
      * @return The current select instance
      */
-    public Select<T> and(DataFilterClause clause) {
+    public Select<Model> and(DataFilterClause clause) {
 
         filterCriteria.addClause(clause, DataFilterConjunction.AND);
         return this;
@@ -129,9 +129,9 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The current select instance
      */
-    public DataFilterCriterion.Builder<Select<T>> or() {
+    public DataFilterCriterion.Builder<Select<Model>> or() {
 
-        return new DataFilterCriterion.Builder<Select<T>>(this, DataFilterClause.DataFilterConjunction.OR);
+        return new DataFilterCriterion.Builder<Select<Model>>(this, DataFilterClause.DataFilterConjunction.OR);
     }
 
     /**
@@ -140,7 +140,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param filterClause The clause to add
      * @return The current select instance
      */
-    public Select<T> or(DataFilterClause filterClause) {
+    public Select<Model> or(DataFilterClause filterClause) {
 
         filterCriteria.addClause(filterClause, DataFilterConjunction.OR);
         return this;
@@ -151,9 +151,9 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The current select instance
      */
-    public DataFilterCriteria.Builder<Select<T>> openBracketAnd() {
+    public DataFilterCriteria.Builder<Select<Model>> openBracketAnd() {
 
-        return new DataFilterCriteria.Builder<Select<T>>(this, DataFilterClause.DataFilterConjunction.AND);
+        return new DataFilterCriteria.Builder<Select<Model>>(this, DataFilterClause.DataFilterConjunction.AND);
     }
 
     /**
@@ -161,9 +161,9 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The current select instance
      */
-    public DataFilterCriteria.Builder<Select<T>> openBracketOr() {
+    public DataFilterCriteria.Builder<Select<Model>> openBracketOr() {
 
-        return new DataFilterCriteria.Builder<Select<T>>(this, DataFilterClause.DataFilterConjunction.OR);
+        return new DataFilterCriteria.Builder<Select<Model>>(this, DataFilterClause.DataFilterConjunction.OR);
     }
 
     /**
@@ -172,7 +172,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param columns the columns to sort
      * @return The current select instance
      */
-    public Select<T> sortDesc(String... columns) {
+    public Select<Model> sortDesc(String... columns) {
 
         for (String column : columns) {
             sortingOrderList.add(column + " DESC");
@@ -186,7 +186,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param columns the columns to sort
      * @return The current select instance
      */
-    public Select<T> sortAsc(String... columns) {
+    public Select<Model> sortAsc(String... columns) {
 
         for (String column : columns) {
             sortingOrderList.add(column + " ASC");
@@ -200,7 +200,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param offset the row offset
      * @return The current select instance
      */
-    public Select<T> offset(int offset) {
+    public Select<Model> offset(int offset) {
 
         if (offset < 0)
             throw new IllegalArgumentException("Offset must be larger than 0");
@@ -214,7 +214,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param limit Amount of rows
      * @return The current select statement
      */
-    public Select<T> limit(int limit) {
+    public Select<Model> limit(int limit) {
 
         if (limit < 1)
             throw new IllegalArgumentException("Limit must be larger than 0");
@@ -229,7 +229,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param columns The columns to retrieve
      * @return The current select instance
      */
-    public Select<T> include(String... columns) {
+    public Select<Model> include(String... columns) {
 
         Collections.addAll(includedColumns, columns);
 
@@ -243,7 +243,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      * @param columns The columns to exclude
      * @return The current select instance
      */
-    public Select<T> exclude(String... columns) {
+    public Select<Model> exclude(String... columns) {
 
         Collections.addAll(excludedColumns, columns);
 
@@ -253,7 +253,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
     /**
      * @see #queryAsCursor(Context)
      */
-    public CPOrmCursor<T> queryAsCursor() {
+    public CPOrmCursor<Model> queryAsCursor() {
 
         return queryAsCursor(CPOrm.getApplicationContext());
     }
@@ -265,7 +265,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The {@link za.co.cporm.model.util.CPOrmCursor} containing the results
      */
-    public CPOrmCursor<T> queryAsCursor(Context context) {
+    public CPOrmCursor<Model> queryAsCursor(Context context) {
 
         ContentResolverValues contentResolverValues = asContentResolverValue(context);
         ContentResolver contentResolver = context.getContentResolver();
@@ -275,13 +275,13 @@ public class Select<T> implements DataFilterClause<Select<T>> {
                 contentResolverValues.getWhereArgs(),
                 contentResolverValues.getSortOrder());
 
-        return new CPOrmCursor<T>(contentResolverValues.getTableDetails(), cursor);
+        return new CPOrmCursor<Model>(contentResolverValues.getTableDetails(), cursor);
     }
 
     /**
      * @see #queryAsIterator(Context)
      */
-    public CursorIterator<T> queryAsIterator() {
+    public CursorIterator<Model> queryAsIterator() {
 
         return queryAsIterator(CPOrm.getApplicationContext());
     }
@@ -293,16 +293,16 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The iterator containing the results
      */
-    public CursorIterator<T> queryAsIterator(Context context) {
+    public CursorIterator<Model> queryAsIterator(Context context) {
 
-        CPOrmCursor<T> cursor = queryAsCursor(context);
-        return new CursorIterator<T>(cursor.getTableDetails(), cursor);
+        CPOrmCursor<Model> cursor = queryAsCursor(context);
+        return new CursorIterator<Model>(cursor.getTableDetails(), cursor);
     }
 
     /**
      * @see #queryAsList(Context)
      */
-    public List<T> queryAsList() {
+    public List<Model> queryAsList() {
 
         return queryAsList(CPOrm.getApplicationContext());
     }
@@ -312,12 +312,12 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The list containing the results
      */
-    public List<T> queryAsList(Context context) {
+    public List<Model> queryAsList(Context context) {
 
-        CPOrmCursor<T> cursor = queryAsCursor(context);
+        CPOrmCursor<Model> cursor = queryAsCursor(context);
 
         try {
-            List<T> resultList = new ArrayList<T>(cursor.getCount());
+            List<Model> resultList = new ArrayList<Model>(cursor.getCount());
 
             while (cursor.moveToNext()) {
                 resultList.add(cursor.inflate());
@@ -344,7 +344,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      */
     public int queryAsCount(Context context) {
 
-        CPOrmCursor<T> cursor = queryAsCursor(context);
+        CPOrmCursor<Model> cursor = queryAsCursor(context);
 
         List<String> includedColumnsTemp = new ArrayList<String>(includedColumns.size());
         List<String> excludedColumnsTemp = new ArrayList<String>(excludedColumns.size());
@@ -404,7 +404,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
     /**
      * @see #first(Context)
      */
-    public T first() {
+    public Model first() {
 
         return first(CPOrm.getApplicationContext());
     }
@@ -415,20 +415,20 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return The first result if found, null otherwise.
      */
-    public T first(Context context) {
+    public Model first(Context context) {
 
         Integer currentLimit = limit;
         limit(1); //Add a default limit for the user
 
         long time = System.currentTimeMillis();
-        CPOrmCursor<T> cursor = queryAsCursor(context);
+        CPOrmCursor<Model> cursor = queryAsCursor(context);
         try {
 
             time = System.currentTimeMillis();
             if (cursor.moveToFirst()) {
 
                 time = System.currentTimeMillis();
-                T inflate = cursor.inflate();
+                Model inflate = cursor.inflate();
                 return inflate;
             } else return null;
         } finally {
@@ -441,7 +441,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
     /**
      * @see #last(Context)
      */
-    public T last() {
+    public Model last() {
 
         return last(CPOrm.getApplicationContext());
     }
@@ -451,10 +451,10 @@ public class Select<T> implements DataFilterClause<Select<T>> {
      *
      * @return Tha last item found in the cursor, null otherwise.
      */
-    public T last(Context context) {
+    public Model last(Context context) {
 
         ContentResolverValues values = asContentResolverValue(context);
-        CPOrmCursor<T> cursor = queryAsCursor(context);
+        CPOrmCursor<Model> cursor = queryAsCursor(context);
         try {
 
             if (cursor.moveToLast()) {
@@ -562,7 +562,7 @@ public class Select<T> implements DataFilterClause<Select<T>> {
     }
 
     @Override
-    public Select<T> addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
+    public Select<Model> addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
 
         this.filterCriteria.addClause(clause, conjunction);
         return this;

@@ -10,7 +10,7 @@ import za.co.cporm.model.util.ContentResolverValues;
 /**
  * Created by hennie.brink on 2015-03-31.
  */
-public class CPOrmLoader<T> extends CursorLoader {
+public class CPOrmLoader<Model> extends CursorLoader {
 
     private TableDetails tableDetails;
     private int cacheSize = 0;
@@ -22,7 +22,7 @@ public class CPOrmLoader<T> extends CursorLoader {
      * @param context The context that will be used to create the cursor.
      * @param select The select statement that will be used to retrieve the data.
      */
-    public CPOrmLoader(Context context, Select<T> select) {
+    public CPOrmLoader(Context context, Select<Model> select) {
         super(context);
 
         ContentResolverValues resolverValues = select.asContentResolverValue(context);
@@ -42,7 +42,7 @@ public class CPOrmLoader<T> extends CursorLoader {
      * @param select The select statement that will be used to retrieve the data.
      * @param cacheSize The cache size for the cursor, or -1 to disable caching
      */
-    public CPOrmLoader(Context context, Select<T> select, int cacheSize) {
+    public CPOrmLoader(Context context, Select<Model> select, int cacheSize) {
         this(context, select);
 
         enableCursorCache(cacheSize);
@@ -54,9 +54,9 @@ public class CPOrmLoader<T> extends CursorLoader {
     }
 
     @Override
-    public CPOrmCursor<T> loadInBackground() {
+    public CPOrmCursor<Model> loadInBackground() {
 
-        CPOrmCursor<T> cursor = new CPOrmCursor<>(tableDetails, super.loadInBackground());
+        CPOrmCursor<Model> cursor = new CPOrmCursor<>(tableDetails, super.loadInBackground());
 
         if(cacheSize == 0){
             cursor.enableCache();
@@ -69,7 +69,7 @@ public class CPOrmLoader<T> extends CursorLoader {
         for (int i = 0; i < count && cursor.isCacheEnabled() && i < 100; i++) {
 
             cursor.moveToPosition(i);
-            T inflate = cursor.inflate();
+            Model inflate = cursor.inflate();
         }
         return cursor;
     }

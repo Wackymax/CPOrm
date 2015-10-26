@@ -1,10 +1,13 @@
 package za.co.cporm.provider;
 
+import android.annotation.TargetApi;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
+import android.os.CancellationSignal;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import za.co.cporm.model.CPOrmConfiguration;
@@ -66,9 +69,41 @@ public class CPOrmContentProvider extends ContentProvider {
         if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
             String itemId = uri.getLastPathSegment();
-            cursor = db.query(tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null);
+            cursor = db.query(tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null, "1");
         } else
             cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
+
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+
+        return cursor;
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder, CancellationSignal cancellationSignal) {
+
+        TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
+        SQLiteDatabase db = database.getReadableDatabase();
+        String limit = constructLimit(uri);
+
+        if (debugEnabled) {
+            CPOrmLog.d("********* Query **********");
+            CPOrmLog.d("Uri: " + uri);
+            CPOrmLog.d("Projection: " + Arrays.toString(projection));
+            CPOrmLog.d("Selection: " + selection);
+            CPOrmLog.d("Args: " + Arrays.toString(selectionArgs));
+            CPOrmLog.d("Sort: " + sortOrder);
+            CPOrmLog.d("Limit: " + limit);
+        }
+
+        Cursor cursor;
+
+        if (uriMatcherHelper.isSingleItemRequested(uri)) {
+
+            String itemId = uri.getLastPathSegment();
+            cursor = db.query(true, tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null, "1", cancellationSignal);
+        } else
+            cursor = db.query(false, tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit, cancellationSignal);
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 

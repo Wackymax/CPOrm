@@ -140,7 +140,7 @@ For more information, check out the example app.
     private String isbn;
     ```
     
-    * `@PrimaryKey` will allow to make a column as primary key, and auto increment. Default value for autoIncrement is true. for e.g. 
+    * `@PrimaryKey` will allow to make a column as primary key, and auto increment. Default value for autoIncrement is true.  For now the library only supports keys of type long. for e.g. 
     
     ```
     @PrimaryKey

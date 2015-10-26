@@ -53,7 +53,9 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
 
                 for (String index : TableGenerator.generateIndecesCreate(findTableDetails(dataModelObject), cPOrmConfiguration.isQueryLoggingEnabled())) {
 
-                    CPOrmLog.d("Creating Index: " + createStatement);
+                    if(cPOrmConfiguration.isQueryLoggingEnabled()) {
+                        CPOrmLog.d("Creating Index: " + createStatement);
+                    }
                     sqLiteDatabase.execSQL(index);
                 }
 

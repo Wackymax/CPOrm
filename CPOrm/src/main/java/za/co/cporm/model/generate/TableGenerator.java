@@ -93,7 +93,7 @@ public class TableGenerator {
             StringBuilder tableQuery = new StringBuilder();
             prettyPrint(1, prettyPrint,  tableQuery);
             tableQuery.append("CREATE INDEX ");
-            tableQuery.append("IDX_").append(tableDetails.getTableName()).append(index.indexName());
+            tableQuery.append("IDX_").append(tableDetails.getTableName()).append("_").append(index.indexName());
             tableQuery.append(" ON ");
             tableQuery.append(tableDetails.getTableName());
             tableQuery.append(" (");

@@ -52,21 +52,130 @@ Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to downloa
 ===================
 
 ## Use it
-To use the ORM, include it as a library in you project. Create a configuration that will tell the ORM all the important stuff like the domain model objects, database name etc. You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. Now all that is left to do is define the meta tags that will tell the ORM all the important stuff. Add these as part of the application element in the Android Manifest
-
-```xml
-      <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.model.MyCPOrmConfiguration" />
-      <meta-data android:name="MAPPING_FACTORY" android:value="om.cp.orm.example.MyMappingFactory" /><!-- This is optional-->
-      <meta-data android:name="AUTHORITY" android:value="za.co.cporm.example" /> <!-- Should match provider-->
-      
-      <provider
-            android:authorities="za.co.cporm.example"
-            android:name="za.co.cporm.provider.CPOrmContentProvider"
-            android:exported="false"
-            android:permission="true"/>
-```
-Now that the setup is done, all you need to do is create your model objects, add the annotations, link them to the model factory, and you are done.  Some notable annotations are Table, Column, and Primary Key.
-
-To interact with the ORM you can extend the CPRecord class, this will make it easy to do CRUD operations, or you can use the CPHelper class if you can't extend CPRecord. To perform queries use the Select class.  To take advantage of the built in support for content providers on android, extend the CPDefaultRecord class, this already has a _id column defined, as well as some usefull methods to interact with the objects.
+To use the ORM, include it as a library in you project. Create a configuration that will tell the ORM all the important stuff like the domain model objects, database name etc. You can define a custom SQLColumnMapping factory as well if you want to handle more that the standard java types. 
 
 For more information, check out the example app.
+
+1. Install the project via any of the method above. and extend `Application` class and use it as following:
+  
+   ```
+   public class SampleApplication extends Application {
+       @Override
+        public void onCreate() {
+    
+            super.onCreate();
+            CPOrm.initialize(this);
+        }
+   }
+   ```
+   
+2. register this application class in Manifest file:
+   
+   ```xml
+   <application
+           android:name=".SampleApplication"
+           ...
+           >
+   ```
+   
+   
+3. add following meta data in `<application>` tag
+   
+   ```xml
+    <meta-data android:name="CPORM_CONFIG" android:value="za.co.cporm.example.model.MyCPOrmConfiguration" />
+    <meta-data android:name="MAPPING_FACTORY" android:value="om.cp.orm.example.MyMappingFactory" /><!-- This is optional-->
+    <meta-data android:name="AUTHORITY" android:value="za.co.cporm.example" /> <!-- Should match provider-->
+   ```
+   
+   
+4. register content provider:
+    
+    ```xml
+    <provider
+            android:authorities="za.co.cporm.example" <!-- Should match the Authority Meta Tag-->
+            android:name="za.co.cporm.provider.CPOrmContentProvider"
+            android:exported="false"
+            android:process=":provider" />
+    ```
+    
+5. Now, you just have to create model classes by:
+    * annotation:
+        
+        ```
+        @Table
+        public class Book {
+        ...
+        }
+        ```
+    
+    * extending class:
+        
+        ```
+        @Table
+        public class Author extends QuantumFluxRecord<Author> {
+            public String name;
+            ...
+        }
+        ```
+6. Register your model classes
+  ```
+  public class MyCPOrmConfiguration implements CPOrmConfiguration {
+
+        @Override
+        public String getDatabaseName() {
+    
+            return "example.db";
+        }
+    
+        @Override
+        public int getDatabaseVersion() {
+    
+            return 1;
+        }
+    
+        @Override
+        public boolean isQueryLoggingEnabled() {
+    
+            return false;
+        }
+    
+        @Override
+        public List<Class<?>> getDataModelObjects() {
+            List<Class<?>> domainObjects = new ArrayList<Class<?>>();
+            domainObjects.add(Book.class);
+            domainObjects.add(Author.class);
+    
+            return domainObjects;
+        }
+    }
+  ```
+7. Access:
+    
+    ```
+    Book book = new Book();
+    book.name = "Sorcerer's Stone";
+    book.isbn = "122342564";
+    CPOrm.insert(book);
+    ```
+    
+    ```
+    Author author = new Author();
+    author.name = "J.K. Rollings";
+    author.save();
+    ```
+    
+    ```
+    Author first = Select.from(Author.class).first();
+    first.name = "J. K. Rowling";
+    first.update();
+    ```
+    
+    ```
+    QuantumFlux.deleteAll(Book.class);
+    Author first = Select.from(Author.class).first();
+    first.delete();
+    ```
+
+=========================
+
+For detailed configuration and advance usages, go through the [Wiki](https://github.com/Wackymax/CPOrm/wiki)

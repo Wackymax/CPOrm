@@ -117,6 +117,43 @@ For more information, check out the example app.
             ...
         }
         ```
+        
+    #####Notes:
+
+    * When you extend CPDefaultRecord you have access to all default access methods such as save(), update(), delete(), etc. and If you are using just @Table annotation, you can use those methods from CPOrm class. for e.g. CPOrm.insert(authorObject);.
+    
+    * When you extend CPDefaultRecord you have already a auto increment primary key with name '_id'. So while using just @Table annotation, consider creating a primary key.
+    
+    * Name of columns and tables will convert from camelCasing to under_score. for e.g. fielf bookName in a model will become book_name in database.
+    
+    #####Column Constraint annotations:
+
+    * `@Column` will allow to change name of column and allow to make it NOT NULL. Default values for not null is false. for e.g. 
+    
+    ```
+    @Column(columnName = "cover_name")
+    private String bookName;
+    ``` 
+    
+    ```
+    @Column(required = true)
+    private String isbn;
+    ```
+    
+    * `@PrimaryKey` will allow to make a column as primary key, and auto increment. Default value for autoIncrement is true. for e.g. 
+    
+    ```
+    @PrimaryKey
+    private String isbn;
+    ```
+    
+    ```
+    @PrimaryKey(autoIncrement = false)
+    private String isbn;
+    ```
+    
+    * `@Unique` will allow you to make a column value unique.
+
 6. Register your model classes
   ```
   public class MyCPOrmConfiguration implements CPOrmConfiguration {

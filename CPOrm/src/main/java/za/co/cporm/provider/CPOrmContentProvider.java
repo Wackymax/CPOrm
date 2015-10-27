@@ -53,6 +53,9 @@ public class CPOrmContentProvider extends ContentProvider {
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getReadableDatabase();
         String limit = constructLimit(uri);
+        Boolean distinct = uri.getBooleanQueryParameter("DISTINCT", false);
+        String groupBy = uri.getQueryParameter("GROUP_BY");
+        String having = uri.getQueryParameter("HAVING");
 
         if (debugEnabled) {
             CPOrmLog.d("********* Query **********");
@@ -62,6 +65,9 @@ public class CPOrmContentProvider extends ContentProvider {
             CPOrmLog.d("Args: " + Arrays.toString(selectionArgs));
             CPOrmLog.d("Sort: " + sortOrder);
             CPOrmLog.d("Limit: " + limit);
+            CPOrmLog.d("Distinct: " + distinct);
+            CPOrmLog.d("Group By: " + groupBy);
+            CPOrmLog.d("Having: " + having);
         }
 
         Cursor cursor;
@@ -69,9 +75,9 @@ public class CPOrmContentProvider extends ContentProvider {
         if (uriMatcherHelper.isSingleItemRequested(uri)) {
 
             String itemId = uri.getLastPathSegment();
-            cursor = db.query(tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null, "1");
+            cursor = db.query(true, tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null, "1");
         } else
-            cursor = db.query(tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit);
+            cursor = db.query(distinct, tableDetails.getTableName(), projection, selection, selectionArgs, groupBy, having, sortOrder, limit);
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
@@ -85,6 +91,9 @@ public class CPOrmContentProvider extends ContentProvider {
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getReadableDatabase();
         String limit = constructLimit(uri);
+        Boolean distinct = uri.getBooleanQueryParameter("DISTINCT", false);
+        String groupBy = uri.getQueryParameter("GROUP_BY");
+        String having = uri.getQueryParameter("HAVING");
 
         if (debugEnabled) {
             CPOrmLog.d("********* Query **********");
@@ -94,6 +103,9 @@ public class CPOrmContentProvider extends ContentProvider {
             CPOrmLog.d("Args: " + Arrays.toString(selectionArgs));
             CPOrmLog.d("Sort: " + sortOrder);
             CPOrmLog.d("Limit: " + limit);
+            CPOrmLog.d("Distinct: " + distinct);
+            CPOrmLog.d("Group By: " + groupBy);
+            CPOrmLog.d("Having: " + having);
         }
 
         Cursor cursor;
@@ -103,7 +115,7 @@ public class CPOrmContentProvider extends ContentProvider {
             String itemId = uri.getLastPathSegment();
             cursor = db.query(true, tableDetails.getTableName(), projection, tableDetails.getPrimaryKeyClause(), new String[]{itemId}, null, null, null, "1", cancellationSignal);
         } else
-            cursor = db.query(false, tableDetails.getTableName(), projection, selection, selectionArgs, null, null, sortOrder, limit, cancellationSignal);
+            cursor = db.query(distinct, tableDetails.getTableName(), projection, selection, selectionArgs, groupBy, having, sortOrder, limit, cancellationSignal);
 
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 

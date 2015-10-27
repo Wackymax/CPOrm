@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 import za.co.cporm.model.CPOrm;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
@@ -29,6 +30,9 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
     private List<String> excludedColumns;
     private Integer offset;
     private Integer limit;
+    private boolean distinct = false;
+    private String groupBy;
+    private String having;
 
     private Select(Class<Model> dataObjectClass) {
 
@@ -49,6 +53,15 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
     public static <T> Select<T> from(Class<T> dataObjectClass) {
 
         return new Select<T>(dataObjectClass);
+    }
+
+    /**
+     * Calling this method will execute the query with a distinct clause
+     */
+    public Select<Model> distinct() {
+        this.distinct = true;
+
+        return this;
     }
 
     /**
@@ -251,6 +264,22 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
     }
 
     /**
+     * The group by clause to use
+     */
+    public Select<Model> groupBy(String groupBy) {
+        this.groupBy = groupBy;
+        return this;
+    }
+
+    /**
+     * The group by clause to use
+     */
+    public Select<Model> having(String having) {
+        this.having = having;
+        return this;
+    }
+
+    /**
      * @see #queryAsCursor(Context)
      */
     public CPOrmCursor<Model> queryAsCursor() {
@@ -397,6 +426,11 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
 
         if (offset != null) itemUri.appendQueryParameter(CPOrmContentProvider.PARAMETER_OFFSET, offset.toString());
         if (limit != null) itemUri.appendQueryParameter(CPOrmContentProvider.PARAMETER_LIMIT, limit.toString());
+        if(distinct) itemUri.appendQueryParameter("DISTINCT", Boolean.TRUE.toString());
+        if(!TextUtils.isEmpty(groupBy)) {
+            itemUri.appendQueryParameter("GROUP_BY", groupBy);
+            if (!TextUtils.isEmpty(having)) itemUri.appendQueryParameter("HAVING", having);
+        }
 
         return new ContentResolverValues(tableDetails, itemUri.build(), getProjection(tableDetails), where.getQueryString(), where.getQueryArgsAsArray(), sort.getQueryString());
     }
@@ -420,14 +454,11 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
         Integer currentLimit = limit;
         limit(1); //Add a default limit for the user
 
-        long time = System.currentTimeMillis();
         CPOrmCursor<Model> cursor = queryAsCursor(context);
         try {
 
-            time = System.currentTimeMillis();
             if (cursor.moveToFirst()) {
 
-                time = System.currentTimeMillis();
                 Model inflate = cursor.inflate();
                 return inflate;
             } else return null;
@@ -523,6 +554,10 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
 
         select.append("SELECT ");
 
+        if(distinct) {
+            select.append("DISTINCT ");
+        }
+
         Iterator<String> columnIterator = Arrays.asList(getProjection(tableDetails)).iterator();
         while (columnIterator.hasNext()) {
 
@@ -536,6 +571,18 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
         if (hasFilterValue()) {
             select.append(" WHERE ");
             select.append(where);
+        }
+
+        if(!TextUtils.isEmpty(groupBy)) {
+
+            select.append(" GROUP BY ");
+            select.append(groupBy);
+
+            if(!TextUtils.isEmpty(having)) {
+
+                select.append(" HAVING ");
+                select.append(having);
+            }
         }
 
         return select;

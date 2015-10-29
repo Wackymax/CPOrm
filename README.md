@@ -15,6 +15,12 @@ Have look at the [Wiki](https://github.com/Wackymax/CPOrm/wiki) for more informa
 6. Allows you to add table change listeners for views.
 7. Most importantly, it is easy to use.
 
+## Planned Features For Future Release
+1. Contract Class Generator
+2. Direct DB Access
+3. Group By Support
+4. Distinct Support
+
 ## Install it
 
 There are four ways to install CPOrm:

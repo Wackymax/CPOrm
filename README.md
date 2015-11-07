@@ -118,7 +118,7 @@ For more information, check out the example app.
         
         ```
         @Table
-        public class Author extends QuantumFluxRecord<Author> {
+        public class Author extends CPDefaultRecord<Author> {
             public String name;
             ...
         }

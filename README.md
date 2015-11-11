@@ -215,7 +215,7 @@ For more information, check out the example app.
     ```
     
     ```
-    QuantumFlux.deleteAll(Book.class);
+    CPOrm.deleteAll(Book.class);
     Author first = Select.from(Author.class).first();
     first.delete();
     ```

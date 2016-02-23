@@ -50,7 +50,7 @@ public class CPOrmLog {
     }
 
     public static int e(String msg) {
-        return Log.w(TAG, msg);
+        return Log.e(TAG, msg);
     }
 
     public static int e(String msg, Throwable th) {

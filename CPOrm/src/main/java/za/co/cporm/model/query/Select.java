@@ -373,8 +373,6 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
      */
     public int queryAsCount(Context context) {
 
-        CPOrmCursor<Model> cursor = queryAsCursor(context);
-
         List<String> includedColumnsTemp = new ArrayList<String>(includedColumns.size());
         List<String> excludedColumnsTemp = new ArrayList<String>(excludedColumns.size());
         Collections.copy(includedColumnsTemp, includedColumns);
@@ -385,6 +383,8 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
 
         String columnName = CPOrm.findTableDetails(context, dataObjectClass).findPrimaryKeyColumn().getColumnName();
         includedColumns.add(columnName);
+
+        CPOrmCursor<Model> cursor = queryAsCursor(context);
         try {
             return cursor.getCount();
         } finally {

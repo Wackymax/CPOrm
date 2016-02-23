@@ -10,7 +10,7 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-version 2.98
+version 2.99
 
 repositories {
     jcenter()
@@ -23,7 +23,7 @@ android {
     defaultConfig {
         minSdkVersion 12
         targetSdkVersion 15
-        versionCode 3
+        versionCode 4
         versionName project.version.toString()
     }
     buildTypes {

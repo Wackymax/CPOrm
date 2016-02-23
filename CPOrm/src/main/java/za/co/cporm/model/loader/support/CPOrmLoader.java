@@ -1,6 +1,7 @@
 package za.co.cporm.model.loader.support;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v4.content.CursorLoader;
 import za.co.cporm.model.generate.TableDetails;
 import za.co.cporm.model.query.Select;
@@ -55,6 +56,10 @@ public class CPOrmLoader<Model> extends CursorLoader {
 
     @Override
     public CPOrmCursor<Model> loadInBackground() {
+
+        Cursor asyncCursor = super.loadInBackground();
+        if(asyncCursor == null)
+            return null;
 
         CPOrmCursor<Model> cursor = new CPOrmCursor<>(tableDetails, super.loadInBackground());
 

@@ -1,6 +1,7 @@
 # CPOrm
 
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-CPOrm-green.svg?style=flat)](https://android-arsenal.com/details/1/2676)
+[![](https://jitpack.io/v/Wackymax/CPOrm.svg)](https://jitpack.io/#Wackymax/CPOrm)
 
 A Powerful Content Provider ORM for android.  This ORM uses an android sqlite database as a backing store, but interacts with it using  content providers.  You use it like a normal ORM, by creating java objects, and then do all of you interactions through the objects. And you get the added benefits of using it like normal content providers, so integration with list views and other components are simple.
 

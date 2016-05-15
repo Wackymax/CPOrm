@@ -42,10 +42,9 @@ public abstract class CPOrmAsyncCursorAdaptor<Model, ViewHolder> extends CPOrmCu
     }
 
     @Override
-    public void changeCursor(Cursor cursor) {
-
+    public Cursor swapCursor(Cursor newCursor) {
         dispose();
-        super.changeCursor(cursor);
+        return super.swapCursor(newCursor);
     }
 
     @Override

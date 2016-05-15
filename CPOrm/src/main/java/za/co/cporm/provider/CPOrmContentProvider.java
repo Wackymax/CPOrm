@@ -3,6 +3,8 @@ package za.co.cporm.provider;
 import android.annotation.TargetApi;
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -40,11 +42,17 @@ public class CPOrmContentProvider extends ContentProvider {
 
         cPOrmConfiguration = ManifestHelper.getConfiguration(getContext());
         database = new CPOrmDatabase(getContext(), cPOrmConfiguration);
-        uriMatcherHelper = new UriMatcherHelper(getContext());
-        uriMatcherHelper.init(getContext(), database.getcPOrmConfiguration(), database.getTableDetailsCache());
 
         debugEnabled = cPOrmConfiguration.isQueryLoggingEnabled();
         return true;
+    }
+
+    @Override
+    public void attachInfo(Context context, ProviderInfo info) {
+        super.attachInfo(context, info);
+
+        uriMatcherHelper = new UriMatcherHelper(getContext(), info.authority);
+        uriMatcherHelper.init(getContext(), database.getcPOrmConfiguration(), database.getTableDetailsCache());
     }
 
     @Override

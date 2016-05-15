@@ -29,6 +29,13 @@ public interface CPOrmConfiguration {
     boolean isQueryLoggingEnabled();
 
     /**
+     * Provides the resource directory to scan for upgrade files.  Upgrade files will have to start with an integer representing the upgrade version.  Upgrade
+     * files should be executale sql scripts to run on the database. A database recreate will happen if no scripts are available for the requested version.
+     * @return The assets direcotry to scan for upgrade scripts
+     */
+    String upgradeResourceDirectory();
+
+    /**
      * Return the database model objects that will be used to construct the database, and to interact with the ORM.<br>
      * All of the returned objects <em>MUST</em> have the required annotations {@link za.co.cporm.model.annotation.Table}<br>
      * Views can also be returned here by implementing the {@link za.co.cporm.model.generate.TableView} interface<br>

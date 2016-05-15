@@ -50,9 +50,11 @@ public class TableGenerator {
         Iterator<TableConstraint> tableConstraintIterator = tableDetails.getConstraints().iterator();
         while (tableConstraintIterator.hasNext()) {
             TableConstraint tableConstraint = tableConstraintIterator.next();
+            if(tableConstraint.constraintType() != TableConstraint.Type.PRIMARY_KEY)
+                continue;
 
             prettyPrint(3, prettyPrint,  tableQuery);
-            tableQuery.append(createTableConstraint(tableConstraint));
+            tableQuery.append(createPrimaryKeyConstraint(tableConstraint));
 
             if(tableConstraintIterator.hasNext()) tableQuery.append(",");
         }
@@ -60,6 +62,19 @@ public class TableGenerator {
         prettyPrint(1, prettyPrint,  tableQuery);
         tableQuery.append(");\n");
         prettyPrint(1, prettyPrint, tableQuery);
+
+        tableConstraintIterator = tableDetails.getConstraints().iterator();
+        while (tableConstraintIterator.hasNext()) {
+            TableConstraint tableConstraint = tableConstraintIterator.next();
+            if(tableConstraint.constraintType() != TableConstraint.Type.UNIQUE)
+                continue;
+
+            prettyPrint(3, prettyPrint,  tableQuery);
+            tableQuery.append(createUniqueKeyConstraint(tableDetails.getTableName(), tableConstraint));
+
+            tableQuery.append(";\n");
+            prettyPrint(1, prettyPrint, tableQuery);
+        }
 
         for (Index index : tableDetails.getIndices()) {
 
@@ -142,23 +157,32 @@ public class TableGenerator {
         return columnDefinition;
     }
 
-
-
-    private static StringBuilder createTableConstraint(TableConstraint constraint){
+    private static StringBuilder createPrimaryKeyConstraint(TableConstraint constraint){
 
         StringBuilder constraintDef = new StringBuilder();
-        constraintDef.append("CONSTRAINT ");
-        constraintDef.append(constraint.name());
+        constraintDef.append(" PRIMARY KEY ");
 
-        switch (constraint.constraintType()){
-            case PRIMARY_KEY:
-                constraintDef.append(" PRIMARY KEY ");
-                break;
-            case UNIQUE:
-                constraintDef.append(" UNIQUE ");
-                break;
-            default: throw new IllegalArgumentException("Constraint Type not supported: " + constraint.constraintType());
+        Iterator<String> columnIterator = Arrays.asList(constraint.constraintColumns()).iterator();
+        constraintDef.append("(");
+        while(columnIterator.hasNext()){
+
+            String columnName = columnIterator.next();
+            constraintDef.append(columnName);
+
+            if(columnIterator.hasNext()) constraintDef.append(", ");
         }
+        constraintDef.append(")");
+
+        return constraintDef;
+    }
+
+    private static StringBuilder createUniqueKeyConstraint(String tableName, TableConstraint constraint){
+
+        StringBuilder constraintDef = new StringBuilder();
+        constraintDef.append(" CREATE UNIQUE INDEX ");
+        constraintDef.append(constraint.name());
+        constraintDef.append(" ON ");
+        constraintDef.append(tableName);
 
         Iterator<String> columnIterator = Arrays.asList(constraint.constraintColumns()).iterator();
         constraintDef.append("(");

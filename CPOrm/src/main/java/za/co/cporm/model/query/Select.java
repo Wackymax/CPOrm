@@ -304,7 +304,7 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
                 contentResolverValues.getWhereArgs(),
                 contentResolverValues.getSortOrder());
 
-        return new CPOrmCursor<Model>(contentResolverValues.getTableDetails(), cursor);
+        return cursor == null ? null : new CPOrmCursor<Model>(contentResolverValues.getTableDetails(), cursor);
     }
 
     /**
@@ -325,7 +325,7 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
     public CursorIterator<Model> queryAsIterator(Context context) {
 
         CPOrmCursor<Model> cursor = queryAsCursor(context);
-        return new CursorIterator<Model>(cursor.getTableDetails(), cursor);
+        return cursor == null ? null : new CursorIterator<Model>(cursor.getTableDetails(), cursor);
     }
 
     /**
@@ -345,6 +345,8 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
 
         CPOrmCursor<Model> cursor = queryAsCursor(context);
 
+        if(cursor == null)
+            return new ArrayList<>();
         try {
             List<Model> resultList = new ArrayList<Model>(cursor.getCount());
 
@@ -373,27 +375,28 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
      */
     public int queryAsCount(Context context) {
 
-        List<String> includedColumnsTemp = new ArrayList<String>(includedColumns.size());
-        List<String> excludedColumnsTemp = new ArrayList<String>(excludedColumns.size());
-        Collections.copy(includedColumnsTemp, includedColumns);
-        Collections.copy(excludedColumnsTemp, excludedColumns);
+        boolean customInclude = false;
 
-        includedColumns.clear();
-        excludedColumns.clear();
-
-        String columnName = CPOrm.findTableDetails(context, dataObjectClass).findPrimaryKeyColumn().getColumnName();
-        includedColumns.add(columnName);
+        if(includedColumns.isEmpty() && excludedColumns.isEmpty()) {
+            String columnName = CPOrm.findTableDetails(context, dataObjectClass).findPrimaryKeyColumn().getColumnName();
+            includedColumns.add(columnName);
+            customInclude = true;
+        }
 
         CPOrmCursor<Model> cursor = queryAsCursor(context);
         try {
+            if(cursor == null)
+                return 0;
             return cursor.getCount();
         } finally {
-            cursor.close();
-            includedColumns.clear();
 
-            //Restore the previous includes and excludes
-            Collections.copy(includedColumns, includedColumns);
-            Collections.copy(excludedColumnsTemp, excludedColumns);
+            if(customInclude)
+            {
+                includedColumns.clear();
+            }
+
+            if(cursor != null)
+                cursor.close();
         }
 
     }
@@ -455,6 +458,8 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
         limit(1); //Add a default limit for the user
 
         CPOrmCursor<Model> cursor = queryAsCursor(context);
+        if(cursor == null)
+            return null;
         try {
 
             if (cursor.moveToFirst()) {
@@ -486,6 +491,8 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
 
         ContentResolverValues values = asContentResolverValue(context);
         CPOrmCursor<Model> cursor = queryAsCursor(context);
+        if(cursor == null)
+            return null;
         try {
 
             if (cursor.moveToLast()) {

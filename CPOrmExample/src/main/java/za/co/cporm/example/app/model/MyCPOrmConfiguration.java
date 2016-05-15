@@ -21,13 +21,18 @@ public class MyCPOrmConfiguration implements CPOrmConfiguration {
     @Override
     public int getDatabaseVersion() {
 
-        return 1;
+        return 2;
     }
 
     @Override
     public boolean isQueryLoggingEnabled() {
 
         return false;
+    }
+
+    @Override
+    public String upgradeResourceDirectory() {
+        return "db.upgrade";
     }
 
     @Override

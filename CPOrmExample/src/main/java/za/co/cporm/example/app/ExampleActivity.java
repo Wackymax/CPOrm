@@ -39,7 +39,7 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
         setContentView(R.layout.activity_example);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        deleteDatabase(new MyCPOrmConfiguration().getDatabaseName());
+        //deleteDatabase(new MyCPOrmConfiguration().getDatabaseName());
 
         adapter = new SimpleCursorAdapter(this,
                 android.R.layout.simple_list_item_1,

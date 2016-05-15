@@ -27,17 +27,31 @@ public class SqlColumnMappingFactory {
         columnMappings.add(new ShortType());
         columnMappings.add(new StringType());
         columnMappings.add(new UUIDType());
+        columnMappings.add(new ByteArray());
     }
 
     public SqlColumnMapping findColumnMapping(Class<?> fieldType){
 
-        Class<?> fieldTypeWrapped = wrapPrimitives(fieldType);
 
         for (SqlColumnMapping columnMapping : columnMappings) {
 
+            Class<?> fieldTypeWrapped = wrapPrimitives(fieldType);
             Class<?> columnType = columnMapping.getJavaType();
             if(columnType.equals(fieldTypeWrapped) || columnType.isAssignableFrom(fieldType))
                 return columnMapping;
+        }
+
+        if(fieldType.isArray()){
+            for (SqlColumnMapping columnMapping : columnMappings) {
+                if(!columnMapping.getJavaType().isArray())
+                    continue;
+
+                Class<?> columnType = columnMapping.getJavaType().getComponentType();
+                Class<?> fieldComponent = fieldType.getComponentType();
+                Class<?> fieldTypeWrapped = wrapPrimitives(fieldComponent);
+                if(columnType.equals(fieldTypeWrapped) || columnType.isAssignableFrom(fieldComponent))
+                    return columnMapping;
+            }
         }
 
         throw new IllegalArgumentException("No valid SQL mapping found for type " + fieldType);

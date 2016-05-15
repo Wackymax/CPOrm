@@ -198,6 +198,20 @@ public class CPOrm {
         contentResolver.update(itemUri, contentValues, null, null);
     }
 
+    public static <T> void batchUpdate(Class<T> dataModelClass, ContentValues contentValues) {
+
+        batchUpdate(getApplicationContext(), dataModelClass, contentValues);
+    }
+
+    public static <T> void batchUpdate(Context context, Class<T> dataModelClass, ContentValues contentValues) {
+
+        TableDetails tableDetails = findTableDetails(context, dataModelClass);
+        Uri itemUri = UriMatcherHelper.generateItemUri(context, tableDetails).build();
+
+        ContentResolver contentResolver = context.getContentResolver();
+        contentResolver.update(itemUri, contentValues, null, null);
+    }
+
     public static <T> void updateColumns(T dataModelObject, String... columns) {
 
         updateColumns(getApplicationContext(), dataModelObject, columns);
@@ -375,7 +389,7 @@ public class CPOrm {
         try {
             cursor = contentResolver.query(itemUri, tableDetails.getColumnNames(), null, null, null);
 
-            if (cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
+            if (cursor != null && cursor.moveToFirst()) return ModelInflater.inflate(cursor, tableDetails);
             else throw new IllegalArgumentException("No row found with the key " + itemUri.getLastPathSegment());
         } finally {
             if (cursor != null) cursor.close();

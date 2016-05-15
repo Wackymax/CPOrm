@@ -1,7 +1,9 @@
 package za.co.cporm.model;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentUris;
 import android.content.Context;
+import android.net.Uri;
 
 import java.util.Iterator;
 
@@ -101,5 +103,10 @@ public abstract class CPRecord<T> {
     public ContentProviderOperation prepareDelete(Context context) {
 
         return CPOrm.prepareDelete(context, this);
+    }
+
+    public Uri getTableUri() {
+
+        return CPOrm.getItemUri(getClass());
     }
 }

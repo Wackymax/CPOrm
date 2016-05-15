@@ -29,10 +29,10 @@ public class UriMatcherHelper {
     private final String authority;
     private UriMatcher uriMatcher;
 
-    public UriMatcherHelper(Context context) {
+    public UriMatcherHelper(Context context, String authority) {
 
         this.matcherCodes = new LinkedHashMap<Integer, TableDetails>();
-        authority = ManifestHelper.getAuthority(context);
+        this.authority = authority;
     }
 
     public void init(Context context, CPOrmConfiguration CPOrmConfiguration, TableDetailsCache detailsCache){

@@ -19,8 +19,6 @@ Have a look at the [Wiki](https://github.com/Wackymax/CPOrm/wiki) for more infor
 ## Planned Features For Future Release
 1. Contract Class Generator
 2. Direct DB Access
-3. Group By Support
-4. Distinct Support
 
 ## Install it
 
@@ -31,7 +29,7 @@ There are four ways to install CPOrm:
 This is the preferred way. Simply add:
 
 ```groovy
-compile 'za.co.cporm:CPOrm:2.99'
+compile 'za.co.cporm:CPOrm:3.0'
 ```
 
 to your project dependencies and run `gradle build` or `gradle assemble`.
@@ -44,7 +42,7 @@ Declare the dependency in Maven:
 <dependency>
     <groupId>za.co.cporm</groupId>
     <artifactId>CPOrm</artifactId>
-    <version>2.99</version>
+    <version>3.0</version>
 </dependency>
 ```
 
@@ -54,7 +52,7 @@ Download the source code and import it as a library project in Eclipse. The proj
 
 #### As a jar
 
-Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to download jars directly. You can drop them into your `libs` folder and configure the Java build path to include the library. See this [tutorial](http://www.vogella.com/tutorials/AndroidLibraryProjects/article.html) for an excellent guide on how to do this.
+Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to download aar directly. You can drop them into your `libs` folder and configure the Java build path to include the library. See this [tutorial](http://www.vogella.com/tutorials/AndroidLibraryProjects/article.html) for an excellent guide on how to do this.
 
 ===================
 
@@ -132,7 +130,7 @@ For more information, check out the example app.
     
     * When you extend CPDefaultRecord you have already a auto increment primary key with name '_id'. So while using just @Table annotation, consider creating a primary key.
     
-    * Name of columns and tables will convert from camelCasing to under_score. for e.g. fielf bookName in a model will become book_name in database.
+    * Name of columns and tables will convert from camelCasing to under_score. for e.g. field bookName in a model will become book_name in database.
     
     #####Column Constraint annotations:
 

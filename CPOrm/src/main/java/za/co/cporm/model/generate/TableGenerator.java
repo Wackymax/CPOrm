@@ -150,7 +150,7 @@ public class TableGenerator {
         if(columnDetails.isPrimaryKey()) {
             columnDefinition.append(" PRIMARY KEY");
             if(columnDetails.isAutoIncrement()) columnDefinition.append(" AUTOINCREMENT");
-            if(columnDetails.isRequired() && "TEXT".equalsIgnoreCase(columnDetails.getColumnTypeMapping().getSqlColumnTypeName())) columnDefinition.append(" NOT NULL");
+            if(columnDetails.isRequired()) columnDefinition.append(" NOT NULL");
         }
         else if(columnDetails.isUnique()) columnDefinition.append(" UNIQUE");
         else if(columnDetails.isRequired()) columnDefinition.append(" NOT NULL");

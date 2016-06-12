@@ -3,6 +3,7 @@ package za.co.cporm.example.app;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.*;
 import android.os.Process;
@@ -15,6 +16,7 @@ import za.co.cporm.example.app.model.MyCPOrmConfiguration;
 import za.co.cporm.example.app.model.domain.Role;
 import za.co.cporm.example.app.model.domain.User;
 import za.co.cporm.model.CPOrm;
+import za.co.cporm.model.CPOrmTransaction;
 import za.co.cporm.model.loader.CPOrmLoader;
 import za.co.cporm.model.query.Select;
 import za.co.cporm.model.util.CPOrmBatchDispatcher;
@@ -64,10 +66,11 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
                 .and() //Add a new criterion
                 .greaterThan("_id", 0); //Specify the criterion column, type and value
         selectUser.and().in("role_id", selectRole); //Add role selection as inner query
-        selectUser.limit(1000); //Limit the select to 1000 records
+        selectUser.and().notLike("user_name", "batch"); //exclude batch inserts from the results
+        selectUser.limit(10000); //Limit the select to 10000 records
 
         CPOrmLoader<User> userCPOrmLoader = new CPOrmLoader<>(this, selectUser);//Give the select to the cursor loader to load the data
-        userCPOrmLoader.setUpdateThrottle(1000); //Set an update throttle because we will be inserting a lot of data causing frequent changes
+        userCPOrmLoader.setUpdateThrottle(100); //Set an update throttle because we will be inserting a lot of data causing frequent changes
 
         return userCPOrmLoader;
     }
@@ -176,6 +179,29 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
             Log.i(TAG, "Updated " + recordCount + " records in " + (testCompleteTime - time) + " seconds");
             Log.i(TAG, "Updated " + (recordCount / TimeUnit.MILLISECONDS.toSeconds(testTime)) + " records in 1 second");
             Log.i(TAG, "Average update time " + ((testCompleteTime - time) / recordCount) + " ms");
+
+            Log.i(TAG, "Testing transaction performance");
+            CPOrmTransaction transaction = new CPOrmTransaction();
+            time = System.currentTimeMillis();
+
+            role = new Role();
+            role.setRoleName("Transaction");
+            transaction.addRecord(role);
+
+            User user = new User();
+            user.setGivenName("Transaction");
+            user.setFamilyName("Transaction");
+            user.setUserName("Transaction");
+            transaction.addRecord(user);
+
+            try {
+                transaction.commit();
+            } catch (Exception e) {
+                Log.i(TAG, "Failed to apply transaction");
+            }
+            testCompleteTime = System.currentTimeMillis();
+
+            Log.i(TAG, "Applied transaction in " + (testCompleteTime - time) + " ms");
 
             Log.i(TAG, "Testing read performance (No Cache)");
             time = System.currentTimeMillis();

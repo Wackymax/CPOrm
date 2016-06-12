@@ -2,8 +2,11 @@ package za.co.cporm.provider;
 
 import android.annotation.TargetApi;
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.OperationApplicationException;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,6 +22,7 @@ import za.co.cporm.model.util.ManifestHelper;
 import za.co.cporm.provider.util.UriMatcherHelper;
 import za.co.cporm.util.CPOrmLog;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -56,7 +60,7 @@ public class CPOrmContentProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getReadableDatabase();
@@ -94,7 +98,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder, CancellationSignal cancellationSignal) {
+    public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder, CancellationSignal cancellationSignal) {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getReadableDatabase();
@@ -131,13 +135,13 @@ public class CPOrmContentProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
 
         return uriMatcherHelper.getType(uri);
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues contentValues) {
+    public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
@@ -153,7 +157,8 @@ public class CPOrmContentProvider extends ContentProvider {
         if (insertId == -1)
             throw new IllegalArgumentException("Failed to insert row for into table " + tableDetails.getTableName() + " using values " + contentValues);
 
-        notifyChanges(uri, tableDetails);
+        if(!db.inTransaction())
+            notifyChanges(uri, tableDetails);
 
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
         if (primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
@@ -165,7 +170,7 @@ public class CPOrmContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String where, String[] args) {
+    public int delete(@NonNull Uri uri, String where, String[] args) {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
@@ -189,14 +194,15 @@ public class CPOrmContentProvider extends ContentProvider {
         if (deleteCount == 0)
             return deleteCount;
 
-        notifyChanges(uri, tableDetails);
+        if(!db.inTransaction())
+            notifyChanges(uri, tableDetails);
 
 
         return deleteCount;
     }
 
     @Override
-    public int update(Uri uri, ContentValues contentValues, String where, String[] args) {
+    public int update(@NonNull Uri uri, ContentValues contentValues, String where, String[] args) {
 
         TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
         SQLiteDatabase db = database.getWritableDatabase();
@@ -218,7 +224,7 @@ public class CPOrmContentProvider extends ContentProvider {
             updateCount = db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         } else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
-        if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues)) {
+        if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues) && !db.inTransaction()) {
             notifyChanges(uri, tableDetails);
         }
 
@@ -226,7 +232,7 @@ public class CPOrmContentProvider extends ContentProvider {
     }
 
     @Override
-    public int bulkInsert(Uri uri, @NonNull ContentValues[] values) {
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
 
         int length = values.length;
         if (length == 0)
@@ -256,12 +262,41 @@ public class CPOrmContentProvider extends ContentProvider {
 
             db.setTransactionSuccessful();
 
-            notifyChanges(uri, tableDetails);
+            if(!db.inTransaction())
+                notifyChanges(uri, tableDetails);
         } finally {
             db.endTransaction();
         }
 
         return count;
+    }
+
+    @NonNull
+    @Override
+    public ContentProviderResult[] applyBatch(@NonNull ArrayList<ContentProviderOperation> operations) throws OperationApplicationException {
+
+        if (debugEnabled) {
+            CPOrmLog.d("********* Apply Batch **********");
+            CPOrmLog.d("Operations Count: " + operations.size());
+        }
+
+        SQLiteDatabase db = database.getWritableDatabase();
+        try {
+            db.beginTransactionNonExclusive();
+            ContentProviderResult[] contentProviderResults = super.applyBatch(operations);
+            db.setTransactionSuccessful();
+
+            for (ContentProviderResult result : contentProviderResults) {
+
+                if(result.uri != null){
+                    TableDetails tableDetails = uriMatcherHelper.getTableDetails(result.uri);
+                    notifyChanges(result.uri, tableDetails);
+                }
+            }
+            return contentProviderResults;
+        } finally {
+            db.endTransaction();
+        }
     }
 
     private String constructLimit(Uri uri) {

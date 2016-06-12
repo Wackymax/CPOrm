@@ -21,7 +21,7 @@ public class MyCPOrmConfiguration implements CPOrmConfiguration {
     @Override
     public int getDatabaseVersion() {
 
-        return 2;
+        return 3;
     }
 
     @Override

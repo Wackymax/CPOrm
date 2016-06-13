@@ -55,6 +55,18 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
         return new Select<T>(dataObjectClass);
     }
 
+    public Class<Model> getTableModel() {
+        return this.dataObjectClass;
+    }
+
+    public TableDetails getTableDetails() {
+        return CPOrm.findTableDetails(CPOrm.getApplicationContext(), this.dataObjectClass);
+    }
+
+    public TableDetails getTableDetails(Context context) {
+        return CPOrm.findTableDetails(context, this.dataObjectClass);
+    }
+
     /**
      * Calling this method will execute the query with a distinct clause
      */

@@ -157,8 +157,7 @@ public class CPOrmContentProvider extends ContentProvider {
         if (insertId == -1)
             throw new IllegalArgumentException("Failed to insert row for into table " + tableDetails.getTableName() + " using values " + contentValues);
 
-        if(!db.inTransaction())
-            notifyChanges(uri, tableDetails);
+        notifyChanges(uri, tableDetails);
 
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
         if (primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
@@ -194,8 +193,7 @@ public class CPOrmContentProvider extends ContentProvider {
         if (deleteCount == 0)
             return deleteCount;
 
-        if(!db.inTransaction())
-            notifyChanges(uri, tableDetails);
+        notifyChanges(uri, tableDetails);
 
 
         return deleteCount;
@@ -224,7 +222,7 @@ public class CPOrmContentProvider extends ContentProvider {
             updateCount = db.update(tableDetails.getTableName(), contentValues, primaryKeyColumn.getColumnName() + " = ?", new String[]{itemId});
         } else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
-        if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues) && !db.inTransaction()) {
+        if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues)) {
             notifyChanges(uri, tableDetails);
         }
 
@@ -262,8 +260,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
             db.setTransactionSuccessful();
 
-            if(!db.inTransaction())
-                notifyChanges(uri, tableDetails);
+            notifyChanges(uri, tableDetails);
         } finally {
             db.endTransaction();
         }

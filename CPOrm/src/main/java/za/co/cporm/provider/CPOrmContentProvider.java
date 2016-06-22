@@ -36,10 +36,10 @@ public class CPOrmContentProvider extends ContentProvider {
     public static final String PARAMETER_LIMIT = "LIMIT";
     public static final String PARAMETER_SYNC = "IS_SYNC";
 
-    private CPOrmConfiguration cPOrmConfiguration;
-    private CPOrmDatabase database;
-    private UriMatcherHelper uriMatcherHelper;
-    private boolean debugEnabled;
+    protected CPOrmConfiguration cPOrmConfiguration;
+    protected CPOrmDatabase database;
+    protected UriMatcherHelper uriMatcherHelper;
+    protected boolean debugEnabled;
 
     @Override
     public boolean onCreate() {

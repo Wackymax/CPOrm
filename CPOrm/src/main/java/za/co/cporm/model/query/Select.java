@@ -577,13 +577,18 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
             select.append("DISTINCT ");
         }
 
-        Iterator<String> columnIterator = Arrays.asList(getProjection(tableDetails)).iterator();
-        while (columnIterator.hasNext()) {
+        String[] projection = getProjection(tableDetails);
+        if(projection != null) {
+            Iterator<String> columnIterator = Arrays.asList(projection).iterator();
+            while (columnIterator.hasNext()) {
 
-            select.append(columnIterator.next());
+                select.append(columnIterator.next());
 
-            if (columnIterator.hasNext()) select.append(", ");
+                if (columnIterator.hasNext()) select.append(", ");
+            }
         }
+        else select.append("* ");
+
         select.append(" FROM ");
         select.append(tableDetails.getTableName());
 

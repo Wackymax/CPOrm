@@ -538,7 +538,7 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
             }
 
             return columns.toArray(new String[columns.size()]);
-        } else return tableDetails.getColumnNames();
+        } else return null;
     }
 
     /**

@@ -121,6 +121,9 @@ public class ModelInflater {
 
     private static <T> void inflateColumn(Cursor cursor, T dataModelObject, TableDetails.ColumnDetails columnDetails, int columnIndex) {
 
+        if(columnDetails == null)
+            return;
+
         //If the column details is not required, then check if it is null
         if (!columnDetails.isRequired() && cursor.isNull(columnIndex)) {
             return;
@@ -134,6 +137,9 @@ public class ModelInflater {
     }
 
     private static <T> void inflateColumn(Bundle bundle, T dataModelObject, TableDetails.ColumnDetails columnDetails) {
+
+        if(columnDetails == null)
+            return;
 
         //If the column details is not required, then check if it is null
         if (!bundle.containsKey(columnDetails.getColumnName())) {

@@ -32,31 +32,9 @@ public class CPOrmTransaction {
 
     public void commit(Context context) throws RemoteException, OperationApplicationException {
 
-        if(records.isEmpty())
+        if (records.isEmpty())
             return;
 
-        ContentResolver contentResolver = context.getContentResolver();
-        ArrayList<ContentProviderOperation> operations = TransactionHelper.prepareTransaction(context, records);
-
-        TableDetails tableDetails = CPOrm.findTableDetails(context, records.get(0).getClass());
-
-        ContentProviderResult[] contentProviderResults = contentResolver.applyBatch(tableDetails.getAuthority(), operations);
-
-        for (int i = 0; i < contentProviderResults.length; i++) {
-
-            ContentProviderResult contentProviderResult = contentProviderResults[i];
-            if(contentProviderResult.uri == null)
-                continue;
-
-            CPDefaultRecord cpDefaultRecord = records.get(i);
-            if(cpDefaultRecord.getId() == null){
-
-                long id = ContentUris.parseId(contentProviderResult.uri);
-
-                if(id != -1) {
-                    cpDefaultRecord.setId(id);
-                }
-            }
-        }
+        TransactionHelper.saveInTransaction(context, records);
     }
 }

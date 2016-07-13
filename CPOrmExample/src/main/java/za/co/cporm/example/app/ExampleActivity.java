@@ -3,16 +3,20 @@ package za.co.cporm.example.app;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
-import android.content.OperationApplicationException;
 import android.database.Cursor;
-import android.os.*;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Process;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import za.co.cporm.example.app.model.MyCPOrmConfiguration;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import za.co.cporm.example.app.model.domain.Role;
 import za.co.cporm.example.app.model.domain.User;
 import za.co.cporm.model.CPOrm;
@@ -21,10 +25,6 @@ import za.co.cporm.model.loader.CPOrmLoader;
 import za.co.cporm.model.query.Select;
 import za.co.cporm.model.util.CPOrmBatchDispatcher;
 import za.co.cporm.model.util.CPOrmCursor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class ExampleActivity extends ActionBarActivity implements LoaderManager.LoaderCallbacks<Cursor> {

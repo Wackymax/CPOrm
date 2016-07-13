@@ -15,6 +15,8 @@ import android.os.Build;
 import android.os.CancellationSignal;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+
+import za.co.cporm.model.CPOrm;
 import za.co.cporm.model.CPOrmConfiguration;
 import za.co.cporm.model.CPOrmDatabase;
 import za.co.cporm.model.generate.TableDetails;
@@ -24,7 +26,10 @@ import za.co.cporm.util.CPOrmLog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The base content provided that will expose all of the model objects.
@@ -35,6 +40,11 @@ public class CPOrmContentProvider extends ContentProvider {
     public static final String PARAMETER_OFFSET = "OFFSET";
     public static final String PARAMETER_LIMIT = "LIMIT";
     public static final String PARAMETER_SYNC = "IS_SYNC";
+    public static final String PARAMETER_CHANGE_TYPE = "CPORM_CHANGE_TYPE";
+    public static final String PARAMETER_NOTIFY_CHANGES = "NOTIFY_CHANGES";
+
+    private final ThreadLocal<Boolean> isBatchOperation = new ThreadLocal<>();
+    private final ThreadLocal<Set<Uri>> changedUri = new ThreadLocal<>();
 
     protected CPOrmConfiguration cPOrmConfiguration;
     protected CPOrmDatabase database;
@@ -157,15 +167,26 @@ public class CPOrmContentProvider extends ContentProvider {
         if (insertId == -1)
             throw new IllegalArgumentException("Failed to insert row for into table " + tableDetails.getTableName() + " using values " + contentValues);
 
-        notifyChanges(uri, tableDetails);
-
+        Uri insertedUri;
         TableDetails.ColumnDetails primaryKeyColumn = tableDetails.findPrimaryKeyColumn();
-        if (primaryKeyColumn.isAutoIncrement()) return uriMatcherHelper.generateSingleItemUri(tableDetails, insertId);
-        else {
+        if (primaryKeyColumn.isAutoIncrement()) {
+            insertedUri = uriMatcherHelper.generateSingleItemUri(tableDetails, insertId)
+                    .buildUpon()
+                    .appendQueryParameter(PARAMETER_CHANGE_TYPE, CPOrm.ChangeType.INSERT.toString())
+                    .build();
+        } else {
 
             String primaryKeyValue = contentValues.getAsString(primaryKeyColumn.getColumnName());
-            return uriMatcherHelper.generateSingleItemUri(tableDetails, primaryKeyValue);
+            insertedUri = uriMatcherHelper.generateSingleItemUri(tableDetails, primaryKeyValue)
+                    .buildUpon()
+                    .appendQueryParameter(PARAMETER_CHANGE_TYPE, CPOrm.ChangeType.INSERT.toString())
+                    .build();
         }
+
+        if(!isBatchOperation()) notifyChanges(insertedUri, tableDetails);
+        else changedUri.get().add(insertedUri);
+
+        return insertedUri;
     }
 
     @Override
@@ -193,8 +214,9 @@ public class CPOrmContentProvider extends ContentProvider {
         if (deleteCount == 0)
             return deleteCount;
 
-        notifyChanges(uri, tableDetails);
-
+        Uri deleteUri = uri.buildUpon().appendQueryParameter(PARAMETER_CHANGE_TYPE, CPOrm.ChangeType.DELETE.toString()).build();
+        if(!isBatchOperation()) notifyChanges(deleteUri, tableDetails);
+        else changedUri.get().add(deleteUri);
 
         return deleteCount;
     }
@@ -223,7 +245,9 @@ public class CPOrmContentProvider extends ContentProvider {
         } else updateCount = db.update(tableDetails.getTableName(), contentValues, where, args);
 
         if (updateCount > 0 && shouldChangesBeNotified(tableDetails, contentValues)) {
-            notifyChanges(uri, tableDetails);
+            Uri updateUri = uri.buildUpon().appendQueryParameter(PARAMETER_CHANGE_TYPE, CPOrm.ChangeType.UPDATE.toString()).build();
+            if(!isBatchOperation()) notifyChanges(updateUri, tableDetails);
+            else changedUri.get().add(updateUri);
         }
 
         return updateCount;
@@ -260,7 +284,7 @@ public class CPOrmContentProvider extends ContentProvider {
 
             db.setTransactionSuccessful();
 
-            notifyChanges(uri, tableDetails);
+            notifyChanges(uri.buildUpon().appendQueryParameter(PARAMETER_CHANGE_TYPE, CPOrm.ChangeType.INSERT.toString()).build(), tableDetails);
         } finally {
             db.endTransaction();
         }
@@ -277,22 +301,32 @@ public class CPOrmContentProvider extends ContentProvider {
             CPOrmLog.d("Operations Count: " + operations.size());
         }
 
+        isBatchOperation.set(true);
+        changedUri.set(new LinkedHashSet<Uri>());
+
+        boolean success = false;
+        ContentProviderResult[] contentProviderResults = null;
         SQLiteDatabase db = database.getWritableDatabase();
         try {
             db.beginTransactionNonExclusive();
-            ContentProviderResult[] contentProviderResults = super.applyBatch(operations);
+            contentProviderResults = super.applyBatch(operations);
             db.setTransactionSuccessful();
-
-            for (ContentProviderResult result : contentProviderResults) {
-
-                if(result.uri != null){
-                    TableDetails tableDetails = uriMatcherHelper.getTableDetails(result.uri);
-                    notifyChanges(result.uri, tableDetails);
-                }
-            }
+            success = true;
             return contentProviderResults;
         } finally {
             db.endTransaction();
+
+            if(success && changedUri.get() != null) {
+                for (Uri uri : changedUri.get()) {
+
+                    if (uri != null) {
+                        TableDetails tableDetails = uriMatcherHelper.getTableDetails(uri);
+                        notifyChanges(uri, tableDetails);
+                    }
+                }
+            }
+            isBatchOperation.set(false);
+            changedUri.remove();
         }
     }
 
@@ -343,6 +377,9 @@ public class CPOrmContentProvider extends ContentProvider {
 
     private void notifyChanges(Uri uri, TableDetails tableDetails) {
 
+        if(!uri.getBooleanQueryParameter(PARAMETER_NOTIFY_CHANGES, true))
+            return;
+
         Boolean sync = uri.getBooleanQueryParameter(PARAMETER_SYNC, true);
         getContext().getContentResolver().notifyChange(uri, null, sync);
 
@@ -362,5 +399,9 @@ public class CPOrmContentProvider extends ContentProvider {
                 getContext().getContentResolver().notifyChange(changeUri, null, sync);
             }
         }
+    }
+
+    private boolean isBatchOperation(){
+        return this.isBatchOperation.get() != null && this.isBatchOperation.get();
     }
 }

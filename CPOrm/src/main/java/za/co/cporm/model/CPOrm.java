@@ -26,6 +26,11 @@ public class CPOrm {
     private static Context applicationContext;
     private static TableDetailsCache tableDetailsCache;
 
+    public enum ChangeType {
+        INSERT,
+        UPDATE,
+        DELETE
+    }
 
     /**
      * This is an optional initialize method that can be used to set the application context.

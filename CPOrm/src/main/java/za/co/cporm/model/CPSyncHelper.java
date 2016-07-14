@@ -20,7 +20,7 @@ import za.co.cporm.provider.util.UriMatcherHelper;
 public class CPSyncHelper {
 
     public static <T> void insert(Context context, ContentProviderClient provider, T... dataModelObjects) throws RemoteException {
-        insert(context, provider, dataModelObjects);
+        insert(context, true, provider, dataModelObjects);
     }
 
     public static <T> void insert(Context context, boolean notifyChanges, ContentProviderClient provider, T... dataModelObjects) throws RemoteException {

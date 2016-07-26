@@ -120,6 +120,17 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
     }
 
     @Override
+    public DataFilterCriterion cloneFrom() {
+
+        DataFilterCriterion clone = new DataFilterCriterion();
+        clone.filterColumn = String.valueOf(this.filterColumn);
+        clone.filterOperator = this.filterOperator;
+        clone.filterValue = this.filterValue;
+
+        return clone;
+    }
+
+    @Override
     public boolean hasFilterValue() {
 
         return filterColumn != null && filterOperator != null;

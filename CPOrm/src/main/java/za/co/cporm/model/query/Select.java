@@ -55,6 +55,22 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
         return new Select<T>(dataObjectClass);
     }
 
+    public Select<Model> cloneFrom() {
+
+        Select<Model> clone = new Select<>(dataObjectClass);
+        clone.filterCriteria = this.filterCriteria.cloneFrom();
+        clone.sortingOrderList = new LinkedList<>(this.sortingOrderList);
+        clone.includedColumns = new ArrayList<>(this.includedColumns);
+        clone.excludedColumns = new ArrayList<>(this.excludedColumns);
+        clone.offset = this.offset;
+        clone.limit = this.limit;
+        clone.distinct = this.distinct;
+        clone.groupBy = this.groupBy;
+        clone.having = this.having;
+
+        return clone;
+    }
+
     public Class<Model> getTableModel() {
         return this.dataObjectClass;
     }

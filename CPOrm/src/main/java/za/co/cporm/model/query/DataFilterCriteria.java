@@ -3,6 +3,7 @@ package za.co.cporm.model.query;
 import android.content.Context;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -112,6 +113,19 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
     }
 
     @Override
+    public DataFilterCriteria cloneFrom() {
+
+        DataFilterCriteria clone = new DataFilterCriteria();
+
+        for (Map.Entry<DataFilterClause, DataFilterConjunction> entry : filterClauses.entrySet()) {
+
+            clone.filterClauses.put(entry.getKey().cloneFrom(), entry.getValue());
+        }
+
+        return clone;
+    }
+
+    @Override
     public boolean hasFilterValue() {
 
         boolean hasFilterValue = false;
@@ -183,6 +197,11 @@ public class DataFilterCriteria implements DataFilterClause<DataFilterCriteria>{
             criteria.addClause(clause, conjunction);
 
             return this;
+        }
+
+        @Override
+        public DataFilterClause<Builder<T>> cloneFrom() {
+            throw new RuntimeException("Cannot clone a builder");
         }
 
         @Override

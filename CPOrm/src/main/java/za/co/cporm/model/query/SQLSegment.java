@@ -2,6 +2,9 @@ package za.co.cporm.model.query;
 
 import android.content.Context;
 import android.text.TextUtils;
+
+import java.util.Arrays;
+
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 
 /**
@@ -9,13 +12,15 @@ import za.co.cporm.model.map.SqlColumnMappingFactory;
  */
 public class SQLSegment implements DataFilterClause {
 
-    private final String sqlSegment;
-    private final Object[] args;
+    private String sqlSegment;
+    private Object[] args;
+
+    private SQLSegment(){
+    }
 
     public SQLSegment(String sqlSegment, Object... args) {
 
         this.sqlSegment = sqlSegment;
-
         this.args = args;
     }
 
@@ -40,6 +45,18 @@ public class SQLSegment implements DataFilterClause {
     @Override
     public SQLSegment addClause(DataFilterClause clause, DataFilterConjunction conjunction) {
         throw new UnsupportedOperationException("Clauses cannot be added to a data filter criterion");
+    }
+
+    @Override
+    public SQLSegment cloneFrom() {
+
+        SQLSegment clone = new SQLSegment();
+        clone.sqlSegment = this.sqlSegment;
+
+        if(this.args != null)
+            clone.args = Arrays.copyOf(this.args, this.args.length);
+
+        return clone;
     }
 
     @Override

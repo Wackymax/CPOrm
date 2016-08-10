@@ -10,6 +10,8 @@ import java.io.Serializable;
  */
 public interface DataFilterClause<T extends DataFilterClause> extends Serializable{
 
+    DataFilterClause<T> cloneFrom();
+
     boolean hasFilterValue();
 
     /** The filter conjunction, this is equal to SQL AND and OR */

@@ -16,7 +16,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,6 +75,16 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                     sqLiteDatabase.execSQL(index);
                 }
             }
+        }
+
+        try {
+            String upgradeDir = cPOrmConfiguration.upgradeResourceDirectory();
+            String initializeFileName = "0_init.sql";
+            if (Arrays.binarySearch(context.getResources().getAssets().list(upgradeDir), initializeFileName) > -1) {
+                upgradeFromScript(sqLiteDatabase, -1, 0, initializeFileName);
+            }
+        } catch (IOException e) {
+            CPOrmLog.e("Failed to execute initialize script 0_init.sql", e);
         }
     }
 
@@ -146,11 +158,27 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                         StringBuilder scriptContent = new StringBuilder();
                         String line;
                         while ((line = scriptStream.readLine()) != null) {
-                            scriptContent.append(line);
+
+                                scriptContent.append(line);
+                                scriptContent.append("\n");
                         }
 
-                        CPOrmLog.i("Executing upgrade script " + scriptFile);
-                        sqLiteDatabase.execSQL(scriptContent.toString());
+                        if (scriptContent.indexOf(";") > -1) {
+                            CPOrmLog.w("SQLite does not support multiple statements separated by ';', we will execute then separately for you");
+                            StringTokenizer stringTokenizer = new StringTokenizer(scriptContent.toString(), ";");
+                            while(stringTokenizer.hasMoreTokens()){
+
+                                String content = stringTokenizer.nextToken().trim();
+                                if(TextUtils.isEmpty(content))
+                                    continue;
+
+                                CPOrmLog.d("Executing upgrade script " + scriptFile);
+                                sqLiteDatabase.execSQL(content);
+                            }
+                        } else {
+                            CPOrmLog.d("Executing upgrade script " + scriptFile);
+                            sqLiteDatabase.execSQL(scriptContent.toString());
+                        }
                     } finally {
                         scriptStream.close();
                     }

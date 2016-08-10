@@ -29,7 +29,7 @@ There are four ways to install CPOrm:
 This is the preferred way. Simply add:
 
 ```groovy
-compile 'za.co.cporm:CPOrm:3.0.6'
+compile 'za.co.cporm:CPOrm:3.0.7'
 ```
 
 to your project dependencies and run `gradle build` or `gradle assemble`.
@@ -42,7 +42,7 @@ Declare the dependency in Maven:
 <dependency>
     <groupId>za.co.cporm</groupId>
     <artifactId>CPOrm</artifactId>
-    <version>3.0.6</version>
+    <version>3.0.7</version>
 </dependency>
 ```
 

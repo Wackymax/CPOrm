@@ -54,6 +54,23 @@ Download the source code and import it as a library project in Eclipse. The proj
 
 Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to download aar directly. You can drop them into your `libs` folder and configure the Java build path to include the library. See this [tutorial](http://www.vogella.com/tutorials/AndroidLibraryProjects/article.html) for an excellent guide on how to do this.
 
+
+### Proguard
+
+In order to use CPOrm in Android release mode include the following proguard rules
+
+```
+# CPORM CONFIGURATION
+
+-keepattributes *Annotation*
+-keepclasseswithmembernames class ** {
+    @za.co.cporm.model.annotation.* *;
+}
+
+-keep class za.co.cporm.** { *; }
+-dontwarn za.co.cporm.**
+```
+
 ===================
 
 ## Use it

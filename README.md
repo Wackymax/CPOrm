@@ -7,6 +7,8 @@ A Powerful Content Provider ORM for android.  This ORM uses an android sqlite da
 
 Have a look at the [Wiki](https://github.com/Wackymax/CPOrm/wiki) for more information.
 
+Please star the repo if you find this library usefull, thank you :)
+
 ## Features
 1. Supports table creation from the data model.
 2. Supports view creation from the data model.

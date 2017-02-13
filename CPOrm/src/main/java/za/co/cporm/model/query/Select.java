@@ -208,6 +208,26 @@ public class Select<Model> implements DataFilterClause<Select<Model>> {
     }
 
     /**
+     * Starts a new Criteria builder with AND conjunction
+     *
+     * @return The current select instance
+     */
+    public DataFilterCriterion.Builder<DataFilterCriteria.Builder<Select<Model>>> andBracket() {
+
+        return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<Select<Model>>>(new DataFilterCriteria.Builder<Select<Model>>(this, DataFilterClause.DataFilterConjunction.AND), DataFilterConjunction.AND);
+    }
+
+    /**
+     * Starts a new Criteria builder with OR conjunction
+     *
+     * @return The current select instance
+     */
+    public DataFilterCriterion.Builder<DataFilterCriteria.Builder<Select<Model>>> orBracket() {
+
+        return new DataFilterCriterion.Builder<DataFilterCriteria.Builder<Select<Model>>>(new DataFilterCriteria.Builder<Select<Model>>(this, DataFilterClause.DataFilterConjunction.OR), DataFilterConjunction.OR);
+    }
+
+    /**
      * Sorts the specified columns in DESC order.  The order here is important, as the sorting will be done in the same order the columns are added.
      *
      * @param columns the columns to sort

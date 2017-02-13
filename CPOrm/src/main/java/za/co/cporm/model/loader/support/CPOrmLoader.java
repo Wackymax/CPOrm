@@ -61,7 +61,7 @@ public class CPOrmLoader<Model> extends CursorLoader {
         if(asyncCursor == null)
             return null;
 
-        CPOrmCursor<Model> cursor = new CPOrmCursor<>(tableDetails, super.loadInBackground());
+        CPOrmCursor<Model> cursor = new CPOrmCursor<>(tableDetails, asyncCursor);
 
         if(cacheSize == 0){
             cursor.enableCache();

@@ -22,6 +22,12 @@ public interface CPOrmConfiguration {
     int getDatabaseVersion();
 
     /**
+     * If the database upgrade fails should we attempt to recreate the database or rather crash the application.
+     * @return true if the database should be recreated
+     */
+    boolean recreateDatabaseOnFailedUpgrade();
+
+    /**
      * If query logging should be enabled.  If this setting is set to true, then all values will be printed for any interaction with the content provider, as well
      * as all database queries that are run.
      * @return True if query logging should be enabled.

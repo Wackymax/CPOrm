@@ -125,6 +125,8 @@ public class ExampleActivity extends ActionBarActivity implements LoaderManager.
                 recordCount++;
             }
 
+            CPOrm.deleteAll(User.class);
+
             long testCompleteTime = System.currentTimeMillis();
             Log.i(TAG, "Inserted " + recordCount + " records in " + (testCompleteTime - time) + " seconds");
             Log.i(TAG, "Inserted " + (recordCount / TimeUnit.MILLISECONDS.toSeconds(testTime)) + " records in 1 second");

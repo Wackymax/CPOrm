@@ -52,7 +52,7 @@ public class ReflectionHelper {
 
             String columnName = column.columnName();
             if(TextUtils.isEmpty(columnName)) columnName = NamingUtils.getSQLName(field.getName());
-            SqlColumnMapping columnMapping = columnMappingFactory.findColumnMapping(field.getType());
+            SqlColumnMapping columnMapping = columnMappingFactory.findColumnMapping(field);
 
             tableDetails.addColumn(new TableDetails.ColumnDetails(columnName, field, columnMapping, field.isAnnotationPresent(PrimaryKey.class), field.isAnnotationPresent(Unique.class), column.required(), autoIncrement, column.notifyChanges()));
         }

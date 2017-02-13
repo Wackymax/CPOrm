@@ -2,6 +2,7 @@ package za.co.cporm.model.map;
 
 import za.co.cporm.model.map.types.*;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,10 @@ public class SqlColumnMappingFactory {
         columnMappings.add(new StringType());
         columnMappings.add(new UUIDType());
         columnMappings.add(new ByteArray());
+    }
+
+    public SqlColumnMapping findColumnMapping(Field field){
+        return findColumnMapping(field.getType());
     }
 
     public SqlColumnMapping findColumnMapping(Class<?> fieldType){

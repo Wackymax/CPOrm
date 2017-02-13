@@ -110,6 +110,8 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                     } catch (Exception e) {
                         CPOrmLog.e("Failed to execute upgrade script " + script, e);
                         CPOrmLog.e("Recreating database");
+                        if(!cPOrmConfiguration.recreateDatabaseOnFailedUpgrade())
+                            throw new RuntimeException("Failed to upgrade database", e);
                         upgraded = false;
                     }
                 }
@@ -163,21 +165,32 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                                 scriptContent.append("\n");
                         }
 
-                        if (scriptContent.indexOf(";") > -1) {
-                            CPOrmLog.w("SQLite does not support multiple statements separated by ';', we will execute then separately for you");
-                            StringTokenizer stringTokenizer = new StringTokenizer(scriptContent.toString(), ";");
-                            while(stringTokenizer.hasMoreTokens()){
+                        if(!TextUtils.isEmpty(scriptContent)) {
+                            if (scriptContent.indexOf(";") > -1) {
+                                CPOrmLog.w("SQLite does not support multiple statements separated by ';', we will execute then separately for you");
+                                StringTokenizer stringTokenizer = new StringTokenizer(scriptContent.toString(), ";");
+                                while (stringTokenizer.hasMoreTokens()) {
 
-                                String content = stringTokenizer.nextToken().trim();
-                                if(TextUtils.isEmpty(content))
-                                    continue;
+                                    String content = stringTokenizer.nextToken().trim();
+                                    if (TextUtils.isEmpty(content))
+                                        continue;
+                                    CPOrmLog.d("Executing upgrade script " + scriptFile);
 
+                                    if(cPOrmConfiguration.isQueryLoggingEnabled()){
+                                        CPOrmLog.d(content);
+                                    }
+
+                                    sqLiteDatabase.execSQL(content);
+                                }
+                            } else {
                                 CPOrmLog.d("Executing upgrade script " + scriptFile);
-                                sqLiteDatabase.execSQL(content);
+
+                                if(cPOrmConfiguration.isQueryLoggingEnabled()){
+                                    CPOrmLog.d(scriptContent.toString());
+                                }
+
+                                sqLiteDatabase.execSQL(scriptContent.toString());
                             }
-                        } else {
-                            CPOrmLog.d("Executing upgrade script " + scriptFile);
-                            sqLiteDatabase.execSQL(scriptContent.toString());
                         }
                     } finally {
                         scriptStream.close();

@@ -143,10 +143,11 @@ public class DataFilterCriterion implements DataFilterClause<DataFilterCriterion
 
     private Object convertToSQLFormat(SqlColumnMappingFactory columnMappingFactory, Object object){
 
-        if(filterOperator == DataFilterOperator.LIKE || filterOperator == DataFilterOperator.NOT_LIKE) return "%" + object + "%";
-        else if(filterOperator == DataFilterOperator.BEGINS_WITH) return object + "%";
-        else if(filterOperator == DataFilterOperator.ENDS_WITH) return "%" + object;
-        else return columnMappingFactory.findColumnMapping(object.getClass()).toSqlType(object);
+        Object sqlType = columnMappingFactory.findColumnMapping(object.getClass()).toSqlType(object);
+        if(filterOperator == DataFilterOperator.LIKE || filterOperator == DataFilterOperator.NOT_LIKE) return "%" + sqlType + "%";
+        else if(filterOperator == DataFilterOperator.BEGINS_WITH) return sqlType + "%";
+        else if(filterOperator == DataFilterOperator.ENDS_WITH) return "%" + sqlType;
+        else return sqlType;
     }
 
     private void validate()

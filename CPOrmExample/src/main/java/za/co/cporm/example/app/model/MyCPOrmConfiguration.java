@@ -25,6 +25,11 @@ public class MyCPOrmConfiguration implements CPOrmConfiguration {
     }
 
     @Override
+    public boolean recreateDatabaseOnFailedUpgrade() {
+        return true;
+    }
+
+    @Override
     public boolean isQueryLoggingEnabled() {
 
         return false;

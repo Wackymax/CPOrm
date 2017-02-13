@@ -7,6 +7,8 @@ A Powerful Content Provider ORM for android.  This ORM uses an android sqlite da
 
 Have a look at the [Wiki](https://github.com/Wackymax/CPOrm/wiki) for more information.
 
+Please star the repo if you find this library usefull, thank you :)
+
 ## Features
 1. Supports table creation from the data model.
 2. Supports view creation from the data model.
@@ -29,7 +31,7 @@ There are four ways to install CPOrm:
 This is the preferred way. Simply add:
 
 ```groovy
-compile 'za.co.cporm:CPOrm:3.0.3'
+compile 'za.co.cporm:CPOrm:3.0.7'
 ```
 
 to your project dependencies and run `gradle build` or `gradle assemble`.
@@ -42,7 +44,7 @@ Declare the dependency in Maven:
 <dependency>
     <groupId>za.co.cporm</groupId>
     <artifactId>CPOrm</artifactId>
-    <version>3.0.3</version>
+    <version>3.0.7</version>
 </dependency>
 ```
 
@@ -53,6 +55,23 @@ Download the source code and import it as a library project in Eclipse. The proj
 #### As a jar
 
 Visit the [releases](https://github.com/Wackymax/CPOrm/releases) page to download aar directly. You can drop them into your `libs` folder and configure the Java build path to include the library. See this [tutorial](http://www.vogella.com/tutorials/AndroidLibraryProjects/article.html) for an excellent guide on how to do this.
+
+
+### Proguard
+
+In order to use CPOrm in Android release mode include the following proguard rules
+
+```
+# CPORM CONFIGURATION
+
+-keepattributes *Annotation*
+-keepclasseswithmembernames class ** {
+    @za.co.cporm.model.annotation.* *;
+}
+
+-keep class za.co.cporm.** { *; }
+-dontwarn za.co.cporm.**
+```
 
 ===================
 

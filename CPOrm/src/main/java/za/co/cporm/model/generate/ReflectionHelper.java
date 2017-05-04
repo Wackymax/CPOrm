@@ -9,7 +9,7 @@ import za.co.cporm.model.annotation.Column.Unique;
 import za.co.cporm.model.map.SqlColumnMapping;
 import za.co.cporm.model.map.SqlColumnMappingFactory;
 import za.co.cporm.model.util.ManifestHelper;
-import za.co.cporm.model.util.NamingUtils;
+import za.co.cporm.model.util.DefaultColumnNameConverter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -36,7 +36,7 @@ public class ReflectionHelper {
         Authority authority = dataModelObject.getAnnotation(Authority.class);
         String authorityName = authority == null ? ManifestHelper.getAuthority(context) : authority.value();
 
-        String tableName = TextUtils.isEmpty(table.tableName()) ? NamingUtils.getSQLName(dataModelObject.getSimpleName()) : table.tableName();
+        String tableName = TextUtils.isEmpty(table.tableName()) ? TableDetails.COLUMN_NAME_CONVERTER.convertToSql(dataModelObject.getSimpleName()) : table.tableName();
         TableDetails tableDetails = new TableDetails(tableName, authorityName, dataModelObject);
         SqlColumnMappingFactory columnMappingFactory = ManifestHelper.getMappingFactory(context);
 
@@ -51,7 +51,7 @@ public class ReflectionHelper {
             }
 
             String columnName = column.columnName();
-            if(TextUtils.isEmpty(columnName)) columnName = NamingUtils.getSQLName(field.getName());
+            if(TextUtils.isEmpty(columnName)) columnName = TableDetails.COLUMN_NAME_CONVERTER.convertToSql(field.getName());
             SqlColumnMapping columnMapping = columnMappingFactory.findColumnMapping(field);
 
             tableDetails.addColumn(new TableDetails.ColumnDetails(columnName, field, columnMapping, field.isAnnotationPresent(PrimaryKey.class), field.isAnnotationPresent(Unique.class), column.required(), autoIncrement, column.notifyChanges()));

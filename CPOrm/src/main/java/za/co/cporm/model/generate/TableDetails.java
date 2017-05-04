@@ -7,6 +7,8 @@ import android.text.TextUtils;
 import za.co.cporm.model.annotation.Index;
 import za.co.cporm.model.annotation.TableConstraint;
 import za.co.cporm.model.map.SqlColumnMapping;
+import za.co.cporm.model.naming.ColumnNameConverter;
+import za.co.cporm.model.util.DefaultColumnNameConverter;
 
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
@@ -20,6 +22,8 @@ import java.util.*;
  * and it contains use full quick shortcuts for manipulating java objects to and from sql.
  */
 public class TableDetails {
+
+    public static ColumnNameConverter COLUMN_NAME_CONVERTER = new DefaultColumnNameConverter();
 
     private final String tableName;
     private final String authority;

@@ -37,7 +37,7 @@ public class MyCPOrmConfiguration implements CPOrmConfiguration {
 
     @Override
     public String upgradeResourceDirectory() {
-        return "db.upgrade";
+        return null;
     }
 
     @Override

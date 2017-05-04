@@ -4,26 +4,26 @@ buildscript {
         mavenLocal()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:2.3.0'
     }
 }
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-version '3.0.8'
+version '3.0.9'
 
 repositories {
     jcenter()
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 12
-        targetSdkVersion 23
-        versionCode 12
+        targetSdkVersion 25
+        versionCode 13
         versionName project.version.toString()
     }
     buildTypes {
@@ -101,7 +101,7 @@ install {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v4:23.4.0'
+    compile 'com.android.support:support-v4:25.3.0'
 }
 
 task sourcesJar(type: Jar) {

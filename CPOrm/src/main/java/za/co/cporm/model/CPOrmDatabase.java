@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -79,9 +80,11 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
 
         try {
             String upgradeDir = cPOrmConfiguration.upgradeResourceDirectory();
-            String initializeFileName = "0_init.sql";
-            if (Arrays.binarySearch(context.getResources().getAssets().list(upgradeDir), initializeFileName) > -1) {
-                upgradeFromScript(sqLiteDatabase, -1, 0, initializeFileName);
+            if(!TextUtils.isEmpty(upgradeDir)) {
+                String initializeFileName = "0_init.sql";
+                if (Arrays.binarySearch(context.getResources().getAssets().list(upgradeDir), initializeFileName) > -1) {
+                    upgradeFromScript(sqLiteDatabase, -1, 0, initializeFileName);
+                }
             }
         } catch (IOException e) {
             CPOrmLog.e("Failed to execute initialize script 0_init.sql", e);
@@ -103,6 +106,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
             }
 
             if (scripts != null) {
+                Arrays.sort(scripts, new UpgradeScriptComparator());
                 for (String script : scripts) {
 
                     try {
@@ -195,7 +199,7 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
                     } finally {
                         scriptStream.close();
                     }
-                    return number == newVersion;
+                    return number.equals(newVersion);
                 }
             } else
                 CPOrmLog.e("Failed to parse upgrade script " + script + ", requires a starting integer indicating the version number");
@@ -246,5 +250,26 @@ public class CPOrmDatabase extends SQLiteOpenHelper {
      */
     public CPOrmConfiguration getcPOrmConfiguration() {
         return cPOrmConfiguration;
+    }
+
+    private static class UpgradeScriptComparator implements Comparator<String>{
+
+        @Override
+        public int compare(String o1, String o2) {
+
+            Pattern pattern = Pattern.compile("^[0-9]+");
+            Matcher match1 = pattern.matcher(o1);
+            Matcher match2 = pattern.matcher(o2);
+
+            if(!match1.find())
+                return 1;
+            if(!match2.find())
+                return -1;
+
+            Integer int1 = Integer.valueOf(match1.group());
+            Integer int2 = Integer.valueOf(match2.group());
+
+            return int1.compareTo(int2);
+        }
     }
 }
